@@ -1,14 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from fastapi.exceptions import HTTPException
+from starlette import status
+from aciniformes_backend.serivce import (
+    pg_receiver_service,
+    ReceiverServiceInterface,
+    exceptions as exc
+)
 
 
 class CreateSchema(BaseModel):
-    pass
+    name: str
+    chat_id: int
 
 
 class UpdateSchema(BaseModel):
-    pass
-
+    name: str | None
+    chat_id: int | None
 
 class GetSchema(BaseModel):
     id: int
@@ -17,26 +25,50 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post('')
-def create():
-    pass
+@router.post("")
+async def create(
+        create_schema: CreateSchema,
+        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+):
+    await receiver_service.create(create_schema.dict())
+    return status.HTTP_201_CREATED
 
 
-@router.get('')
-def get_all():
-    pass
+@router.get("")
+async def get_all(
+        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+):
+    res = await receiver_service.get_all()
+    return res
 
 
 @router.get("/{id}")
-def get(id: int):
-    pass
+async def get(
+        id: int,
+        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+):
+    try:
+        res = await receiver_service.get_by_id(id)
+    except exc.ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.patch("/{id}")
-def update(id: int):
-    pass
+async def update(
+        id: int,
+        update_schema: UpdateSchema,
+        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+):
+    try:
+        res = await receiver_service.update(id, update_schema.dict(exclude_unset=True))
+    except exc.ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return res
 
 
 @router.delete("/{id}")
-def delete(id: int):
-    pass
+async def delete(
+        id: int,
+        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+):
+    await receiver_service.delete(id)

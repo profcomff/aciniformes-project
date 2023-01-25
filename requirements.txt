@@ -1,1 +1,10 @@
 fastapi
+sqlalchemy
+pydantic
+uvicorn
+alembic
+python-dotenv
+fastapi-sqlalchemy
+psycopg2-binary
+gunicorn
+starlette

@@ -1,13 +1,34 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
+from starlette import status
+from pydantic import BaseModel, Json
+from aciniformes_backend.serivce import (
+    FetcherServiceInterface,
+    pg_metric_service,
+    exceptions as exc
+)
 
 
 class CreateSchema(BaseModel):
-    pass
+    name: str
+    type: str
+    address: str
+    fetch_data: str
+    metrics: Json
+    metric_name: str
+    delay_ok: int
+    delay_fail: int
 
 
 class UpdateSchema(BaseModel):
-    pass
+    name: str | None
+    type: str | None
+    address: str | None
+    fetch_data: str | None
+    metrics: Json | None
+    metric_name: str | None
+    delay_ok: int | None
+    delay_fail: int | None
 
 
 class GetSchema(BaseModel):
@@ -17,26 +38,48 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post('')
-def create():
-    pass
+@router.post("")
+async def create(
+        create_schema: CreateSchema,
+        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+):
+    res = await fetcher_service.create(create_schema.dict())
+    return status.HTTP_201_CREATED
 
 
-@router.get('')
-def get_all():
-    pass
+@router.get("")
+async def get_all(
+        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+):
+    res = await fetcher_service.get_all()
+    return res
 
 
 @router.get("/{id}")
-def get(id: int):
-    pass
+async def get(
+        id: int,
+        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+):
+    try:
+        res = await fetcher_service.get_by_id(id)
+    except exc.ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return res
 
 
 @router.patch("/{id}")
-def update(id: int):
-    pass
+async def update(
+        id: int,
+        update_schema: UpdateSchema,
+        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+):
+    res = await fetcher_service.update(id, update_schema.dict(exclude_unset=True))
+    return res
 
 
 @router.delete("/{id}")
-def delete(id: int):
-    pass
+async def delete(
+        id: int,
+        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+):
+    await fetcher_service.delete(id)
