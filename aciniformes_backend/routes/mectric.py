@@ -5,7 +5,7 @@ from pydantic import BaseModel, Json
 from aciniformes_backend.serivce import (
     MetricServiceInterface,
     metric_service,
-    exceptions as exc
+    exceptions as exc,
 )
 
 
@@ -22,28 +22,23 @@ router = APIRouter()
 
 @router.post("")
 async def create(
-        metric_schema: CreateSchema,
-        metric_servie: MetricServiceInterface = Depends(metric_service),
+    metric_schema: CreateSchema,
+    metric: MetricServiceInterface = Depends(metric_service),
 ):
-    await metric_servie.create(metric_schema.metrics)
+    await metric.create(metric_schema.metrics)
     return status.HTTP_201_CREATED
 
 
 @router.get("")
-async def get_all(
-        metric_service: MetricServiceInterface = Depends(metric_service)
-):
-    res = await metric_service.get_all()
+async def get_all(metric: MetricServiceInterface = Depends(metric_service)):
+    res = await metric.get_all()
     return res
 
 
 @router.get("/{id}")
-async def get(
-        id_: int,
-        metric_service: MetricServiceInterface = Depends(metric_service())
-):
+async def get(id_: int, metric: MetricServiceInterface = Depends(metric_service)):
     try:
-        res = await metric_service.get_by_id(id_)
+        res = await metric.get_by_id(id_)
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res

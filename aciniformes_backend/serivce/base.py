@@ -16,7 +16,6 @@ class BaseService(ABC):
 
 
 class AlertServiceInterface(BaseService):
-
     @abstractmethod
     async def create(self, alert: dict) -> None:
         raise NotImplementedError

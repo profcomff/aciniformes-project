@@ -8,7 +8,11 @@ class PgAlertService(AlertServiceInterface):
         self.session.add(db_models.Alert(**alert))
 
     async def get_by_id(self, id_: int) -> db_models.Alert:
-        res = self.session.query(db_models.Alert).filter(db_models.Alert.id_ == id_).one_or_none()
+        res = (
+            self.session.query(db_models.Alert)
+            .filter(db_models.Alert.id_ == id_)
+            .one_or_none()
+        )
         if not res:
             raise exc.ObjectNotFound(id_)
         return res

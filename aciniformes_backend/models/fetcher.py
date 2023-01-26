@@ -16,7 +16,9 @@ class FetcherType(str, Enum):
 class Fetcher(BaseModel):
     id_ = Column("id", Integer, primary_key=True)
     name = Column(String, nullable=False)
-    type_ = Column("type", sqlalchemy.Enum(FetcherType, native_enum=False), nullable=False)
+    type_ = Column(
+        "type", sqlalchemy.Enum(FetcherType, native_enum=False), nullable=False
+    )
     address = Column(String, nullable=False)
     fetch_data = Column(String)  # Данные, которые передаются в теле POST запроса
     metrics = Column(JSON, default={}, nullable=False)  # Статическая часть метрик

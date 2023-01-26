@@ -24,16 +24,19 @@ def metric_service():
 def alert_service():
     if Config.fake:
         return FakeAlertService(None)
-    return PgAlertService(db.session)
+    with db():
+        return PgAlertService(db.session)
 
 
 def receiver_service():
     if Config.fake:
         return FakeReceiverSerivce(None)
-    return PgReceiverService(db.session)
+    with db():
+        return PgReceiverService(db.session)
 
 
 def fetcher_service():
     if Config.fake:
         return FakeFetcherService(None)
-    return PgFetcherService(db.session)
+    with db():
+        return PgFetcherService(db.session)

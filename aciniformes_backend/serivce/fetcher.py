@@ -4,11 +4,15 @@ import aciniformes_backend.models as db_models
 
 
 class PgFetcherService(FetcherServiceInterface):
-    async def create(self, fetcher: db_models.Fetcher) -> None:
+    async def create(self, fetcher: dict) -> None:
         self.session.add(db_models.Fetcher(**fetcher))
 
     async def get_by_id(self, id_: int) -> db_models.Fetcher:
-        res = self.session.query(db_models.Fetcher).filter(db_models.Fetcher.id_ == id_).one_or_none()
+        res = (
+            self.session.query(db_models.Fetcher)
+            .filter(db_models.Fetcher.id_ == id_)
+            .one_or_none()
+        )
         if not res:
             raise exc.ObjectNotFound(id_)
         return res

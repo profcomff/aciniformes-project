@@ -5,7 +5,11 @@ import aciniformes_backend.serivce.exceptions as exc
 
 class PgMetricService(MetricServiceInterface):
     async def get_by_id(self, id_: int) -> db_models.Metric:
-        res = self.session.query(db_models.Metric).filter(db_models.Metric.id_ == id_).one_or_none()
+        res = (
+            self.session.query(db_models.Metric)
+            .filter(db_models.Metric.id_ == id_)
+            .one_or_none()
+        )
         if not res:
             raise exc.ObjectNotFound(id_)
         return res

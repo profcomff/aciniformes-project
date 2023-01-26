@@ -1,16 +1,11 @@
 import pytest
-from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from aciniformes_backend.routes.base import app
 from aciniformes_backend.settings import get_settings
 from aciniformes_backend.models.base import BaseModel
-
-
-@pytest.fixture(scope='session')
-def client():
-    client = TestClient(app)
-    return client
+from aciniformes_backend.routes.base import app
+from aciniformes_backend.serivce import Config
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture(scope="session")
@@ -25,10 +20,23 @@ def tables(engine):
     BaseModel.metadata.drop_all(engine)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def dbsession(engine, tables):
     connection = engine.connect()
     session = Session(bind=connection, autocommit=True, autoflush=False)
     yield session
     session.close()
     connection.close()
+
+
+@pytest.fixture(scope="session")
+def service_config():
+    Config.fake = True
+    conf = Config()
+    yield conf
+
+
+@pytest.fixture
+def client(service_config):
+    client = TestClient(app)
+    return client

@@ -5,7 +5,11 @@ import aciniformes_backend.models as db_models
 
 class PgReceiverService(ReceiverServiceInterface):
     async def get_by_id(self, id_: int) -> db_models.Receiver:
-        res = self.session.query(db_models.Receiver).filter(db_models.Receiver.id_ == id_).one_or_none()
+        res = (
+            self.session.query(db_models.Receiver)
+            .filter(db_models.Receiver.id_ == id_)
+            .one_or_none()
+        )
         if not res:
             raise exc.ObjectNotFound(id_)
         return res

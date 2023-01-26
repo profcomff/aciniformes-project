@@ -5,7 +5,7 @@ from starlette import status
 from aciniformes_backend.serivce import (
     receiver_service,
     ReceiverServiceInterface,
-    exceptions as exc
+    exceptions as exc,
 )
 
 
@@ -18,6 +18,7 @@ class UpdateSchema(BaseModel):
     name: str | None
     chat_id: int | None
 
+
 class GetSchema(BaseModel):
     id: int
 
@@ -27,40 +28,37 @@ router = APIRouter()
 
 @router.post("")
 async def create(
-        create_schema: CreateSchema,
-        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
+    create_schema: CreateSchema,
+    receiver: ReceiverServiceInterface = Depends(receiver_service),
 ):
-    await receiver_service.create(create_schema.dict())
+    await receiver.create(create_schema.dict())
     return status.HTTP_201_CREATED
 
 
 @router.get("")
 async def get_all(
-        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
+    receiver: ReceiverServiceInterface = Depends(receiver_service),
 ):
-    res = await receiver_service.get_all()
+    res = await receiver.get_all()
     return res
 
 
 @router.get("/{id}")
-async def get(
-        id: int,
-        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
-):
+async def get(id: int, receiver: ReceiverServiceInterface = Depends(receiver_service)):
     try:
-        res = await receiver_service.get_by_id(id)
+        res = await receiver.get_by_id(id)
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.patch("/{id}")
 async def update(
-        id: int,
-        update_schema: UpdateSchema,
-        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
+    id: int,
+    update_schema: UpdateSchema,
+    receiver: ReceiverServiceInterface = Depends(receiver_service),
 ):
     try:
-        res = await receiver_service.update(id, update_schema.dict(exclude_unset=True))
+        res = await receiver.update(id, update_schema.dict(exclude_unset=True))
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res
@@ -68,7 +66,6 @@ async def update(
 
 @router.delete("/{id}")
 async def delete(
-        id: int,
-        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
+    id: int, receiver: ReceiverServiceInterface = Depends(receiver_service)
 ):
-    await receiver_service.delete(id)
+    await receiver.delete(id)
