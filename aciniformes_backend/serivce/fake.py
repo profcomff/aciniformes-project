@@ -12,8 +12,8 @@ import aciniformes_backend.models as db_models
 class FakeAlertService(AlertServiceInterface):
     id_incr = 0
 
-    def __init__(self):
-        super().__init__(None)
+    def __init__(self, session):
+        super().__init__(session)
         self.repository = dict()
 
     async def create(self, alert: dict) -> None:
@@ -37,8 +37,8 @@ class FakeAlertService(AlertServiceInterface):
 class FakeReceiverSerivce(ReceiverServiceInterface):
     id_incr = 0
 
-    def __init__(self):
-        super().__init__(None)
+    def __init__(self, session):
+        super().__init__(session)
         self.repository = dict()
 
     async def create(self, receiver: dict) -> None:
@@ -62,8 +62,8 @@ class FakeReceiverSerivce(ReceiverServiceInterface):
 class FakeFetcherService(FetcherServiceInterface):
     id_incr = 0
 
-    def __init__(self):
-        super().__init__(None)
+    def __init__(self, session):
+        super().__init__(session)
         self.repository = dict()
 
     async def create(self, fetcher: dict) -> None:
@@ -87,8 +87,8 @@ class FakeFetcherService(FetcherServiceInterface):
 class FakeMetricService(MetricServiceInterface):
     id_incr = 0
 
-    def __init__(self):
-        super().__init__(None)
+    def __init__(self, session):
+        super().__init__(session)
         self.repository = dict()
 
     async def create(self, metrics: pydantic.Json) -> None:

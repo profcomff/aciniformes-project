@@ -4,7 +4,7 @@ from starlette import status
 from pydantic import BaseModel, Json
 from aciniformes_backend.serivce import (
     MetricServiceInterface,
-    pg_metric_service,
+    metric_service,
     exceptions as exc
 )
 
@@ -23,7 +23,7 @@ router = APIRouter()
 @router.post("")
 async def create(
         metric_schema: CreateSchema,
-        metric_servie: MetricServiceInterface = Depends(pg_metric_service),
+        metric_servie: MetricServiceInterface = Depends(metric_service),
 ):
     await metric_servie.create(metric_schema.metrics)
     return status.HTTP_201_CREATED
@@ -31,7 +31,7 @@ async def create(
 
 @router.get("")
 async def get_all(
-        metric_service: MetricServiceInterface = Depends(pg_metric_service)
+        metric_service: MetricServiceInterface = Depends(metric_service)
 ):
     res = await metric_service.get_all()
     return res
@@ -40,7 +40,7 @@ async def get_all(
 @router.get("/{id}")
 async def get(
         id_: int,
-        metric_service: MetricServiceInterface = Depends(pg_metric_service())
+        metric_service: MetricServiceInterface = Depends(metric_service())
 ):
     try:
         res = await metric_service.get_by_id(id_)

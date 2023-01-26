@@ -4,7 +4,7 @@ from starlette import status
 from pydantic import BaseModel, Json
 from aciniformes_backend.serivce import (
     FetcherServiceInterface,
-    pg_metric_service,
+    metric_service,
     exceptions as exc
 )
 
@@ -41,7 +41,7 @@ router = APIRouter()
 @router.post("")
 async def create(
         create_schema: CreateSchema,
-        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+        fetcher_service: FetcherServiceInterface = Depends(metric_service),
 ):
     res = await fetcher_service.create(create_schema.dict())
     return status.HTTP_201_CREATED
@@ -49,7 +49,7 @@ async def create(
 
 @router.get("")
 async def get_all(
-        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+        fetcher_service: FetcherServiceInterface = Depends(metric_service),
 ):
     res = await fetcher_service.get_all()
     return res
@@ -58,7 +58,7 @@ async def get_all(
 @router.get("/{id}")
 async def get(
         id: int,
-        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+        fetcher_service: FetcherServiceInterface = Depends(metric_service),
 ):
     try:
         res = await fetcher_service.get_by_id(id)
@@ -71,7 +71,7 @@ async def get(
 async def update(
         id: int,
         update_schema: UpdateSchema,
-        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+        fetcher_service: FetcherServiceInterface = Depends(metric_service),
 ):
     res = await fetcher_service.update(id, update_schema.dict(exclude_unset=True))
     return res
@@ -80,6 +80,6 @@ async def update(
 @router.delete("/{id}")
 async def delete(
         id: int,
-        fetcher_service: FetcherServiceInterface = Depends(pg_metric_service),
+        fetcher_service: FetcherServiceInterface = Depends(metric_service),
 ):
     await fetcher_service.delete(id)

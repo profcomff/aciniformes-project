@@ -7,9 +7,9 @@ from .base import (
 )
 
 from .bootstrap import (
-    pg_receiver_service,
-    pg_alert_service,
-    pg_metric_service,
+    receiver_service,
+    alert_service,
+    metric_service,
 )
 
 
@@ -18,8 +18,8 @@ __all__ = [
     "FetcherServiceInterface",
     "MetricServiceInterface",
     "ReceiverServiceInterface",
-    "pg_metric_service",
-    "pg_receiver_service",
-    "pg_alert_service",
+    "metric_service",
+    "receiver_service",
+    "alert_service",
     "exceptions",
 ]

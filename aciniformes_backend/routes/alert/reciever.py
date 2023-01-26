@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi.exceptions import HTTPException
 from starlette import status
 from aciniformes_backend.serivce import (
-    pg_receiver_service,
+    receiver_service,
     ReceiverServiceInterface,
     exceptions as exc
 )
@@ -28,7 +28,7 @@ router = APIRouter()
 @router.post("")
 async def create(
         create_schema: CreateSchema,
-        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
 ):
     await receiver_service.create(create_schema.dict())
     return status.HTTP_201_CREATED
@@ -36,7 +36,7 @@ async def create(
 
 @router.get("")
 async def get_all(
-        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
 ):
     res = await receiver_service.get_all()
     return res
@@ -45,7 +45,7 @@ async def get_all(
 @router.get("/{id}")
 async def get(
         id: int,
-        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
 ):
     try:
         res = await receiver_service.get_by_id(id)
@@ -57,7 +57,7 @@ async def get(
 async def update(
         id: int,
         update_schema: UpdateSchema,
-        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
 ):
     try:
         res = await receiver_service.update(id, update_schema.dict(exclude_unset=True))
@@ -69,6 +69,6 @@ async def update(
 @router.delete("/{id}")
 async def delete(
         id: int,
-        receiver_service: ReceiverServiceInterface = Depends(pg_receiver_service)
+        receiver_service: ReceiverServiceInterface = Depends(receiver_service)
 ):
     await receiver_service.delete(id)

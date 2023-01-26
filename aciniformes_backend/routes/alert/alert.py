@@ -4,7 +4,7 @@ from pydantic import BaseModel, Json
 from fastapi import Depends
 from starlette import status
 from aciniformes_backend.serivce import (
-    pg_alert_service,
+    alert_service,
     AlertServiceInterface,
     exceptions as exc
 )
@@ -32,7 +32,7 @@ router = APIRouter()
 @router.post("")
 async def create(
         create_schema: CreateSchema,
-        alert_service: AlertServiceInterface = Depends(pg_alert_service)
+        alert_service: AlertServiceInterface = Depends(alert_service)
 ):
     await alert_service.create(create_schema.dict(exclude_unset=True))
     return status.HTTP_201_CREATED
@@ -40,7 +40,7 @@ async def create(
 
 @router.get("")
 async def get_all(
-        alert_service: AlertServiceInterface = Depends(pg_alert_service)
+        alert_service: AlertServiceInterface = Depends(alert_service)
 ):
     res = await alert_service.get_all()
     return res
@@ -49,7 +49,7 @@ async def get_all(
 @router.get("/{id}")
 async def get(
         id: int,
-        alert_service: AlertServiceInterface = Depends(pg_alert_service)
+        alert_service: AlertServiceInterface = Depends(alert_service)
 ):
     try:
         res = await alert_service.get_by_id(id)
@@ -62,7 +62,7 @@ async def get(
 async def update(
         id: int,
         update_schema: UpdateSchema,
-        alert_service: AlertServiceInterface = Depends(pg_alert_service)
+        alert_service: AlertServiceInterface = Depends(alert_service)
 ):
     res = await alert_service.update(id, update_schema.dict(exclude_unset=True))
     return res
@@ -71,6 +71,6 @@ async def update(
 @router.delete("/{id}")
 async def delete(
         id: int,
-        alert_service: AlertServiceInterface = Depends(pg_alert_service)
+        alert_service: AlertServiceInterface = Depends(alert_service)
 ):
     await alert_service.delete(id)
