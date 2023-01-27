@@ -30,13 +30,13 @@ def dbsession(engine, tables):
 
 
 @pytest.fixture(scope="session")
-def service_config():
+def fake_config():
     Config.fake = True
     conf = Config()
     yield conf
 
 
 @pytest.fixture
-def client(service_config):
+def client(fake_config):
     client = TestClient(app)
     return client

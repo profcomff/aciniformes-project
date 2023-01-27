@@ -11,9 +11,13 @@ from aciniformes_backend.serivce import (
 
 
 class CreateSchema(BaseModel):
-    data: Json
+    data: dict
     receiver: int
     filter: str
+
+
+class PostResponseSchema(CreateSchema):
+    id: int
 
 
 class UpdateSchema(BaseModel):
@@ -29,13 +33,16 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post("")
+@router.post(
+    "",
+    response_model=PostResponseSchema,
+)
 async def create(
     create_schema: CreateSchema,
-    alert_service: AlertServiceInterface = Depends(alert_service),
+    alert: AlertServiceInterface = Depends(alert_service),
 ):
-    await alert_service.create(create_schema.dict(exclude_unset=True))
-    return status.HTTP_201_CREATED
+    id_ = await alert.create(create_schema.dict(exclude_unset=True))
+    return PostResponseSchema(**create_schema.dict(), id=id_)
 
 
 @router.get("")

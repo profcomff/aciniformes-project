@@ -1,6 +1,3 @@
-import pytest
-
-
 class TestAlertService:
     def test_create(self, pg_alert_service):
         pass

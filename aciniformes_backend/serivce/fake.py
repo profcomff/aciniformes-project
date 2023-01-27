@@ -16,9 +16,10 @@ class FakeAlertService(AlertServiceInterface):
     def __init__(self, session):
         super().__init__(session)
 
-    async def create(self, alert: dict) -> None:
-        self.repository[self.id_incr] = db_models.Alert(**alert)
+    async def create(self, item: dict) -> int:
+        self.repository[self.id_incr] = db_models.Alert(**item)
         self.id_incr += 1
+        return self.id_incr
 
     async def get_by_id(self, id_: int) -> db_models.Alert:
         return self.repository[id_]
@@ -34,16 +35,17 @@ class FakeAlertService(AlertServiceInterface):
         return list(self.repository.values())
 
 
-class FakeReceiverSerivce(ReceiverServiceInterface):
+class FakeReceiverService(ReceiverServiceInterface):
     id_incr = 0
     repository = dict()
 
     def __init__(self, session):
         super().__init__(session)
 
-    async def create(self, receiver: dict) -> None:
-        self.repository[self.id_incr] = db_models.Receiver(**receiver)
+    async def create(self, item: dict) -> int:
+        self.repository[self.id_incr] = db_models.Receiver(**item)
         self.id_incr += 1
+        return self.id_incr
 
     async def get_by_id(self, id_: int) -> db_models.Receiver:
         return self.repository[id_]
@@ -66,9 +68,10 @@ class FakeFetcherService(FetcherServiceInterface):
     def __init__(self, session):
         super().__init__(session)
 
-    async def create(self, fetcher: dict) -> None:
-        self.repository[self.id_incr] = db_models.Fetcher(**fetcher)
+    async def create(self, item: dict) -> int:
+        self.repository[self.id_incr] = db_models.Fetcher(**item)
         self.id_incr += 1
+        return self.id_incr
 
     async def get_by_id(self, id_: int) -> db_models.Fetcher:
         return self.repository[id_]
@@ -91,9 +94,10 @@ class FakeMetricService(MetricServiceInterface):
     def __init__(self, session):
         super().__init__(session)
 
-    async def create(self, metrics: pydantic.Json) -> None:
-        self.repository[self.id_incr] = db_models.Metric(**metrics)
+    async def create(self, item: dict) -> int:
+        self.repository[self.id_incr] = db_models.Fetcher(**item)
         self.id_incr += 1
+        return self.id_incr
 
     async def get_by_id(self, id_: int) -> db_models.Metric:
         return self.repository[id_]

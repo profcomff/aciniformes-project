@@ -4,6 +4,11 @@ import aciniformes_backend.models as db_models
 
 
 class PgReceiverService(ReceiverServiceInterface):
+    async def create(self, item: dict) -> int:
+        receiver = db_models.Receiver(**item)
+        self.session.add(receiver)
+        return receiver.id_
+
     async def get_by_id(self, id_: int) -> db_models.Receiver:
         res = (
             self.session.query(db_models.Receiver)
@@ -27,6 +32,3 @@ class PgReceiverService(ReceiverServiceInterface):
 
     async def get_all(self) -> list[db_models.BaseModel]:
         return self.session.query(db_models.Receiver).all()
-
-    async def create(self, receiver: dict) -> None:
-        self.session.add(db_models.Receiver(**receiver))

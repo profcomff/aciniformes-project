@@ -6,7 +6,7 @@ from .fetcher import PgFetcherService
 from .fake import (
     FakeAlertService,
     FakeMetricService,
-    FakeReceiverSerivce,
+    FakeReceiverService,
     FakeFetcherService,
 )
 
@@ -18,7 +18,8 @@ class Config:
 def metric_service():
     if Config.fake:
         return FakeMetricService(None)
-    return PgMetricService(db.session)
+    with db():
+        return PgMetricService(db.session)
 
 
 def alert_service():
@@ -30,7 +31,7 @@ def alert_service():
 
 def receiver_service():
     if Config.fake:
-        return FakeReceiverSerivce(None)
+        return FakeReceiverService(None)
     with db():
         return PgReceiverService(db.session)
 

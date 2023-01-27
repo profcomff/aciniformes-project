@@ -4,8 +4,10 @@ import aciniformes_backend.models as db_models
 
 
 class PgFetcherService(FetcherServiceInterface):
-    async def create(self, fetcher: dict) -> None:
-        self.session.add(db_models.Fetcher(**fetcher))
+    async def create(self, item: dict) -> int:
+        fetcher = db_models.Fetcher(**item)
+        self.session.add(fetcher)
+        return fetcher.id_
 
     async def get_by_id(self, id_: int) -> db_models.Fetcher:
         res = (

@@ -4,8 +4,10 @@ import aciniformes_backend.models as db_models
 
 
 class PgAlertService(AlertServiceInterface):
-    async def create(self, alert: dict) -> None:
-        self.session.add(db_models.Alert(**alert))
+    async def create(self, item: dict) -> int:
+        alert = db_models.Alert(**item)
+        self.session.add(alert)
+        return alert.id_
 
     async def get_by_id(self, id_: int) -> db_models.Alert:
         res = (

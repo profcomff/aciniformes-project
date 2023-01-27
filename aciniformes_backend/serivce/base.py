@@ -14,12 +14,12 @@ class BaseService(ABC):
     async def get_all(self) -> list[db_models.BaseModel]:
         raise NotImplementedError
 
-
-class AlertServiceInterface(BaseService):
     @abstractmethod
-    async def create(self, alert: dict) -> None:
+    async def create(self, item: dict) -> int:
         raise NotImplementedError
 
+
+class AlertServiceInterface(BaseService):
     @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Alert:
         raise NotImplementedError
@@ -35,10 +35,6 @@ class AlertServiceInterface(BaseService):
 
 class ReceiverServiceInterface(BaseService):
     @abstractmethod
-    async def create(self, receiver: dict) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Receiver:
         raise NotImplementedError
 
@@ -53,10 +49,6 @@ class ReceiverServiceInterface(BaseService):
 
 class FetcherServiceInterface(BaseService):
     @abstractmethod
-    async def create(self, fetcher: dict) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Fetcher:
         raise NotImplementedError
 
@@ -70,10 +62,6 @@ class FetcherServiceInterface(BaseService):
 
 
 class MetricServiceInterface(BaseService):
-    @abstractmethod
-    async def create(self, metrics: pydantic.Json) -> None:
-        raise NotImplementedError
-
     @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Metric:
         raise NotImplementedError

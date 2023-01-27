@@ -3,10 +3,10 @@ import pytest
 from starlette import status
 from aciniformes_backend.settings import get_settings
 from aciniformes_backend.models import Fetcher
-from aciniformes_backend.serivce import fetcher_service
+from aciniformes_backend.serivce import fetcher_service, Config
 
 
-def test_fake_service(service_config):
+def test_fake_service(fake_config):
     s = fetcher_service()
     assert s.session is None
     assert type(s.repository) is dict
@@ -15,6 +15,7 @@ def test_fake_service(service_config):
 class TestFetcher:
     _url = "/fetcher"
     settings = get_settings()
+    Config.fake = True
     s = fetcher_service()
 
     def test_post_success(self, client):

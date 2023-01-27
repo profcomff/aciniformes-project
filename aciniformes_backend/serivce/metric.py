@@ -4,6 +4,11 @@ import aciniformes_backend.serivce.exceptions as exc
 
 
 class PgMetricService(MetricServiceInterface):
+    async def create(self, item: dict) -> int:
+        metric = db_models.Metric(**item)
+        self.session.add(metric)
+        return metric.id_
+
     async def get_by_id(self, id_: int) -> db_models.Metric:
         res = (
             self.session.query(db_models.Metric)
@@ -19,6 +24,3 @@ class PgMetricService(MetricServiceInterface):
         if not res:
             raise exc.ObjectNotFound("table empty")
         return res
-
-    async def create(self, metrics) -> None:
-        self.session.add(db_models.Metric(metrics=metrics))
