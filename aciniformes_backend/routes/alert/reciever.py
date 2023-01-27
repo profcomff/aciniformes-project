@@ -13,6 +13,7 @@ class CreateSchema(BaseModel):
     name: str
     chat_id: int
 
+
 class PostResponseSchema(CreateSchema):
     id: int
 
@@ -29,10 +30,7 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post(
-    "",
-    response_model=PostResponseSchema
-)
+@router.post("", response_model=PostResponseSchema)
 async def create(
     create_schema: CreateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),

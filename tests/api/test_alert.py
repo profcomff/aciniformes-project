@@ -2,7 +2,6 @@ import json
 import pytest
 from starlette import status
 from aciniformes_backend.settings import get_settings
-from aciniformes_backend.models import Alert, Receiver
 from aciniformes_backend.serivce import alert_service, receiver_service, Config
 
 
@@ -91,12 +90,8 @@ class TestAlert:
 
 @pytest.fixture
 def this_receiver():
-    body = {
-        "id": 66,
-        "name": "string",
-        "chat_id": 0
-    }
-    receiver_service().repository[body['id']] = body
+    body = {"id": 66, "name": "string", "chat_id": 0}
+    receiver_service().repository[body["id"]] = body
     return body
 
 
@@ -107,10 +102,7 @@ class TestReceiver:
     s = receiver_service()
 
     def test_post_success(self, client):
-        body = {
-            "name": "string",
-            "chat_id": 0
-        }
+        body = {"name": "string", "chat_id": 0}
         res = client.post(self._url, data=json.dumps(body))
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
@@ -128,7 +120,7 @@ class TestReceiver:
     def test_delete_by_id_success(self, client, this_receiver):
         res = client.delete(f"{self._url}/{this_receiver['id']}")
         assert res.status_code == status.HTTP_200_OK
-        assert self.s.repository[this_receiver['id']] is None
+        assert self.s.repository[this_receiver["id"]] is None
 
     def test_get_success(self, client, this_receiver):
         res = client.get(self._url)
@@ -136,10 +128,7 @@ class TestReceiver:
         assert len(res.json())
 
     def test_patch_by_id_success(self, client, this_receiver):
-        body = {
-            "name": "s",
-            "chat_id": 11
-        }
+        body = {"name": "s", "chat_id": 11}
         res = client.patch(f"{self._url}/{this_receiver['id']}", data=json.dumps(body))
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
@@ -151,10 +140,6 @@ class TestReceiver:
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
     def test_patch_by_id_not_found(self, client):
-        body = {
-            "name": "st",
-            "chat_id": 0
-        }
+        body = {"name": "st", "chat_id": 0}
         res = client.patch(f"{self._url}/{888}", data=json.dumps(body))
         assert res.status_code == status.HTTP_404_NOT_FOUND
-
