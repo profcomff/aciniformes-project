@@ -29,10 +29,48 @@ class TestAlert:
     def test_delete_by_id_success(self, client):
         pass
 
-    def test_get_success(self):
+    def test_get_success(self, client):
+        pass
+
+    def test_patch_by_id_success(self, client):
+        pass
+
+    def test_get_by_id_not_found(self, client):
+        pass
+
+    def test_delete_by_id_not_found(self, client):
+        pass
+
+    def test_patch_by_id_not_found(self, client):
         pass
 
 
 class TestReceiver:
     _url = "/receiver"
     settings = get_settings()
+    s = receiver_service()
+
+    def test_post_success(self, client):
+        pass
+
+    def test_get_by_id_success(self, client):
+        pass
+
+    def test_delete_by_id_success(self, client):
+        pass
+
+    def test_get_success(self, client):
+        pass
+
+    def test_patch_by_id_success(self, client):
+        pass
+
+    def test_get_by_id_not_found(self, client):
+        pass
+
+    def test_delete_by_id_not_found(self, client):
+        pass
+
+    def test_patch_by_id_not_found(self, client):
+        pass
+
