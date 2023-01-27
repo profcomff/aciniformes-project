@@ -36,8 +36,5 @@ class TestFetcher:
     def test_get_by_id_not_found(self, client):
         pass
 
-    def test_delete_by_id_not_found(self, client):
-        pass
-
     def test_patch_by_id_not_found(self, client):
         pass

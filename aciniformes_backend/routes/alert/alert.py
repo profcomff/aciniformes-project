@@ -21,7 +21,7 @@ class PostResponseSchema(CreateSchema):
 
 
 class UpdateSchema(BaseModel):
-    data: Json | None
+    data: dict | None
     receiver: int | None
     filter: str | None
 
@@ -66,7 +66,10 @@ async def update(
     update_schema: UpdateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
 ):
-    res = await alert.update(id, update_schema.dict(exclude_unset=True))
+    try:
+        res = await alert.update(id, update_schema.dict(exclude_unset=True))
+    except exc.ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res
 
 

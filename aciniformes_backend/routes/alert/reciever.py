@@ -13,6 +13,9 @@ class CreateSchema(BaseModel):
     name: str
     chat_id: int
 
+class PostResponseSchema(CreateSchema):
+    id: int
+
 
 class UpdateSchema(BaseModel):
     name: str | None
@@ -26,13 +29,16 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post("")
+@router.post(
+    "",
+    response_model=PostResponseSchema
+)
 async def create(
     create_schema: CreateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
 ):
-    await receiver.create(create_schema.dict())
-    return status.HTTP_201_CREATED
+    id_ = await receiver.create(create_schema.dict())
+    return PostResponseSchema(**create_schema.dict(), id=id_)
 
 
 @router.get("")
@@ -47,6 +53,7 @@ async def get_all(
 async def get(id: int, receiver: ReceiverServiceInterface = Depends(receiver_service)):
     try:
         res = await receiver.get_by_id(id)
+        return res
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 

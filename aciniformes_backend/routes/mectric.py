@@ -10,7 +10,7 @@ from aciniformes_backend.serivce import (
 
 
 class CreateSchema(BaseModel):
-    metrics: Json
+    metrics: dict
 
 
 class GetSchema(BaseModel):
