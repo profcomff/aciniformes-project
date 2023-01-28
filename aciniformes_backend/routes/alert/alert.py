@@ -1,17 +1,32 @@
+from datetime import datetime
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
+from aciniformes_backend.models.alerts import Alert
 
 
 class CreateSchema(BaseModel):
-    pass
+    data: Json
+    reciever_id: int
+    filter: str
 
 
 class UpdateSchema(BaseModel):
+    data: Json
+    reciever_id: int
+    filter: str
+
+
+class GetReciever(BaseModel):
     pass
 
 
 class GetSchema(BaseModel):
-    id: int
+    id_: int
+    data: Json
+    reciever_id: GetReciever
+    filter_: str
+    create_ts: datetime
+    modify_ts: datetime
 
 
 router = APIRouter()

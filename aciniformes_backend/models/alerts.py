@@ -10,13 +10,13 @@ class Reciever(BaseModel):
     name = Column(String, nullable=False)
     chat_id = Column(Integer, nullable=False)
     create_ts = Column(DateTime, default=datetime.utcnow)
-    modify_ts = Column(DateTime, default=datetime.utcnow, on_update=datetime.utcnow)
+    modify_ts = Column(DateTime, default=datetime.utcnow)  #, on_update=datetime.utcnow)
 
 
 class Alert(BaseModel):
     id_ = Column('id', Integer, primary_key=True)
     data = Column(JSON, nullable=False)
-    reciever = Column(Integer, ForeignKey('reciever.id'), nullable=False)
-    filter = Column(String, nullable=False)
+    reciever_id = Column(Integer, ForeignKey('reciever.id'), nullable=False)
+    filter_ = Column('filter', String, nullable=False)
     create_ts = Column(DateTime, default=datetime.utcnow)
-    modify_ts = Column(DateTime, default=datetime.utcnow, on_update=datetime.utcnow)
+    modify_ts = Column(DateTime, default=datetime.utcnow)  #, on_update=datetime.utcnow)
