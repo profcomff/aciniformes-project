@@ -10,7 +10,7 @@ class Receiver(BaseModel):
     name = Column(String, nullable=False)
     chat_id = Column(Integer, nullable=False)
     create_ts = Column(DateTime, default=datetime.utcnow)
-    modify_ts = Column(DateTime, default=datetime.utcnow, on_update=datetime.utcnow)
+    modify_ts = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class Alert(BaseModel):
@@ -19,4 +19,4 @@ class Alert(BaseModel):
     receiver = Column(Integer, ForeignKey("receiver.id"), nullable=False)
     filter = Column(String, nullable=False)
     create_ts = Column(DateTime, default=datetime.utcnow)
-    modify_ts = Column(DateTime, default=datetime.utcnow, on_update=datetime.utcnow)
+    modify_ts = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -7,6 +7,9 @@ class PgReceiverService(ReceiverServiceInterface):
     async def create(self, item: dict) -> int:
         receiver = db_models.Receiver(**item)
         self.session.add(receiver)
+        self.session.flush()
+        self.session.refresh(receiver)
+        d = receiver.id_
         return receiver.id_
 
     async def get_by_id(self, id_: int) -> db_models.Receiver:

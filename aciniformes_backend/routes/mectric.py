@@ -13,6 +13,10 @@ class CreateSchema(BaseModel):
     metrics: dict
 
 
+class ResponsePostSchema(CreateSchema):
+    id: int
+
+
 class GetSchema(BaseModel):
     id: int
 
@@ -20,13 +24,13 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post("")
+@router.post("", response_model=ResponsePostSchema)
 async def create(
     metric_schema: CreateSchema,
     metric: MetricServiceInterface = Depends(metric_service),
 ):
-    await metric.create(metric_schema.metrics)
-    return status.HTTP_201_CREATED
+    id_ = await metric.create(metric_schema.metrics)
+    return ResponsePostSchema(**metric_schema.dict(), id=id_)
 
 
 @router.get("")
@@ -36,9 +40,9 @@ async def get_all(metric: MetricServiceInterface = Depends(metric_service)):
 
 
 @router.get("/{id}")
-async def get(id_: int, metric: MetricServiceInterface = Depends(metric_service)):
+async def get(id: int, metric: MetricServiceInterface = Depends(metric_service)):
     try:
-        res = await metric.get_by_id(id_)
+        res = await metric.get_by_id(id)
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res

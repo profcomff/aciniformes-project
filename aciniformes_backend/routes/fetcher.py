@@ -11,21 +11,25 @@ from aciniformes_backend.serivce import (
 
 class CreateSchema(BaseModel):
     name: str
-    type: str
+    type_: str
     address: str
     fetch_data: str
-    metrics: Json
+    metrics: dict
     metric_name: str
     delay_ok: int
     delay_fail: int
 
 
+class ResponsePostSchema(CreateSchema):
+    id: int
+
+
 class UpdateSchema(BaseModel):
     name: str | None
-    type: str | None
+    type_: str | None
     address: str | None
     fetch_data: str | None
-    metrics: Json | None
+    metrics: dict | None
     metric_name: str | None
     delay_ok: int | None
     delay_fail: int | None
@@ -38,13 +42,13 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post("")
+@router.post("", response_model=ResponsePostSchema)
 async def create(
     create_schema: CreateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
-    await fetcher.create(create_schema.dict())
-    return status.HTTP_201_CREATED
+    id_ = await fetcher.create(create_schema.dict())
+    return ResponsePostSchema(**create_schema.dict(), id=id_)
 
 
 @router.get("")
@@ -73,7 +77,10 @@ async def update(
     update_schema: UpdateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
-    res = await fetcher.update(id, update_schema.dict(exclude_unset=True))
+    try:
+        res = await fetcher.update(id, update_schema.dict(exclude_unset=True))
+    except exc.ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res
 
 

@@ -7,7 +7,8 @@ class PgAlertService(AlertServiceInterface):
     async def create(self, item: dict) -> int:
         alert = db_models.Alert(**item)
         self.session.add(alert)
-        return alert.id_
+        id_ = self.session.query(db_models.Alert).first().id_
+        return id_
 
     async def get_by_id(self, id_: int) -> db_models.Alert:
         res = (

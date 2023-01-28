@@ -97,7 +97,6 @@ def this_receiver():
 
 class TestReceiver:
     _url = "/receiver"
-    settings = get_settings()
     Config.fake = True
     s = receiver_service()
 

@@ -30,4 +30,4 @@ class Fetcher(BaseModel):
         Integer, default=30, nullable=False
     )  # Через сколько секунд повторить запрос, если предыдущий неуспешный
     create_ts = Column(DateTime, default=datetime.utcnow)
-    modify_ts = Column(DateTime, default=datetime.utcnow, on_update=datetime.utcnow)
+    modify_ts = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
