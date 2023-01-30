@@ -1,5 +1,8 @@
 import re
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
+from sqlalchemy.orm import declared_attr, as_declarative
+from sqlalchemy.orm import registry
+
+mapper_registry = registry()
 
 
 @as_declarative()
@@ -13,9 +16,3 @@ class BaseModel:
         Convert CamelCase class name to snake_case db table name.
         """
         return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
-
-    def __repr__(self) -> str:
-        attrs = []
-        for c in self.__table__.columns:
-            attrs.append(f"{c.name}={getattr(self, c.name)}")
-        return "{}({})".format(self.__class__.__name__, ", ".join(attrs))

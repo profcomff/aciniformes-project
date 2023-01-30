@@ -11,13 +11,19 @@ class Receiver(BaseModel):
     name: Mapped[str] = mapped_column(String, nullable=False)
     chat_id: Mapped[int] = mapped_column(Integer, nullable=False)
     create_ts: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    modify_ts: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    modify_ts: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
 class Alert(BaseModel):
     id_: Mapped[int] = mapped_column("id", Integer, primary_key=True)
     data = mapped_column(JSON, nullable=False)
-    receiver: Mapped[int] = mapped_column(Integer, ForeignKey("receiver.id", ondelete='CASCADE'), nullable=False)
+    receiver: Mapped[int] = mapped_column(
+        Integer, ForeignKey("receiver.id", ondelete="CASCADE"), nullable=False
+    )
     filter = mapped_column(String, nullable=False)
     create_ts = mapped_column(DateTime, default=datetime.utcnow)
-    modify_ts = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    modify_ts = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )

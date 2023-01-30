@@ -10,7 +10,9 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture(scope="session")
 def engine():
-    return create_engine(get_settings().DB_DSN, execution_options={"isolation_level": "AUTOCOMMIT"})
+    return create_engine(
+        get_settings().DB_DSN, execution_options={"isolation_level": "AUTOCOMMIT"}
+    )
 
 
 @pytest.fixture(scope="session")

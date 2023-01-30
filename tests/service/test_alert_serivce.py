@@ -3,8 +3,11 @@ import pytest
 import sqlalchemy
 
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
-from aciniformes_backend.routes.alert.reciever import CreateSchema as ReceiverCreateSchema
+from aciniformes_backend.routes.alert.reciever import (
+    CreateSchema as ReceiverCreateSchema,
+)
 from aciniformes_backend.models import Alert, Receiver
+import aciniformes_backend.serivce.exceptions as exc
 
 
 @pytest.fixture
@@ -16,7 +19,11 @@ def receiver_schema():
 
 @pytest.fixture
 def db_receiver(dbsession, receiver_schema):
-    q = sqlalchemy.insert(Receiver).values(**receiver_schema.dict(exclude_unset=True)).returning(Receiver)
+    q = (
+        sqlalchemy.insert(Receiver)
+        .values(**receiver_schema.dict(exclude_unset=True))
+        .returning(Receiver)
+    )
     receiver = dbsession.execute(q).scalar()
     dbsession.flush()
     yield receiver
@@ -38,7 +45,11 @@ def alert_schema(receiver_schema, db_receiver):
 
 @pytest.fixture
 def db_alert(db_receiver, dbsession, alert_schema):
-    q = sqlalchemy.insert(Alert).values(**alert_schema.dict(exclude_unset=True)).returning(Alert)
+    q = (
+        sqlalchemy.insert(Alert)
+        .values(**alert_schema.dict(exclude_unset=True))
+        .returning(Alert)
+    )
     alert = dbsession.execute(q).scalar()
     dbsession.flush()
     yield alert
@@ -60,6 +71,7 @@ class TestReceiverService:
     async def test_get_all(self, pg_receiver_service, db_receiver, db_alert):
         res = await pg_receiver_service.get_all()
         assert len(res)
+        assert type(res) is list
         assert type(res[0]) is Receiver
 
     @pytest.mark.asyncio
@@ -67,6 +79,8 @@ class TestReceiverService:
         res = await pg_receiver_service.get_by_id(db_receiver.id_)
         assert res is not None
         assert res.name == db_receiver.name
+        with pytest.raises(exc.ObjectNotFound):
+            await pg_receiver_service.get_by_id(db_receiver.id_ + 1000)
 
     @pytest.mark.asyncio
     async def test_delete(self, pg_receiver_service, db_receiver):
@@ -80,12 +94,17 @@ class TestReceiverService:
 class TestAlertService:
     @pytest.mark.asyncio
     async def test_create(self, pg_alert_service, alert_schema, db_receiver):
-        res = await pg_alert_service.create(alert_schema.dict(exclude_unset=True), )
+        res = await pg_alert_service.create(
+            alert_schema.dict(exclude_unset=True),
+        )
         assert type(res) == int
 
     @pytest.mark.asyncio
-    async def test_get_all(self, pg_alert_service):
-        pass
+    async def test_get_all(self, pg_alert_service, db_alert):
+        res = await pg_alert_service.get_all()
+        assert len(res)
+        assert type(res) is list
+        assert type(res[0]) is Alert
 
     @pytest.mark.asyncio
     async def test_get_by_id(self, pg_alert_service):

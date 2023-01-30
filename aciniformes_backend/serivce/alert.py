@@ -1,3 +1,5 @@
+import sqlalchemy as sa
+
 from .base import AlertServiceInterface
 import aciniformes_backend.serivce.exceptions as exc
 import aciniformes_backend.models as db_models
@@ -5,31 +7,30 @@ import aciniformes_backend.models as db_models
 
 class PgAlertService(AlertServiceInterface):
     async def create(self, item: dict) -> int:
-        alert = db_models.Alert(**item)
-        self.session.add(alert)
-        id_ = self.session.query(db_models.Alert).first().id_
-        return id_
+        q = sa.insert(db_models.Alert).values(**item).returning(db_models.Alert)
+        alert = self.session.execute(q).scalar()
+        self.session.flush()
+        return alert.id_
 
     async def get_by_id(self, id_: int) -> db_models.Alert:
-        res = (
-            self.session.query(db_models.Alert)
-            .filter(db_models.Alert.id_ == id_)
-            .one_or_none()
-        )
+        q = sa.select(db_models.Alert).where(db_models.Alert.id_ == id_)
+        res = self.session.execute(q).scalar()
         if not res:
             raise exc.ObjectNotFound(id_)
         return res
 
     async def delete(self, id_: int) -> None:
-        item = self.get_by_id(id_)
-        self.session.delete(item)
+        q = sa.delete(db_models.Alert).where(db_models.Alert.id_ == id_)
+        self.session.execute(q)
+        self.session.flush()
 
     async def update(self, id_: int, item: dict) -> db_models.Alert:
-        q = self.session.query(db_models.Alert).filter(db_models.Alert.id_ == id_)
-        if not q.one_or_none():
+        q = sa.update(db_models.Alert).where(db_models.Alert.id_ == id_).values(**item)
+        if not self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
-        q.update(**item)
-        return q.one_or_none()
+        res = self.session.scalar(q)
+        self.session.flush()
+        return res
 
     async def get_all(self) -> list[db_models.BaseModel]:
-        return self.session.query(db_models.Alert).all()
+        return list(self.session.scalars(sa.select(db_models.Alert)).all())

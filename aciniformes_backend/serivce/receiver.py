@@ -1,3 +1,7 @@
+from typing import Type
+
+import sqlalchemy as sa
+
 from .base import ReceiverServiceInterface
 import aciniformes_backend.serivce.exceptions as exc
 import aciniformes_backend.models as db_models
@@ -5,33 +9,33 @@ import aciniformes_backend.models as db_models
 
 class PgReceiverService(ReceiverServiceInterface):
     async def create(self, item: dict) -> int:
-        receiver = db_models.Receiver(**item)
-        self.session.add(receiver)
+        q = sa.insert(db_models.Receiver).values(**item).returning(db_models.Receiver)
+        receiver = self.session.execute(q).scalar()
         self.session.flush()
-        self.session.refresh(receiver)
-        d = receiver.id_
         return receiver.id_
 
-    async def get_by_id(self, id_: int) -> db_models.Receiver:
-        res = (
-            self.session.query(db_models.Receiver)
-            .filter(db_models.Receiver.id_ == id_)
-            .one_or_none()
-        )
+    async def get_by_id(self, id_: int) -> Type[db_models.Receiver]:
+        q = sa.select(db_models.Receiver).where(db_models.Receiver.id_ == id_)
+        res = self.session.scalar(q)
         if not res:
             raise exc.ObjectNotFound(id_)
         return res
 
     async def delete(self, id_: int) -> None:
-        item = self.get_by_id(id_)
-        self.session.delete(item)
+        q = sa.delete(db_models.Receiver).where(db_models.Receiver.id_ == id_)
+        self.session.execute(q)
+        self.session.flush()
 
-    async def update(self, id_: int, item: dict) -> db_models.Receiver:
-        q = self.session.query(db_models.Receiver).filter(db_models.Receiver.id_ == id_)
-        if not q.one_or_none():
+    async def update(self, id_: int, item: dict) -> Type[db_models.Receiver]:
+        q = (
+            sa.update(db_models.Receiver)
+            .where(db_models.Receiver.id_ == id_)
+            .values(**item)
+        )
+        if not self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
-        q.update(**item)
-        return q.one_or_none()
+        res = self.session.scalar(q)
+        return res
 
     async def get_all(self) -> list[db_models.BaseModel]:
-        return self.session.query(db_models.Receiver).all()
+        return list(self.session.scalars(sa.select(db_models.Receiver)).all())
