@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture(scope="session")
 def engine():
-    return create_engine(get_settings().DB_DSN)
+    return create_engine(get_settings().DB_DSN, execution_options={"isolation_level": "AUTOCOMMIT"})
 
 
 @pytest.fixture(scope="session")
@@ -23,7 +23,7 @@ def tables(engine):
 @pytest.fixture(scope="session")
 def dbsession(engine, tables):
     connection = engine.connect()
-    session = Session(bind=connection, autocommit=True, autoflush=False)
+    session = Session(bind=connection, autoflush=False)
     yield session
     session.close()
     connection.close()

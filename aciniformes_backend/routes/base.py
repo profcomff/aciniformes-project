@@ -16,6 +16,5 @@ app.include_router(metric_router, prefix="/metric")
 app.add_middleware(
     DBSessionMiddleware,
     db_url=get_settings().DB_DSN,
-    session_args={"autocommit": True},
-    engine_args={"pool_pre_ping": True},
+    engine_args={"pool_pre_ping": True, "isolation_level": "AUTOCOMMIT"},
 )
