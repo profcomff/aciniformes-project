@@ -25,11 +25,10 @@ class PgAlertService(AlertServiceInterface):
         self.session.flush()
 
     async def update(self, id_: int, item: dict) -> db_models.Alert:
-        q = sa.update(db_models.Alert).where(db_models.Alert.id_ == id_).values(**item)
+        q = sa.update(db_models.Alert).where(db_models.Alert.id_ == id_).values(**item).returning(db_models.Alert)
         if not self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
-        res = self.session.scalar(q)
-        self.session.flush()
+        res = self.session.execute(q).scalar()
         return res
 
     async def get_all(self) -> list[db_models.BaseModel]:

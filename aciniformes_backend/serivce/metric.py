@@ -7,7 +7,7 @@ import aciniformes_backend.serivce.exceptions as exc
 
 class PgMetricService(MetricServiceInterface):
     async def create(self, item: dict) -> int:
-        q = sa.insert(db_models.Metric).values(**item)
+        q = sa.insert(db_models.Metric).values(**item).returning(db_models.Metric)
         metric = self.session.scalar(q)
         self.session.flush()
         return metric.id_
@@ -20,4 +20,4 @@ class PgMetricService(MetricServiceInterface):
         return res
 
     async def get_all(self) -> list[db_models.BaseModel]:
-        return list(self.session.scalars(sa.select(db_models.Fetcher)).all())
+        return list(self.session.scalars(sa.select(db_models.Metric)).all())

@@ -87,8 +87,10 @@ class TestReceiverService:
         await pg_receiver_service.delete(db_receiver.id_)
 
     @pytest.mark.asyncio
-    async def test_update(self, pg_receiver_service):
-        pass
+    async def test_update(self, pg_receiver_service, db_receiver, dbsession):
+        res = await pg_receiver_service.update(db_receiver.id_, {"name": "Alex", "chat_id": 11})
+        assert res.name == "Alex"
+        assert res.chat_id == 11
 
 
 class TestAlertService:
@@ -107,13 +109,18 @@ class TestAlertService:
         assert type(res[0]) is Alert
 
     @pytest.mark.asyncio
-    async def test_get_by_id(self, pg_alert_service):
-        pass
+    async def test_get_by_id(self, pg_alert_service, db_alert):
+        res = await pg_alert_service.get_by_id(db_alert.id_)
+        assert res is not None
+        assert res.receiver == db_alert.receiver
+        with pytest.raises(exc.ObjectNotFound):
+            await pg_alert_service.get_by_id(db_alert.id_ + 1000)
 
     @pytest.mark.asyncio
-    async def test_delete(self, pg_alert_service):
-        pass
+    async def test_delete(self, pg_alert_service, db_alert):
+        await pg_alert_service.delete(db_alert.id_)
 
     @pytest.mark.asyncio
-    async def test_update(self, pg_alert_service):
-        pass
+    async def test_update(self, pg_alert_service, db_alert):
+        res = await pg_alert_service.update(db_alert.id_, {"data": {"type": "stig", "name": "stig"}})
+        assert res.data == {"type": "stig", "name": "stig"}

@@ -31,10 +31,11 @@ class PgReceiverService(ReceiverServiceInterface):
             sa.update(db_models.Receiver)
             .where(db_models.Receiver.id_ == id_)
             .values(**item)
+            .returning(db_models.Receiver)
         )
         if not self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
-        res = self.session.scalar(q)
+        res = self.session.execute(q).scalar()
         return res
 
     async def get_all(self) -> list[db_models.BaseModel]:

@@ -7,7 +7,7 @@ import aciniformes_backend.models as db_models
 
 class PgFetcherService(FetcherServiceInterface):
     async def create(self, item: dict) -> int:
-        q = sa.insert(db_models.Fetcher).values(**item)
+        q = sa.insert(db_models.Fetcher).values(**item).returning(db_models.Fetcher)
         fetcher = self.session.scalar(q)
         self.session.flush()
         return fetcher.id_
@@ -29,11 +29,11 @@ class PgFetcherService(FetcherServiceInterface):
             sa.update(db_models.Fetcher)
             .where(db_models.Fetcher.id_ == id_)
             .values(**item)
+            .returning(db_models.Fetcher)
         )
         if not self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
-        res = self.session.scalar(q)
-        self.session.flush()
+        res = self.session.execute(q).scalar()
         return res
 
     async def get_all(self) -> list[db_models.BaseModel]:
