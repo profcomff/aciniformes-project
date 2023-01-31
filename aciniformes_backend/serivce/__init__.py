@@ -4,6 +4,7 @@ from .base import (
     FetcherServiceInterface,
     MetricServiceInterface,
     ReceiverServiceInterface,
+    AuthServiceInterface,
 )
 
 from .bootstrap import (
@@ -11,6 +12,7 @@ from .bootstrap import (
     alert_service,
     metric_service,
     fetcher_service,
+    auth_service,
     Config,
 )
 
@@ -20,6 +22,8 @@ __all__ = [
     "FetcherServiceInterface",
     "MetricServiceInterface",
     "ReceiverServiceInterface",
+    "AuthServiceInterface",
+    "auth_service",
     "metric_service",
     "receiver_service",
     "alert_service",

@@ -1,8 +1,5 @@
 import re
 from sqlalchemy.orm import declared_attr, as_declarative
-from sqlalchemy.orm import registry
-
-mapper_registry = registry()
 
 
 @as_declarative()

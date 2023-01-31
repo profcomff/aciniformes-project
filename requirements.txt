@@ -8,3 +8,7 @@ fastapi-sqlalchemy
 psycopg2-binary
 gunicorn
 starlette
+aioschedule
+pytest
+jose
+passlib

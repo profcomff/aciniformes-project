@@ -5,9 +5,11 @@ from .base import (
     ReceiverServiceInterface,
     FetcherServiceInterface,
     MetricServiceInterface,
+    AuthServiceInterface,
 )
 import aciniformes_backend.serivce.exceptions as exc
 import aciniformes_backend.models as db_models
+from aciniformes_backend.settings import get_settings
 
 
 class FakeAlertService(AlertServiceInterface):
@@ -119,3 +121,32 @@ class FakeMetricService(MetricServiceInterface):
 
     async def get_all(self) -> list[db_models.BaseModel]:
         return list(self.repository.values())
+
+
+class FakeAuthService(AuthServiceInterface):
+    async def get_all(self) -> list[db_models.BaseModel]:
+        pass
+
+    async def create(self, item: dict) -> int:
+        pass
+
+    repository = []
+
+    async def registrate_user(self, username, password):
+        self.repository.append(Auth(id="fake", username=username, password=password))
+
+    async def authenticate_user(self, username, password) -> Auth | None:
+        for auth in self.repository:
+            if auth.password == password and auth.username == username:
+                return auth
+        raise exc.NotRegistered(username)
+
+    async def get_user(self, username):
+        for auth in self.repository:
+            if auth.username == username:
+                return auth
+        raise exc.NotRegistered(username)
+
+    @staticmethod
+    async def _validate_password(db_password, inp_password):
+        return get_settings().PWD_CONTEXT.verify(inp_password, db_password)
