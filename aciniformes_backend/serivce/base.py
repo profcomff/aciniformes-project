@@ -73,7 +73,7 @@ class AuthServiceInterface(BaseService):
         raise NotImplementedError
 
     @abstractmethod
-    async def authenticate_user(self, username, password) -> Auth | None:
+    async def authenticate_user(self, username, password) -> db_models.Auth | None:
         raise NotImplementedError
 
     @abstractmethod

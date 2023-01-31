@@ -21,7 +21,7 @@ class PgAuthService(AuthServiceInterface):
         else:
             self.repository.add(Auth(username=username, password=password))
 
-    async def authenticate_user(self, username, password) -> Auth | None:
+    async def authenticate_user(self, username, password) -> db_models.Auth | None:
         db_user: Auth | None = self.repository.get_user_by_username(username)
         if not db_user:
             raise exc.NotRegistered(username)

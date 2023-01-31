@@ -135,7 +135,7 @@ class FakeAuthService(AuthServiceInterface):
     async def registrate_user(self, username, password):
         self.repository.append(Auth(id="fake", username=username, password=password))
 
-    async def authenticate_user(self, username, password) -> Auth | None:
+    async def authenticate_user(self, username, password) -> db_models.Auth | None:
         for auth in self.repository:
             if auth.password == password and auth.username == username:
                 return auth
