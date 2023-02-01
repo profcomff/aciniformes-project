@@ -31,7 +31,7 @@ class PgFetcherService(FetcherServiceInterface):
             .values(**item)
             .returning(db_models.Fetcher)
         )
-        if not self.get_by_id(id_):
+        if not await self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
         res = self.session.execute(q).scalar()
         return res
