@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from starlette import status
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
 from typing import Any
 from aciniformes_backend.serivce import (
     MetricServiceInterface,
@@ -11,7 +11,7 @@ from aciniformes_backend.serivce import (
 
 
 class CreateSchema(BaseModel):
-    metrics: dict[Any]
+    metrics: dict[str, int | str | list]
 
 
 class ResponsePostSchema(CreateSchema):

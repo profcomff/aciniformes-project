@@ -72,7 +72,7 @@ class AuthServiceInterface(ABC):
         self.session = session
 
     @abstractmethod
-    async def registrate_user(self, username, password)-> db_models.Auth | None:
+    async def registrate_user(self, username, password) -> db_models.Auth | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -86,4 +86,3 @@ class AuthServiceInterface(ABC):
     @staticmethod
     async def _validate_password(db_password, inp_password):
         raise NotImplementedError
-

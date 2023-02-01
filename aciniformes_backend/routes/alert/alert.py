@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
-from typing import Any
 from fastapi import Depends
 from starlette import status
 from aciniformes_backend.serivce import (
@@ -12,7 +11,7 @@ from aciniformes_backend.serivce import (
 
 
 class CreateSchema(BaseModel):
-    data: dict[Any]
+    data: dict[str, int | str | list]
     receiver: int
     filter: str
 
@@ -22,7 +21,7 @@ class PostResponseSchema(CreateSchema):
 
 
 class UpdateSchema(BaseModel):
-    data: dict[Any] | None
+    data: dict[str, int | str | list] | None
     receiver: int | None
     filter: str | None
 

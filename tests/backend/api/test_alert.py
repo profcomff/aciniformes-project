@@ -128,7 +128,11 @@ class TestReceiver:
 
     def test_patch_by_id_success(self, client, this_receiver, auth_header):
         body = {"name": "s", "chat_id": 11}
-        res = client.patch(f"{self._url}/{this_receiver['id']}", data=json.dumps(body), headers=auth_header)
+        res = client.patch(
+            f"{self._url}/{this_receiver['id']}",
+            data=json.dumps(body),
+            headers=auth_header,
+        )
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
         assert res_body["name"] == body["name"]
@@ -140,5 +144,7 @@ class TestReceiver:
 
     def test_patch_by_id_not_found(self, client, auth_header):
         body = {"name": "st", "chat_id": 0}
-        res = client.patch(f"{self._url}/{888}", data=json.dumps(body), headers=auth_header)
+        res = client.patch(
+            f"{self._url}/{888}", data=json.dumps(body), headers=auth_header
+        )
         assert res.status_code == status.HTTP_404_NOT_FOUND

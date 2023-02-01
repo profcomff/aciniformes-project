@@ -35,7 +35,7 @@ router = APIRouter()
 async def create(
     create_schema: CreateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    token=Depends(get_current_user)
+    token=Depends(get_current_user),
 ):
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -65,7 +65,7 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    token=Depends(get_current_user)
+    token=Depends(get_current_user),
 ):
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -78,8 +78,9 @@ async def update(
 
 @router.delete("/{id}")
 async def delete(
-    id: int, receiver: ReceiverServiceInterface = Depends(receiver_service),
-    token=Depends(get_current_user)
+    id: int,
+    receiver: ReceiverServiceInterface = Depends(receiver_service),
+    token=Depends(get_current_user),
 ):
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)

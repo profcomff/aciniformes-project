@@ -133,11 +133,14 @@ class FakeAuthService(AuthServiceInterface):
 
     async def authenticate_user(self, username, password) -> db_models.Auth | None:
         for auth in self.repository:
-            if self._validate_password(auth.password, password) and auth.username == username:
+            if (
+                self._validate_password(auth.password, password)
+                and auth.username == username
+            ):
                 return auth
         raise exc.NotRegistered(username)
 
-    async def get_user(self, username)-> db_models.Auth | None:
+    async def get_user(self, username) -> db_models.Auth | None:
         for auth in self.repository:
             if auth.username == username:
                 return auth

@@ -9,7 +9,11 @@ settings = get_settings()
 
 class PgAuthService(AuthServiceInterface):
     async def registrate_user(self, username, password) -> db_models.Auth | None:
-        q = sa.insert(db_models.Auth).values(username=username, password=password).returning(db_models.Auth)
+        q = (
+            sa.insert(db_models.Auth)
+            .values(username=username, password=password)
+            .returning(db_models.Auth)
+        )
         if await self.get_user(username):
             raise exc.AlreadyRegistered(username)
         else:
@@ -24,7 +28,9 @@ class PgAuthService(AuthServiceInterface):
         return db_user
 
     async def get_user(self, username) -> db_models.Auth | None:
-        return self.session.scalar(sa.select(db_models.Auth).where(db_models.Auth.username == username))
+        return self.session.scalar(
+            sa.select(db_models.Auth).where(db_models.Auth.username == username)
+        )
 
     @staticmethod
     async def _validate_password(db_password, inp_password):

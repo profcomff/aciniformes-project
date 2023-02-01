@@ -15,7 +15,11 @@ def metric_schema():
 
 @pytest.fixture()
 def db_metric(dbsession, metric_schema):
-    q = sqlalchemy.insert(Metric).values(**metric_schema.dict(exclude_unset=True)).returning(Metric)
+    q = (
+        sqlalchemy.insert(Metric)
+        .values(**metric_schema.dict(exclude_unset=True))
+        .returning(Metric)
+    )
     metric = dbsession.scalar(q)
     dbsession.flush()
     yield metric
@@ -43,4 +47,3 @@ class TestMetricService:
     async def test_get_by_id(self, pg_metric_service, db_metric):
         res = await pg_metric_service.get_by_id(db_metric.id_)
         assert res.metrics == db_metric.metrics
-

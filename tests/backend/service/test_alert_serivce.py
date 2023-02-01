@@ -88,7 +88,9 @@ class TestReceiverService:
 
     @pytest.mark.asyncio
     async def test_update(self, pg_receiver_service, db_receiver, dbsession):
-        res = await pg_receiver_service.update(db_receiver.id_, {"name": "Alex", "chat_id": 11})
+        res = await pg_receiver_service.update(
+            db_receiver.id_, {"name": "Alex", "chat_id": 11}
+        )
         assert res.name == "Alex"
         assert res.chat_id == 11
 
@@ -122,5 +124,7 @@ class TestAlertService:
 
     @pytest.mark.asyncio
     async def test_update(self, pg_alert_service, db_alert):
-        res = await pg_alert_service.update(db_alert.id_, {"data": {"type": "stig", "name": "stig"}})
+        res = await pg_alert_service.update(
+            db_alert.id_, {"data": {"type": "stig", "name": "stig"}}
+        )
         assert res.data == {"type": "stig", "name": "stig"}

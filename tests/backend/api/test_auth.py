@@ -17,19 +17,15 @@ def test_auth_service(fake_config):
 
 @pytest.fixture
 def registered_user(client):
-    body = {
-        'username': "test", 'password': "test"
-    }
-    res = client.post('/auth/register', data=json.dumps(body))
+    body = {"username": "test", "password": "test"}
+    res = client.post("/auth/register", data=json.dumps(body))
     assert res.status_code == status.HTTP_201_CREATED
 
 
 class TestAuth:
-    _url = '/auth'
+    _url = "/auth"
 
     def test_create_user(self, dbsession, client):
-        body = {
-            'username': "test", 'password': "test"
-        }
-        res = client.post('/auth/register', data=json.dumps(body))
+        body = {"username": "test", "password": "test"}
+        res = client.post("/auth/register", data=json.dumps(body))
         assert res.status_code == status.HTTP_201_CREATED

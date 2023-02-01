@@ -125,7 +125,5 @@ async def register(
     response_model=User,
     responses={status.HTTP_401_UNAUTHORIZED: {"detail": "Unauthorized"}},
 )
-async def get_current_user_info(
-    _: Request, current_user=Depends(get_current_user)
-):
+async def get_current_user_info(_: Request, current_user=Depends(get_current_user)):
     return User(id=current_user.id, username=current_user.username)

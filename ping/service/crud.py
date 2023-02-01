@@ -18,8 +18,10 @@ class CrudServiceInterface(ABC):
     async def add_alert(self):
         raise NotImplementedError
 
+
 class CrudService(CrudServiceInterface):
     pass
+
 
 class FakeCrudService(CrudServiceInterface):
     pass

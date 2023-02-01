@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from starlette import status
-from typing import Any
-from pydantic import BaseModel, HttpUrl, validator
+from pydantic import BaseModel, HttpUrl
 from .auth import get_current_user
 from aciniformes_backend.serivce import (
     FetcherServiceInterface,
@@ -16,7 +15,7 @@ class CreateSchema(BaseModel):
     type_: str
     address: str
     fetch_data: str
-    metrics: dict[Any]
+    metrics: dict[str, int | str | list]
     metric_name: str
     delay_ok: int
     delay_fail: int
@@ -31,7 +30,7 @@ class UpdateSchema(BaseModel):
     type_: str | None
     address: HttpUrl | None
     fetch_data: str | None
-    metrics: dict | None
+    metrics: dict[str, int | str | list] | None
     metric_name: str | None
     delay_ok: int | None
     delay_fail: int | None
@@ -48,7 +47,7 @@ router = APIRouter()
 async def create(
     create_schema: CreateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user)
+    token=Depends(get_current_user),
 ):
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -81,7 +80,7 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user)
+    token=Depends(get_current_user),
 ):
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -96,7 +95,7 @@ async def update(
 async def delete(
     id: int,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user)
+    token=Depends(get_current_user),
 ):
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)

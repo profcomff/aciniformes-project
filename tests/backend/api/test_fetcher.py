@@ -65,7 +65,11 @@ class TestFetcher:
 
     def test_patch_by_id_success(self, client, this_fetcher, auth_header):
         body = {"name": "string", "type_": "post_ok", "delay_fail": 0}
-        res = client.patch(f"{self._url}/{this_fetcher['id']}", data=json.dumps(body), headers=auth_header)
+        res = client.patch(
+            f"{self._url}/{this_fetcher['id']}",
+            data=json.dumps(body),
+            headers=auth_header,
+        )
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
         assert res_body["name"] == body["name"]
@@ -77,5 +81,7 @@ class TestFetcher:
 
     def test_patch_by_id_not_found(self, client, auth_header):
         body = {"name": "s"}
-        res = client.patch(f"{self._url}/{888}", data=json.dumps(body), headers=auth_header)
+        res = client.patch(
+            f"{self._url}/{888}", data=json.dumps(body), headers=auth_header
+        )
         assert res.status_code == status.HTTP_404_NOT_FOUND

@@ -25,7 +25,11 @@ def fetcher_schema():
 
 @pytest.fixture()
 def db_fetcher(dbsession, fetcher_schema):
-    q = sqlalchemy.insert(Fetcher).values(**fetcher_schema.dict(exclude_unset=True)).returning(Fetcher)
+    q = (
+        sqlalchemy.insert(Fetcher)
+        .values(**fetcher_schema.dict(exclude_unset=True))
+        .returning(Fetcher)
+    )
     fetcher = dbsession.scalar(q)
     dbsession.flush()
     yield fetcher
