@@ -1,13 +1,29 @@
 from fastapi import APIRouter
+from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
+from fastapi import Depends
+from starlette import status
+from aciniformes_backend.serivce import (
+    alert_service,
+    AlertServiceInterface,
+    exceptions as exc,
+)
 
 
 class CreateSchema(BaseModel):
-    pass
+    data: dict[str, int | str | list]
+    receiver: int
+    filter: str
+
+
+class PostResponseSchema(CreateSchema):
+    id: int | None
 
 
 class UpdateSchema(BaseModel):
-    pass
+    data: dict[str, int | str | list] | None
+    receiver: int | None
+    filter: str | None
 
 
 class GetSchema(BaseModel):
@@ -17,26 +33,46 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post('')
-def create():
-    pass
+@router.post(
+    "",
+    response_model=PostResponseSchema,
+)
+async def create(
+    create_schema: CreateSchema,
+    alert: AlertServiceInterface = Depends(alert_service),
+):
+    id_ = await alert.create(create_schema.dict(exclude_unset=True))
+    return PostResponseSchema(**create_schema.dict(), id=id_)
 
 
-@router.get('')
-def get_all():
-    pass
+@router.get("")
+async def get_all(alert: AlertServiceInterface = Depends(alert_service)):
+    res = await alert.get_all()
+    return res
 
 
 @router.get("/{id}")
-def get(id: int):
-    pass
+async def get(id: int, alert: AlertServiceInterface = Depends(alert_service)):
+    try:
+        res = await alert.get_by_id(id)
+    except exc.ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return res
 
 
 @router.patch("/{id}")
-def update(id: int):
-    pass
+async def update(
+    id: int,
+    update_schema: UpdateSchema,
+    alert: AlertServiceInterface = Depends(alert_service),
+):
+    try:
+        res = await alert.update(id, update_schema.dict(exclude_unset=True))
+    except exc.ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return res
 
 
 @router.delete("/{id}")
-def delete(id: int):
-    pass
+async def delete(id: int, alert: AlertServiceInterface = Depends(alert_service)):
+    await alert.delete(id)

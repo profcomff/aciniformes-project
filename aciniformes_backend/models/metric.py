@@ -2,10 +2,12 @@
 """
 
 from datetime import datetime
-from .base import BaseModel, Column, Integer, JSON, DateTime
+from .base import BaseModel
+from sqlalchemy import Integer, JSON, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class Metric(BaseModel):
-    id_ = Column('id', Integer, primary_key=True)
-    metrics = Column(JSON, nullable=False)
-    create_ts = Column(DateTime, default=datetime.utcnow)
+    id_: Mapped[int] = mapped_column("id", Integer, primary_key=True)
+    metrics: Mapped[dict] = mapped_column(JSON, nullable=False)
+    create_ts: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

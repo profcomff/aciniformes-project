@@ -1,13 +1,21 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
+from starlette import status
+from pydantic import BaseModel, Json
+from typing import Any
+from aciniformes_backend.serivce import (
+    MetricServiceInterface,
+    metric_service,
+    exceptions as exc,
+)
 
 
 class CreateSchema(BaseModel):
-    pass
+    metrics: dict[str, int | str | list]
 
 
-class UpdateSchema(BaseModel):
-    pass
+class ResponsePostSchema(CreateSchema):
+    id: int | None
 
 
 class GetSchema(BaseModel):
@@ -17,26 +25,25 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post('')
-def create():
-    pass
+@router.post("", response_model=ResponsePostSchema)
+async def create(
+    metric_schema: CreateSchema,
+    metric: MetricServiceInterface = Depends(metric_service),
+):
+    id_ = await metric.create(metric_schema.metrics)
+    return ResponsePostSchema(**metric_schema.dict(), id=id_)
 
 
-@router.get('')
-def get_all():
-    pass
+@router.get("")
+async def get_all(metric: MetricServiceInterface = Depends(metric_service)):
+    res = await metric.get_all()
+    return res
 
 
 @router.get("/{id}")
-def get(id: int):
-    pass
-
-
-@router.patch("/{id}")
-def update(id: int):
-    pass
-
-
-@router.delete("/{id}")
-def delete(id: int):
-    pass
+async def get(id: int, metric: MetricServiceInterface = Depends(metric_service)):
+    try:
+        res = await metric.get_by_id(id)
+    except exc.ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return res
