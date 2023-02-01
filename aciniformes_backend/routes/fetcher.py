@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from starlette import status
+from typing import Any
 from pydantic import BaseModel, HttpUrl, validator
 from .auth import get_current_user
 from aciniformes_backend.serivce import (
@@ -15,14 +16,14 @@ class CreateSchema(BaseModel):
     type_: str
     address: str
     fetch_data: str
-    metrics: dict
+    metrics: dict[Any]
     metric_name: str
     delay_ok: int
     delay_fail: int
 
 
 class ResponsePostSchema(CreateSchema):
-    id: int
+    id: int | None
 
 
 class UpdateSchema(BaseModel):

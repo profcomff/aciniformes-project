@@ -16,7 +16,7 @@ class CreateSchema(BaseModel):
 
 
 class PostResponseSchema(CreateSchema):
-    id: int
+    id: int | None
 
 
 class UpdateSchema(BaseModel):
