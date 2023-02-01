@@ -10,5 +10,6 @@ gunicorn
 starlette
 aioschedule
 pytest
-jose
+python-jose
+python-multipart
 passlib

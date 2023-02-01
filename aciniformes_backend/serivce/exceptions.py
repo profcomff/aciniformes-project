@@ -3,11 +3,6 @@ class SessionNotInitializedError(Exception):
         super().__init__(f"DB Session not initialized")
 
 
-class InvalidUrl(Exception):
-    def __init__(self, url):
-        super().__init__(f"Invalid Url: {url}")
-
-
 class ObjectNotFound(Exception):
     def __init__(self, key):
         super().__init__(f"Object not found: {key}")
@@ -26,8 +21,3 @@ class NotRegistered(Exception):
 class WrongPassword(Exception):
     def __init__(self):
         super().__init__(f"Incorrect password")
-
-
-class WrongToken(Exception):
-    def __init__(self):
-        super().__init__(f"Could not decode token")

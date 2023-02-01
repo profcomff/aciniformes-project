@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from datetime import datetime
 from jose import JWTError, jwt
@@ -70,6 +70,7 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
 
 @auth_router.post(
     "/token",

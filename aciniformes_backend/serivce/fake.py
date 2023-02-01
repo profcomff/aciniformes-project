@@ -124,16 +124,12 @@ class FakeMetricService(MetricServiceInterface):
 
 
 class FakeAuthService(AuthServiceInterface):
-    async def get_all(self) -> list[db_models.BaseModel]:
-        pass
-
-    async def create(self, item: dict) -> int:
-        pass
-
     repository = []
 
-    async def registrate_user(self, username, password):
-        self.repository.append(Auth(id="fake", username=username, password=password))
+    async def registrate_user(self, username, password) -> db_models.Auth | None:
+        db_user = db_models.Auth(username=username, password=password)
+        self.repository.append(db_user)
+        return db_user
 
     async def authenticate_user(self, username, password) -> db_models.Auth | None:
         for auth in self.repository:
@@ -141,7 +137,7 @@ class FakeAuthService(AuthServiceInterface):
                 return auth
         raise exc.NotRegistered(username)
 
-    async def get_user(self, username):
+    async def get_user(self, username)-> db_models.Auth | None:
         for auth in self.repository:
             if auth.username == username:
                 return auth

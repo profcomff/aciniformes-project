@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from fastapi.exceptions import HTTPException
 from starlette import status
+from aciniformes_backend.routes.auth import get_current_user
 from aciniformes_backend.serivce import (
     receiver_service,
     ReceiverServiceInterface,
@@ -34,7 +35,10 @@ router = APIRouter()
 async def create(
     create_schema: CreateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
+    token=Depends(get_current_user)
 ):
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     id_ = await receiver.create(create_schema.dict())
     return PostResponseSchema(**create_schema.dict(), id=id_)
 
@@ -61,7 +65,10 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
+    token=Depends(get_current_user)
 ):
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     try:
         res = await receiver.update(id, update_schema.dict(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -71,6 +78,9 @@ async def update(
 
 @router.delete("/{id}")
 async def delete(
-    id: int, receiver: ReceiverServiceInterface = Depends(receiver_service)
+    id: int, receiver: ReceiverServiceInterface = Depends(receiver_service),
+    token=Depends(get_current_user)
 ):
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     await receiver.delete(id)
