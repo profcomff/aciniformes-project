@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 
 class Auth(BaseModel):
-    id: Mapped[int] = mapped_column(
+    id_: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
     )

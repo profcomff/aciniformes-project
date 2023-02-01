@@ -13,3 +13,4 @@ pytest
 python-jose
 python-multipart
 passlib
+bcrypt

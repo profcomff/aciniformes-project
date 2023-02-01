@@ -100,9 +100,9 @@ class TestReceiver:
     Config.fake = True
     s = receiver_service()
 
-    def test_post_success(self, client):
+    def test_post_success(self, client, auth_header):
         body = {"name": "string", "chat_id": 0}
-        res = client.post(self._url, data=json.dumps(body))
+        res = client.post(self._url, data=json.dumps(body), headers=auth_header)
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
         assert res_body["name"] == body["name"]
@@ -116,8 +116,8 @@ class TestReceiver:
         assert res_body["name"] == this_receiver["name"]
         assert res_body["chat_id"] == this_receiver["chat_id"]
 
-    def test_delete_by_id_success(self, client, this_receiver):
-        res = client.delete(f"{self._url}/{this_receiver['id']}")
+    def test_delete_by_id_success(self, client, this_receiver, auth_header):
+        res = client.delete(f"{self._url}/{this_receiver['id']}", headers=auth_header)
         assert res.status_code == status.HTTP_200_OK
         assert self.s.repository[this_receiver["id"]] is None
 
@@ -126,9 +126,9 @@ class TestReceiver:
         assert res.status_code == status.HTTP_200_OK
         assert len(res.json())
 
-    def test_patch_by_id_success(self, client, this_receiver):
+    def test_patch_by_id_success(self, client, this_receiver, auth_header):
         body = {"name": "s", "chat_id": 11}
-        res = client.patch(f"{self._url}/{this_receiver['id']}", data=json.dumps(body))
+        res = client.patch(f"{self._url}/{this_receiver['id']}", data=json.dumps(body), headers=auth_header)
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
         assert res_body["name"] == body["name"]
@@ -138,7 +138,7 @@ class TestReceiver:
         res = client.get(f"{self._url}/{888}")
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_patch_by_id_not_found(self, client):
+    def test_patch_by_id_not_found(self, client, auth_header):
         body = {"name": "st", "chat_id": 0}
-        res = client.patch(f"{self._url}/{888}", data=json.dumps(body))
+        res = client.patch(f"{self._url}/{888}", data=json.dumps(body), headers=auth_header)
         assert res.status_code == status.HTTP_404_NOT_FOUND
