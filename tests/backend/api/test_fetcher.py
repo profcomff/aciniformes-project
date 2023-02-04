@@ -3,6 +3,7 @@ import pytest
 from starlette import status
 from aciniformes_backend.serivce import fetcher_service, Config
 
+
 def test_fake_service(fake_config):
     s = fetcher_service()
     assert s.session is None

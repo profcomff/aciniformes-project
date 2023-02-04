@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
-from aciniformes_backend.models import Fetcher
+from aciniformes_backend.models import Fetcher, FetcherType
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from .crud import CrudServiceInterface
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
+import httpx
+from datetime import datetime
+import time
 
 
 class SchedulerServiceInterface(ABC):
@@ -14,7 +17,7 @@ class SchedulerServiceInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_fetcher(self):
+    async def delete_fetcher(self, fetcher: Fetcher):
         raise NotImplementedError
 
     @abstractmethod
@@ -32,13 +35,13 @@ class SchedulerServiceInterface(ABC):
 class FakeSchedulerService(SchedulerServiceInterface):
     def __init__(self, crud_service: CrudServiceInterface):
         self.scheduler = None
-        self.crud_service = crud_service
+        self.container = crud_service
 
     async def add_fetcher(self, fetcher: Fetcher):
         pass
 
-    async def delete_fetcher(self):
-        pass
+    async def delete_fetcher(self, fetcher: Fetcher):
+        self.scheduler.remove_job(fetcher.name)
 
     async def start(self):
         pass
@@ -53,16 +56,44 @@ class ApSchedulerService(SchedulerServiceInterface):
         self.crud_service = crud_service
 
     async def add_fetcher(self, fetcher: Fetcher):
-        self.scheduler.add_job(self.make_func(fetcher))
+        f = await self._fetch_it(fetcher)
+        self.scheduler.add_job(
+            f,
+            name=f"{fetcher.name}",
+            next_run_time=fetcher.delay_ok,
+            trigger="interval",
+        )
 
-    async def delete_fetcher(self):
-        pass
+    async def delete_fetcher(self, fetcher: Fetcher):
+        self.scheduler.remove_job(fetcher.name)
 
     async def start(self):
-        pass
+        self.scheduler.start()
 
     async def stop(self):
-        pass
+        self.scheduler.shutdown()
 
-    async def make_func(self, fetcher: Fetcher):
-        pass
+    @staticmethod
+    async def _parse_timedelta(fetcher: Fetcher):
+        return fetcher.delay_ok, fetcher.delay_fail
+
+    async def _fetch_it(self, fetcher: Fetcher):
+        prev = time.time()
+        res = None
+        match fetcher.type_:
+            case FetcherType.GET:
+                res = httpx.get(fetcher.address)
+            case FetcherType.POST:
+                res = httpx.post(fetcher.address, data=fetcher.fetch_data)
+            case FetcherType.PING:
+                res = httpx.get(fetcher.address)
+        cur = time.time()
+        timing = cur - prev
+        metric = MetricCreateSchema(
+            metrics={
+                "status": res.status_code,
+                "dt_created": datetime.utcnow(),
+                "timing": timing,
+            }
+        )
+        await self.crud_service.add_metric(metric)

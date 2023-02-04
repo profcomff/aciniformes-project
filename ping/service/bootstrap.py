@@ -14,5 +14,5 @@ def crud_service():
 
 def scheduler_service():
     if Config.fake:
-        return FakeCrudService()
-    return ApSchedulerService()
+        return FakeSchedulerService(crud_service())
+    return ApSchedulerService(crud_service())
