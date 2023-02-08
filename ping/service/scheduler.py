@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from aciniformes_backend.models import Fetcher, FetcherType
+from aciniformes_backend.models import Fetcher, FetcherType, Alert
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from .crud import CrudServiceInterface
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
@@ -28,8 +28,16 @@ class SchedulerServiceInterface(ABC):
     async def stop(self):
         raise NotImplementedError
 
+    @abstractmethod
+    async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
+        raise NotImplementedError
+
     async def _add_metric(self, metric: MetricCreateSchema):
         await self.crud_service.add_metric(metric)
+
+    @property
+    def alerts(self):
+        return await self.crud_service.get_alerts()
 
 
 class FakeSchedulerService(SchedulerServiceInterface):
@@ -48,6 +56,9 @@ class FakeSchedulerService(SchedulerServiceInterface):
 
     async def stop(self):
         pass
+
+    async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
+        raise NotImplementedError
 
 
 class ApSchedulerService(SchedulerServiceInterface):
@@ -73,6 +84,9 @@ class ApSchedulerService(SchedulerServiceInterface):
     async def stop(self):
         self.scheduler.shutdown()
 
+    async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
+        raise NotImplementedError
+
     @staticmethod
     async def _parse_timedelta(fetcher: Fetcher):
         return fetcher.delay_ok, fetcher.delay_fail
@@ -96,4 +110,7 @@ class ApSchedulerService(SchedulerServiceInterface):
                 "timing": timing,
             }
         )
+        for alert in self.alerts:
+            if alert.filter == str(res.status_code):
+                await self.write_alert(metric, alert)
         await self.crud_service.add_metric(metric)

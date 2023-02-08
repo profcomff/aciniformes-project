@@ -16,11 +16,11 @@ async def start_scheduler(
     await scheduler.start()
 
 
-@ping_app.get("/fetchers")
+@ping_app.get("/fetchers_active")
 async def get_fetchers(
     scheduler: SchedulerServiceInterface = Depends(scheduler_service),
 ):
-    return await scheduler.crud_service.get_fetchers()
+    return scheduler.scheduler.get_jobs()
 
 
 @ping_app.post("/schedule")
@@ -42,6 +42,6 @@ async def delete_all_fetchers_from_scheduler(
 
 @ping_app.get("/stop")
 async def stop_scheduler(
-        scheduler: SchedulerServiceInterface = Depends(scheduler_service)
+    scheduler: SchedulerServiceInterface = Depends(scheduler_service),
 ):
     await scheduler.stop()
