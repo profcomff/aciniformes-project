@@ -31,7 +31,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String(), nullable=False),
         sa.Column(
             "type",
-            sa.Enum("GET", "POST", "PING", name="fetchertype", native_enum=False),
+            sa.Enum("GET", "POST", "PING", name="fetcher_type", native_enum=False),
             nullable=False,
         ),
         sa.Column("address", sa.String(), nullable=False),

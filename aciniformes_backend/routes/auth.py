@@ -37,9 +37,9 @@ class RegistrationForm(BaseModel):
 
 settings = get_settings()
 auth_router = APIRouter(tags=["Authentication"])
-oauth2bearer = OAuth2PasswordBearer(tokenUrl="token")
+oauth2bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 async def create_token(**kwargs):

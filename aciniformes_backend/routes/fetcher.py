@@ -15,7 +15,7 @@ class CreateSchema(BaseModel):
     type_: str
     address: str
     fetch_data: str
-    metrics: dict[str, int | str | list]
+    metrics: dict
     metric_name: str
     delay_ok: int
     delay_fail: int
@@ -30,7 +30,7 @@ class UpdateSchema(BaseModel):
     type_: str | None
     address: HttpUrl | None
     fetch_data: str | None
-    metrics: dict[str, int | str | list] | None
+    metrics: dict | None
     metric_name: str | None
     delay_ok: int | None
     delay_fail: int | None

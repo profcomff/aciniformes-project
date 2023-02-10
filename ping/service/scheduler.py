@@ -36,7 +36,7 @@ class SchedulerServiceInterface(ABC):
         await self.crud_service.add_metric(metric)
 
     @property
-    def alerts(self):
+    async def alerts(self):
         return await self.crud_service.get_alerts()
 
 
@@ -100,7 +100,7 @@ class ApSchedulerService(SchedulerServiceInterface):
             case FetcherType.POST:
                 res = httpx.post(fetcher.address, data=fetcher.fetch_data)
             case FetcherType.PING:
-                res = httpx.get(fetcher.address)
+                res = httpx.head(fetcher.address)
         cur = time.time()
         timing = cur - prev
         metric = MetricCreateSchema(
@@ -110,7 +110,7 @@ class ApSchedulerService(SchedulerServiceInterface):
                 "timing": timing,
             }
         )
-        for alert in self.alerts:
+        for alert in await self.alerts:
             if alert.filter == str(res.status_code):
                 await self.write_alert(metric, alert)
         await self.crud_service.add_metric(metric)

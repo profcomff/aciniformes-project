@@ -11,7 +11,7 @@ from aciniformes_backend.serivce import (
 
 
 class CreateSchema(BaseModel):
-    metrics: dict[str, int | str | list]
+    metrics: dict
 
 
 class ResponsePostSchema(CreateSchema):
