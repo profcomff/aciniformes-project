@@ -2,7 +2,9 @@ from ping.service import (
     SchedulerServiceInterface,
     scheduler_service,
 )
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
+from starlette import status
+import ping.service.exceptions as exc
 
 ping_app = FastAPI()
 
@@ -13,14 +15,17 @@ ping_app = FastAPI()
 async def start_scheduler(
     scheduler: SchedulerServiceInterface = Depends(scheduler_service),
 ):
-    await scheduler.start()
+    try:
+        await scheduler.start()
+    except exc.AlreadyRunning as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.__repr__())
 
 
 @ping_app.get("/fetchers_active")
 async def get_fetchers(
     scheduler: SchedulerServiceInterface = Depends(scheduler_service),
 ):
-    return scheduler.scheduler.get_jobs()
+    return await scheduler.get_jobs()
 
 
 @ping_app.post("/schedule")

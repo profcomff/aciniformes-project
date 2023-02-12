@@ -19,7 +19,9 @@ def engine():
 def tables(engine):
     BaseModel.metadata.create_all(engine)
     yield
+    # truncate all tables
     BaseModel.metadata.drop_all(engine)
+    BaseModel.metadata.create_all(engine)
 
 
 @pytest.fixture(scope="session")

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from aciniformes_backend.models import Fetcher, FetcherType, Alert
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from .crud import CrudServiceInterface
+from .exceptions import AlreadyRunning
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
 import httpx
 from datetime import datetime
@@ -18,6 +19,10 @@ class SchedulerServiceInterface(ABC):
 
     @abstractmethod
     async def delete_fetcher(self, fetcher: Fetcher):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_jobs(self):
         raise NotImplementedError
 
     @abstractmethod
@@ -51,6 +56,9 @@ class FakeSchedulerService(SchedulerServiceInterface):
     async def delete_fetcher(self, fetcher: Fetcher):
         self.scheduler.remove_job(fetcher.name)
 
+    async def get_jobs(self):
+        raise NotImplementedError
+
     async def start(self):
         pass
 
@@ -61,24 +69,34 @@ class FakeSchedulerService(SchedulerServiceInterface):
         raise NotImplementedError
 
 
+async def foo():
+    print("ddd")
+
+
 class ApSchedulerService(SchedulerServiceInterface):
+    scheduler = AsyncIOScheduler()
+
     def __init__(self, crud_service: CrudServiceInterface):
-        self.scheduler = AsyncIOScheduler()
         self.crud_service = crud_service
 
     async def add_fetcher(self, fetcher: Fetcher):
-        f = await self._fetch_it(fetcher)
         self.scheduler.add_job(
-            f,
-            name=f"{fetcher.name}",
-            next_run_time=fetcher.delay_ok,
+            self._fetch_it,
+            args=[fetcher],
+            id=f"{fetcher.name}",
+            seconds=fetcher.delay_ok,
             trigger="interval",
         )
 
     async def delete_fetcher(self, fetcher: Fetcher):
         self.scheduler.remove_job(fetcher.name)
 
+    async def get_jobs(self):
+        return [j.id for j in self.scheduler.get_jobs()]
+
     async def start(self):
+        if self.scheduler.running:
+            raise AlreadyRunning
         self.scheduler.start()
 
     async def stop(self):
@@ -86,6 +104,7 @@ class ApSchedulerService(SchedulerServiceInterface):
 
     async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
         raise NotImplementedError
+        # await self.crud_service.add_metric(metric_log)
 
     @staticmethod
     async def _parse_timedelta(fetcher: Fetcher):
@@ -106,8 +125,9 @@ class ApSchedulerService(SchedulerServiceInterface):
         metric = MetricCreateSchema(
             metrics={
                 "status": res.status_code,
-                "dt_created": datetime.utcnow(),
-                "timing": timing,
+                "address": fetcher.address,
+                "data": fetcher.fetch_data,
+                "timing_ms": timing,
             }
         )
         for alert in await self.alerts:

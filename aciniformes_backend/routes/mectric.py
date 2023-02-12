@@ -30,7 +30,7 @@ async def create(
     metric_schema: CreateSchema,
     metric: MetricServiceInterface = Depends(metric_service),
 ):
-    id_ = await metric.create(metric_schema.metrics)
+    id_ = await metric.create(metric_schema.dict())
     return ResponsePostSchema(**metric_schema.dict(), id=id_)
 
 

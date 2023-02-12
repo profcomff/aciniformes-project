@@ -26,13 +26,13 @@ class CrudService(CrudServiceInterface):
         self.backend_url: str = get_settings().BACKEND_URL
 
     async def get_fetchers(self) -> list[Fetcher]:
-        return httpx.get(f"{self.backend_url}/fetcher").json()
+        return [Fetcher(**d) for d in httpx.get(f"{self.backend_url}/fetcher").json()]
 
     async def add_metric(self, metric: MetricCreateSchema):
-        return httpx.post(f"{self.backend_url}/metric", data=metric.dict())
+        return httpx.post(f"{self.backend_url}/metric", data=metric.json())
 
     async def get_alerts(self) -> list[Alert]:
-        raise httpx.get(f"{self.backend_url}/alert").json()
+        return httpx.get(f"{self.backend_url}/alert").json()
 
 
 class FakeCrudService(CrudServiceInterface):
