@@ -21,7 +21,6 @@ class Token(BaseModel):
 class User(BaseModel):
     id: str
     username: str
-    email: str | None = None
 
 
 class RegistrationForm(BaseModel):

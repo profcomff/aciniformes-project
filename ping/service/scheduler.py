@@ -5,7 +5,7 @@ from .crud import CrudServiceInterface
 from .exceptions import AlreadyRunning
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
 import httpx
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 
@@ -83,7 +83,7 @@ class ApSchedulerService(SchedulerServiceInterface):
         self.scheduler.add_job(
             self._fetch_it,
             args=[fetcher],
-            id=f"{fetcher.name}",
+            id=f"{fetcher.name} {fetcher.create_ts}",
             seconds=fetcher.delay_ok,
             trigger="interval",
         )
@@ -124,13 +124,23 @@ class ApSchedulerService(SchedulerServiceInterface):
         timing = cur - prev
         metric = MetricCreateSchema(
             metrics={
-                "status": res.status_code,
-                "address": fetcher.address,
-                "data": fetcher.fetch_data,
+                "status_code": res.status_code,
+                "url": fetcher.address,
+                "body": fetcher.fetch_data,
                 "timing_ms": timing,
             }
         )
+        self.scheduler.reschedule_job(
+            f"{fetcher.name} {fetcher.create_ts}",
+            seconds=fetcher.delay_ok,
+            trigger="interval",
+        )
         for alert in await self.alerts:
             if alert.filter == str(res.status_code):
+                self.scheduler.reschedule_job(
+                    f"{fetcher.name} {fetcher.create_ts}",
+                    seconds=fetcher.delay_fail,
+                    trigger="interval",
+                )
                 await self.write_alert(metric, alert)
         await self.crud_service.add_metric(metric)
