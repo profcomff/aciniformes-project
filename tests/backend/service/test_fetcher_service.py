@@ -3,7 +3,6 @@ import sqlalchemy
 
 from aciniformes_backend.routes.fetcher import CreateSchema as FetcherCreateSchema
 from aciniformes_backend.models import Fetcher
-import aciniformes_backend.serivce.exceptions as exc
 
 
 @pytest.fixture

@@ -5,12 +5,16 @@ from .crud import CrudServiceInterface
 from .exceptions import AlreadyRunning
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
 import httpx
+from datetime import datetime, timedelta
+from ping.settings import get_settings
 import time
+
+settings = get_settings()
 
 
 class SchedulerServiceInterface(ABC):
     crud_service: CrudServiceInterface
-    scheduler: BaseScheduler | None
+    scheduler: BaseScheduler | dict
 
     @abstractmethod
     async def add_fetcher(self, fetcher: Fetcher):
@@ -45,31 +49,30 @@ class SchedulerServiceInterface(ABC):
 
 
 class FakeSchedulerService(SchedulerServiceInterface):
+    scheduler = dict()
+
     def __init__(self, crud_service: CrudServiceInterface):
-        self.scheduler = None
-        self.container = crud_service
+        self.crud_service = crud_service
 
     async def add_fetcher(self, fetcher: Fetcher):
-        pass
+        self.scheduler[fetcher.id_] = fetcher
 
     async def delete_fetcher(self, fetcher: Fetcher):
-        self.scheduler.remove_job(fetcher.name)
+        del self.scheduler[fetcher.name]
 
     async def get_jobs(self):
         raise NotImplementedError
 
     async def start(self):
-        pass
+        if 'started' in self.scheduler:
+            raise AlreadyRunning
+        self.scheduler['started'] = True
 
     async def stop(self):
-        pass
+        self.scheduler['started'] = False
 
     async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        raise NotImplementedError
-
-
-async def foo():
-    print("ddd")
+        httpx.post(f"{settings.BOT_URL}/alert", data=metric_log.json())
 
 
 class ApSchedulerService(SchedulerServiceInterface):
@@ -102,7 +105,7 @@ class ApSchedulerService(SchedulerServiceInterface):
         self.scheduler.shutdown()
 
     async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        raise NotImplementedError
+        httpx.post(f"{settings.BOT_URL}/alert", data=metric_log.json())
 
     @staticmethod
     async def _parse_timedelta(fetcher: Fetcher):
