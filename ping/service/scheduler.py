@@ -58,18 +58,18 @@ class FakeSchedulerService(SchedulerServiceInterface):
         self.scheduler[fetcher.id_] = fetcher
 
     async def delete_fetcher(self, fetcher: Fetcher):
-        del self.scheduler[fetcher.name]
+        del self.scheduler[fetcher.id_]
 
     async def get_jobs(self):
-        raise NotImplementedError
+        return await self.crud_service.get_fetchers()
 
     async def start(self):
-        if 'started' in self.scheduler:
+        if "started" in self.scheduler:
             raise AlreadyRunning
-        self.scheduler['started'] = True
+        self.scheduler["started"] = True
 
     async def stop(self):
-        self.scheduler['started'] = False
+        self.scheduler["started"] = False
 
     async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
         httpx.post(f"{settings.BOT_URL}/alert", data=metric_log.json())

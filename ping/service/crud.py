@@ -37,7 +37,18 @@ class CrudService(CrudServiceInterface):
 
 class FakeCrudService(CrudServiceInterface):
     id_incr = 0
-    fetcher_repo: dict[int, Fetcher] = dict()
+    fetcher_repo: dict[int, Fetcher] = {
+        0: Fetcher(**{
+            "name": "https://www.python.org",
+            "type_": "get_ok",
+            "address": "https://www.python.org",
+            "fetch_data": "string",
+            "metrics": {},
+            "metric_name": "string",
+            "delay_ok": 30,
+            "delay_fail": 40,
+        })
+    }
     alert_repo: dict[int, Alert] = dict()
     metric_repo: dict[int, MetricCreateSchema] = dict()
 
