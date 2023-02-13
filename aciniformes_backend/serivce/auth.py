@@ -20,6 +20,11 @@ class PgAuthService(AuthServiceInterface):
             return self.session.scalar(q)
 
     async def authenticate_user(self, username, password) -> db_models.Auth | None:
+        password_from_settings = settings.ADMIN_SECRET.get(username)
+        if password_from_settings and await self._validate_password(
+            settings.PWD_CONTEXT.hash(password_from_settings), password
+        ):
+            return db_models.Auth(username=username, password=password)
         db_user = await self.get_user(username)
         if not db_user:
             raise exc.NotRegistered(username)

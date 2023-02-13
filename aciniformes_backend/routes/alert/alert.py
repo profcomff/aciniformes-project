@@ -11,7 +11,7 @@ from aciniformes_backend.serivce import (
 
 
 class CreateSchema(BaseModel):
-    data: dict[str, int | str | list]
+    data: dict
     receiver: int
     filter: str
 
@@ -21,7 +21,7 @@ class PostResponseSchema(CreateSchema):
 
 
 class UpdateSchema(BaseModel):
-    data: dict[str, int | str | list] | None
+    data: dict | None
     receiver: int | None
     filter: str | None
 

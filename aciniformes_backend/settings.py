@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DB_DSN: PostgresDsn
     PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
     EXPIRY_TIMEDELTA: datetime.timedelta = datetime.timedelta(days=7)
+    ADMIN_SECRET: dict[str, str] = {"admin": "42"}
     JWT_KEY = "42"
     ALGORITHM: str = "HS256"
 

@@ -5,7 +5,6 @@ from .crud import CrudServiceInterface
 from .exceptions import AlreadyRunning
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
 import httpx
-from datetime import datetime, timedelta
 import time
 
 
@@ -104,7 +103,6 @@ class ApSchedulerService(SchedulerServiceInterface):
 
     async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
         raise NotImplementedError
-        # await self.crud_service.add_metric(metric_log)
 
     @staticmethod
     async def _parse_timedelta(fetcher: Fetcher):
