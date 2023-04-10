@@ -1,9 +1,9 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 import pydantic
+import sqlalchemy.orm
 
 import aciniformes_backend.models as db_models
-import sqlalchemy.orm
 
 
 class BaseService(ABC):
@@ -67,22 +67,22 @@ class MetricServiceInterface(BaseService):
         raise NotImplementedError
 
 
-class AuthServiceInterface(ABC):
-    def __init__(self, session: sqlalchemy.orm.Session | None):
-        self.session = session
-
-    @abstractmethod
-    async def registrate_user(self, username, password) -> db_models.Auth | None:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def authenticate_user(self, username, password) -> db_models.Auth | None:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def get_user(self, username) -> db_models.Auth | None:
-        raise NotImplementedError
-
-    @staticmethod
-    async def _validate_password(db_password, inp_password):
-        raise NotImplementedError
+# class AuthServiceInterface(ABC):
+#     def __init__(self, session: sqlalchemy.orm.Session | None):
+#         self.session = session
+#
+#     @abstractmethod
+#     async def registrate_user(self, username, password) -> db_models.Auth | None:
+#         raise NotImplementedError
+#
+#     @abstractmethod
+#     async def authenticate_user(self, username, password) -> db_models.Auth | None:
+#         raise NotImplementedError
+#
+#     @abstractmethod
+#     async def get_user(self, username) -> db_models.Auth | None:
+#         raise NotImplementedError
+#
+#     @staticmethod
+#     async def _validate_password(db_password, inp_password):
+#         raise NotImplementedError

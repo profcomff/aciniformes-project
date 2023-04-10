@@ -1,29 +1,13 @@
-from .base import (
-    BaseService,
-    AlertServiceInterface,
-    FetcherServiceInterface,
-    MetricServiceInterface,
-    ReceiverServiceInterface,
-    AuthServiceInterface,
-)
-
-from .bootstrap import (
-    receiver_service,
-    alert_service,
-    metric_service,
-    fetcher_service,
-    auth_service,
-    Config,
-)
-
+from .base import (AlertServiceInterface, BaseService, FetcherServiceInterface,
+                   MetricServiceInterface, ReceiverServiceInterface)
+from .bootstrap import (Config, alert_service, fetcher_service, metric_service,
+                        receiver_service)
 
 __all__ = [
     "AlertServiceInterface",
     "FetcherServiceInterface",
     "MetricServiceInterface",
     "ReceiverServiceInterface",
-    "AuthServiceInterface",
-    "auth_service",
     "metric_service",
     "receiver_service",
     "alert_service",

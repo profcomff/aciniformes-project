@@ -2,9 +2,11 @@
 """
 
 from datetime import datetime
-from .base import BaseModel
-from sqlalchemy import Integer, JSON, DateTime
+
+from sqlalchemy import JSON, DateTime, Integer
 from sqlalchemy.orm import Mapped, mapped_column
+
+from .base import BaseModel
 
 
 class Metric(BaseModel):

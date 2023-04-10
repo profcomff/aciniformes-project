@@ -1,13 +1,12 @@
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 from fastapi.exceptions import HTTPException
+from pydantic import BaseModel
 from starlette import status
-from aciniformes_backend.routes.auth import get_current_user
-from aciniformes_backend.serivce import (
-    receiver_service,
-    ReceiverServiceInterface,
-    exceptions as exc,
-)
+
+from aciniformes_backend.serivce import ReceiverServiceInterface
+from aciniformes_backend.serivce import exceptions as exc
+from aciniformes_backend.serivce import receiver_service
 
 
 class CreateSchema(BaseModel):
@@ -35,10 +34,8 @@ router = APIRouter()
 async def create(
     create_schema: CreateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    token=Depends(get_current_user),
+    user=Depends(UnionAuth(["pinger.receiver.create"])),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     id_ = await receiver.create(create_schema.dict())
     return PostResponseSchema(**create_schema.dict(), id=id_)
 
@@ -65,10 +62,8 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    token=Depends(get_current_user),
+    user=Depends(UnionAuth(["pinger.receiver.update"])),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     try:
         res = await receiver.update(id, update_schema.dict(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -80,8 +75,6 @@ async def update(
 async def delete(
     id: int,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    token=Depends(get_current_user),
+    user=Depends(UnionAuth(["pinger.receiver.delete"])),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     await receiver.delete(id)

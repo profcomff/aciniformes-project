@@ -1,13 +1,17 @@
+import logging
+
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from starlette import status
 from pydantic import BaseModel, HttpUrl
-from .auth import get_current_user
-from aciniformes_backend.serivce import (
-    FetcherServiceInterface,
-    fetcher_service,
-    exceptions as exc,
-)
+from starlette import status
+
+from aciniformes_backend.serivce import FetcherServiceInterface
+from aciniformes_backend.serivce import exceptions as exc
+from aciniformes_backend.serivce import fetcher_service
+
+logger = logging.getLogger(__name__)
+router = APIRouter()
 
 
 class CreateSchema(BaseModel):
@@ -40,17 +44,12 @@ class GetSchema(BaseModel):
     id: int
 
 
-router = APIRouter()
-
-
 @router.post("", response_model=ResponsePostSchema)
 async def create(
     create_schema: CreateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user),
+    user=Depends(UnionAuth(["pinger.fetcher.create"])),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     id_ = await fetcher.create(create_schema.dict())
     return ResponsePostSchema(**create_schema.dict(), id=id_)
 
@@ -80,10 +79,8 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user),
+    user=Depends(UnionAuth(["pinger.fetcher.update"])),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     try:
         res = await fetcher.update(id, update_schema.dict(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -95,8 +92,6 @@ async def update(
 async def delete(
     id: int,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user),
+    user=Depends(UnionAuth(["pinger.fetcher.delete"])),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     await fetcher.delete(id)

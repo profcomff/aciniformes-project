@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 import httpx
 
-from aciniformes_backend.models import Fetcher, Alert
-from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
+from aciniformes_backend.models import Alert, Fetcher
+from aciniformes_backend.routes.mectric import \
+    CreateSchema as MetricCreateSchema
 from ping.settings import get_settings
 
 
@@ -38,16 +39,18 @@ class CrudService(CrudServiceInterface):
 class FakeCrudService(CrudServiceInterface):
     id_incr = 0
     fetcher_repo: dict[int, Fetcher] = {
-        0: Fetcher(**{
-            "name": "https://www.python.org",
-            "type_": "get_ok",
-            "address": "https://www.python.org",
-            "fetch_data": "string",
-            "metrics": {},
-            "metric_name": "string",
-            "delay_ok": 30,
-            "delay_fail": 40,
-        })
+        0: Fetcher(
+            **{
+                "name": "https://www.python.org",
+                "type_": "get_ok",
+                "address": "https://www.python.org",
+                "fetch_data": "string",
+                "metrics": {},
+                "metric_name": "string",
+                "delay_ok": 30,
+                "delay_fail": 40,
+            }
+        )
     }
     alert_repo: dict[int, Alert] = dict()
     metric_repo: dict[int, MetricCreateSchema] = dict()

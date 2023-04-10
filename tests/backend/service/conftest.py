@@ -1,11 +1,8 @@
 import pytest
-from aciniformes_backend.serivce import (
-    alert_service,
-    fetcher_service,
-    receiver_service,
-    metric_service,
-    Config,
-)
+
+from aciniformes_backend.serivce import (Config, alert_service,
+                                         fetcher_service, metric_service,
+                                         receiver_service)
 
 
 @pytest.fixture

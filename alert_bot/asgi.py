@@ -1,9 +1,11 @@
-from fastapi import FastAPI, Depends
-from aiogram.bot.bot import Bot
-from functools import lru_cache
-from alert_bot.settings import get_settings
-from pydantic import BaseModel
 from datetime import datetime
+from functools import lru_cache
+
+from aiogram.bot.bot import Bot
+from fastapi import Depends, FastAPI
+from pydantic import BaseModel
+
+from alert_bot.settings import get_settings
 
 app = FastAPI()
 

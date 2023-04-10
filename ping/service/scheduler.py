@@ -1,13 +1,17 @@
+import time
 from abc import ABC, abstractmethod
-from aciniformes_backend.models import Fetcher, FetcherType, Alert
-from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
+from datetime import datetime, timedelta
+
+import httpx
+from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
+
+from aciniformes_backend.models import Alert, Fetcher, FetcherType
+from aciniformes_backend.routes.mectric import \
+    CreateSchema as MetricCreateSchema
+from ping.settings import get_settings
+
 from .crud import CrudServiceInterface
 from .exceptions import AlreadyRunning
-from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
-import httpx
-from datetime import datetime, timedelta
-from ping.settings import get_settings
-import time
 
 settings = get_settings()
 

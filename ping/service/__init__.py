@@ -1,7 +1,6 @@
+from .bootstrap import Config, crud_service, scheduler_service
 from .crud import CrudServiceInterface
 from .scheduler import SchedulerServiceInterface
-from .bootstrap import crud_service, scheduler_service, Config
-
 
 __all__ = [
     "CrudServiceInterface",

@@ -2,10 +2,12 @@
 """
 from datetime import datetime
 from enum import Enum
-from .base import BaseModel
+
 import sqlalchemy
 from sqlalchemy import JSON, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+
+from .base import BaseModel
 
 
 class FetcherType(str, Enum):

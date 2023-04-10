@@ -1,13 +1,12 @@
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from pydantic import BaseModel
 from starlette import status
-from pydantic import BaseModel, Json
-from typing import Any
-from aciniformes_backend.serivce import (
-    MetricServiceInterface,
-    metric_service,
-    exceptions as exc,
-)
+
+from aciniformes_backend.serivce import MetricServiceInterface
+from aciniformes_backend.serivce import exceptions as exc
+from aciniformes_backend.serivce import metric_service
 
 
 class CreateSchema(BaseModel):
@@ -29,6 +28,7 @@ router = APIRouter()
 async def create(
     metric_schema: CreateSchema,
     metric: MetricServiceInterface = Depends(metric_service),
+    user=Depends(UnionAuth(["pinger.metric.create"])),
 ):
     id_ = await metric.create(metric_schema.dict())
     return ResponsePostSchema(**metric_schema.dict(), id=id_)

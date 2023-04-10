@@ -1,11 +1,12 @@
 import pytest
-from sqlalchemy.orm import Session
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from aciniformes_backend.settings import get_settings
+from sqlalchemy.orm import Session
+
 from aciniformes_backend.models.base import BaseModel
 from aciniformes_backend.routes.base import app
 from aciniformes_backend.serivce import Config
-from fastapi.testclient import TestClient
+from aciniformes_backend.settings import get_settings
 
 
 @pytest.fixture(scope="session")

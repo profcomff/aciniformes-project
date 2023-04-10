@@ -1,5 +1,6 @@
-from ping.service import Config, scheduler_service, crud_service
 import pytest
+
+from ping.service import Config, crud_service, scheduler_service
 
 
 @pytest.fixture

@@ -1,12 +1,11 @@
 import json
 
 import pytest
-import json
-
 import sqlalchemy
+from starlette import status
+
 from aciniformes_backend.models import Auth
 from aciniformes_backend.serivce import auth_service
-from starlette import status
 
 
 def test_auth_service(fake_config):

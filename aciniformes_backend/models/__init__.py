@@ -1,8 +1,6 @@
-from .metric import Metric
-from .fetcher import Fetcher
 from .alerts import Alert, Receiver
-from .fetcher import FetcherType
 from .base import BaseModel
-from .auth import Auth
+from .fetcher import Fetcher, FetcherType
+from .metric import Metric
 
-__all__ = ["Metric", "Fetcher", "Alert", "Receiver", "BaseModel", "Auth", "FetcherType"]
+__all__ = ["Metric", "Fetcher", "Alert", "Receiver", "BaseModel", "FetcherType"]

@@ -1,10 +1,8 @@
-from ping.service import (
-    SchedulerServiceInterface,
-    scheduler_service,
-)
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from starlette import status
+
 import ping.service.exceptions as exc
+from ping.service import SchedulerServiceInterface, scheduler_service
 
 ping_app = FastAPI()
 

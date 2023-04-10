@@ -1,7 +1,8 @@
-from pydantic import BaseSettings, PostgresDsn
-from functools import lru_cache
-from passlib.context import CryptContext
 import datetime
+from functools import lru_cache
+
+from passlib.context import CryptContext
+from pydantic import BaseSettings, PostgresDsn
 
 
 class Settings(BaseSettings):

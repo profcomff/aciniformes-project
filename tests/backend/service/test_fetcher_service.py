@@ -1,8 +1,9 @@
 import pytest
 import sqlalchemy
 
-from aciniformes_backend.routes.fetcher import CreateSchema as FetcherCreateSchema
 from aciniformes_backend.models import Fetcher
+from aciniformes_backend.routes.fetcher import \
+    CreateSchema as FetcherCreateSchema
 
 
 @pytest.fixture

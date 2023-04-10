@@ -1,9 +1,11 @@
 """Классы хранения настроек нотификаций
 """
 from datetime import datetime
-from .base import BaseModel
+
 from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+
+from .base import BaseModel
 
 
 class Receiver(BaseModel):

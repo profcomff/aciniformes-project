@@ -22,10 +22,10 @@ class TestAsgi:
         assert res.status_code == status.HTTP_200_OK
 
     def test_get_active_jobs(self, ping_client):
-        res = ping_client.get('/fetchers_active')
+        res = ping_client.get("/fetchers_active")
         assert res.status_code == status.HTTP_200_OK
         assert len(res.json()) > 0
 
     def test_delete_schedulers(self, ping_client):
-        res = ping_client.delete('/schedule')
+        res = ping_client.delete("/schedule")
         assert res.status_code == status.HTTP_200_OK

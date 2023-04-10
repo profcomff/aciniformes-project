@@ -1,9 +1,10 @@
 import pytest
 import sqlalchemy
 
-from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from aciniformes_backend.models import Metric
 import aciniformes_backend.serivce.exceptions as exc
+from aciniformes_backend.models import Metric
+from aciniformes_backend.routes.mectric import \
+    CreateSchema as MetricCreateSchema
 
 
 @pytest.fixture

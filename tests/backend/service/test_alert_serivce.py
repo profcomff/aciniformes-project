@@ -1,13 +1,14 @@
 import json
+
 import pytest
 import sqlalchemy
 
-from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
-from aciniformes_backend.routes.alert.reciever import (
-    CreateSchema as ReceiverCreateSchema,
-)
-from aciniformes_backend.models import Alert, Receiver
 import aciniformes_backend.serivce.exceptions as exc
+from aciniformes_backend.models import Alert, Receiver
+from aciniformes_backend.routes.alert.alert import \
+    CreateSchema as AlertCreateSchema
+from aciniformes_backend.routes.alert.reciever import \
+    CreateSchema as ReceiverCreateSchema
 
 
 @pytest.fixture

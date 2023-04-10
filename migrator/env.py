@@ -1,10 +1,10 @@
 from logging.config import fileConfig
-from aciniformes_backend.settings import get_settings
-from aciniformes_backend.models import BaseModel
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
 
+from alembic import context
+from sqlalchemy import engine_from_config, pool
+
+from aciniformes_backend.models import BaseModel
+from aciniformes_backend.settings import get_settings
 
 config = context.config
 settings = get_settings()

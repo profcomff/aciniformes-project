@@ -1,13 +1,11 @@
-from fastapi import APIRouter
+from auth_lib.fastapi import UnionAuth
+from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
-from fastapi import Depends
 from starlette import status
-from aciniformes_backend.serivce import (
-    alert_service,
-    AlertServiceInterface,
-    exceptions as exc,
-)
+
+from aciniformes_backend.serivce import AlertServiceInterface, alert_service
+from aciniformes_backend.serivce import exceptions as exc
 
 
 class CreateSchema(BaseModel):
@@ -40,6 +38,7 @@ router = APIRouter()
 async def create(
     create_schema: CreateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
+    user=Depends(UnionAuth(["pinger.alert.create"])),
 ):
     id_ = await alert.create(create_schema.dict(exclude_unset=True))
     return PostResponseSchema(**create_schema.dict(), id=id_)
@@ -65,6 +64,7 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
+    user=Depends(UnionAuth(["pinger.alert.update"])),
 ):
     try:
         res = await alert.update(id, update_schema.dict(exclude_unset=True))
@@ -74,5 +74,9 @@ async def update(
 
 
 @router.delete("/{id}")
-async def delete(id: int, alert: AlertServiceInterface = Depends(alert_service)):
+async def delete(
+    id: int,
+    alert: AlertServiceInterface = Depends(alert_service),
+    user=Depends(UnionAuth(["pinger.alert.delete"])),
+):
     await alert.delete(id)

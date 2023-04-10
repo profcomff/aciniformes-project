@@ -1,7 +1,9 @@
 import json
+
 import pytest
 from starlette import status
-from aciniformes_backend.serivce import metric_service, Config
+
+from aciniformes_backend.serivce import Config, metric_service
 
 
 @pytest.fixture

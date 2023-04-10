@@ -1,8 +1,9 @@
 import pytest
-from ping.api.asgi import ping_app
 from fastapi.testclient import TestClient
-from ping.service import Config
+
 from aciniformes_backend.routes import app
+from ping.api.asgi import ping_app
+from ping.service import Config
 
 
 @pytest.fixture(scope="session")

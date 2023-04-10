@@ -1,29 +1,39 @@
 import pytest
-from aciniformes_backend.models import Fetcher
+
 import ping.service.exceptions as exc
+from aciniformes_backend.models import Fetcher
 
 
 @pytest.fixture()
 def fetcher_obj():
-    yield Fetcher(**{
-        "name": "https://www.python.org",
-        "type_": "get_ok",
-        "address": "https://www.python.org",
-        "fetch_data": "string",
-        "metrics": {},
-        "metric_name": "string",
-        "delay_ok": 30,
-        "delay_fail": 40,
-    })
+    yield Fetcher(
+        **{
+            "name": "https://www.python.org",
+            "type_": "get_ok",
+            "address": "https://www.python.org",
+            "fetch_data": "string",
+            "metrics": {},
+            "metric_name": "string",
+            "delay_ok": 30,
+            "delay_fail": 40,
+        }
+    )
+
 
 class TestSchedulerService:
     @pytest.mark.asyncio
-    async def test_add_fetcher_success(self, pg_scheduler_service, fake_crud_service, fetcher_obj):
+    async def test_add_fetcher_success(
+        self, pg_scheduler_service, fake_crud_service, fetcher_obj
+    ):
         pg_scheduler_service.add_fetcher(fetcher_obj)
 
     @pytest.mark.asyncio
-    async def test_delete_fetcher(self, pg_scheduler_service, fake_crud_service, fetcher_obj):
-        pg_scheduler_service.delete_fetcher(f"{fetcher_obj.name} {fetcher_obj.create_ts}")
+    async def test_delete_fetcher(
+        self, pg_scheduler_service, fake_crud_service, fetcher_obj
+    ):
+        pg_scheduler_service.delete_fetcher(
+            f"{fetcher_obj.name} {fetcher_obj.create_ts}"
+        )
 
     @pytest.mark.asyncio
     async def test_get_jobs(self, pg_scheduler_service, fake_crud_service):

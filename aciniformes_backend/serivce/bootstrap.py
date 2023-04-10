@@ -1,16 +1,11 @@
 from fastapi_sqlalchemy import db
-from .metric import PgMetricService
+
 from .alert import PgAlertService
-from .receiver import PgReceiverService
+from .fake import (FakeAlertService, FakeFetcherService, FakeMetricService,
+                   FakeReceiverService)
 from .fetcher import PgFetcherService
-from .auth import PgAuthService
-from .fake import (
-    FakeAlertService,
-    FakeMetricService,
-    FakeReceiverService,
-    FakeFetcherService,
-    FakeAuthService,
-)
+from .metric import PgMetricService
+from .receiver import PgReceiverService
 
 
 class Config:
@@ -43,10 +38,3 @@ def fetcher_service():
         return FakeFetcherService(None)
     with db():
         return PgFetcherService(db.session)
-
-
-def auth_service():
-    if Config.fake:
-        return FakeAuthService(None)
-    with db():
-        return PgAuthService(db.session)

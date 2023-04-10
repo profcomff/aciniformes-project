@@ -1,8 +1,10 @@
 import json
+
 import pytest
 from starlette import status
+
+from aciniformes_backend.serivce import Config, alert_service, receiver_service
 from aciniformes_backend.settings import get_settings
-from aciniformes_backend.serivce import alert_service, receiver_service, Config
 
 
 def test_fake_service(fake_config):

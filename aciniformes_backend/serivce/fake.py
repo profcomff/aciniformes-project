@@ -1,15 +1,11 @@
 import pydantic
 
-from .base import (
-    AlertServiceInterface,
-    ReceiverServiceInterface,
-    FetcherServiceInterface,
-    MetricServiceInterface,
-    AuthServiceInterface,
-)
-import aciniformes_backend.serivce.exceptions as exc
 import aciniformes_backend.models as db_models
+import aciniformes_backend.serivce.exceptions as exc
 from aciniformes_backend.settings import get_settings
+
+from .base import (AlertServiceInterface, FetcherServiceInterface,
+                   MetricServiceInterface, ReceiverServiceInterface)
 
 
 class FakeAlertService(AlertServiceInterface):
@@ -121,31 +117,3 @@ class FakeMetricService(MetricServiceInterface):
 
     async def get_all(self) -> list[db_models.BaseModel]:
         return list(self.repository.values())
-
-
-class FakeAuthService(AuthServiceInterface):
-    repository = []
-
-    async def registrate_user(self, username, password) -> db_models.Auth | None:
-        db_user = db_models.Auth(username=username, password=password)
-        self.repository.append(db_user)
-        return db_user
-
-    async def authenticate_user(self, username, password) -> db_models.Auth | None:
-        for auth in self.repository:
-            if (
-                self._validate_password(auth.password, password)
-                and auth.username == username
-            ):
-                return auth
-        raise exc.NotRegistered(username)
-
-    async def get_user(self, username) -> db_models.Auth | None:
-        for auth in self.repository:
-            if auth.username == username:
-                return auth
-        raise exc.NotRegistered(username)
-
-    @staticmethod
-    async def _validate_password(db_password, inp_password):
-        return get_settings().PWD_CONTEXT.verify(inp_password, db_password)
