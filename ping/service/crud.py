@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 import httpx
 
 from aciniformes_backend.models import Alert, Fetcher
-from aciniformes_backend.routes.mectric import \
-    CreateSchema as MetricCreateSchema
+from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from ping.settings import get_settings
 
 

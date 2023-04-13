@@ -1,8 +1,12 @@
 from fastapi_sqlalchemy import db
 
 from .alert import PgAlertService
-from .fake import (FakeAlertService, FakeFetcherService, FakeMetricService,
-                   FakeReceiverService)
+from .fake import (
+    FakeAlertService,
+    FakeFetcherService,
+    FakeMetricService,
+    FakeReceiverService,
+)
 from .fetcher import PgFetcherService
 from .metric import PgMetricService
 from .receiver import PgReceiverService

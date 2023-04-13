@@ -16,3 +16,4 @@ bcrypt
 APScheduler~=3.10.0
 jose~=1.0.0
 auth-lib-profcomff~=2023.3.16.2
+asyncio~=3.4.3

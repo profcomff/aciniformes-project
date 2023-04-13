@@ -4,8 +4,12 @@ import aciniformes_backend.models as db_models
 import aciniformes_backend.serivce.exceptions as exc
 from aciniformes_backend.settings import get_settings
 
-from .base import (AlertServiceInterface, FetcherServiceInterface,
-                   MetricServiceInterface, ReceiverServiceInterface)
+from .base import (
+    AlertServiceInterface,
+    FetcherServiceInterface,
+    MetricServiceInterface,
+    ReceiverServiceInterface,
+)
 
 
 class FakeAlertService(AlertServiceInterface):

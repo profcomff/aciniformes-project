@@ -6,8 +6,7 @@ import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
 
 from aciniformes_backend.models import Alert, Fetcher, FetcherType
-from aciniformes_backend.routes.mectric import \
-    CreateSchema as MetricCreateSchema
+from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from ping.settings import get_settings
 
 from .crud import CrudServiceInterface

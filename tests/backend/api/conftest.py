@@ -1,28 +1,42 @@
-import json
-
 import pytest
+from fastapi.testclient import TestClient
+from pytest_mock import MockerFixture
+
+from aciniformes_backend.routes.base import app
 
 
 @pytest.fixture
-def auth_user(client):
-    body = {"username": "test", "password": "test"}
-    res = client.post("/auth/register", data=json.dumps(body))
-    assert res.status_code == 201
-    return body
-
-
-@pytest.fixture
-def auth_header(client, auth_user):
-    beaver = client.post(
-        f"/auth/token",
-        data={
-            "username": auth_user["username"],
-            "password": auth_user["password"],
-            "grant_type": "password",
-        },
-        headers={"content-type": "application/x-www-form-urlencoded"},
-    )
-    assert beaver.status_code == 200
-    auth_data = json.loads(beaver.content)
-    auth_headers = {"Authorization": f"Bearer {auth_data.get('access_token')}"}
-    return auth_headers
+def client(mocker: MockerFixture):
+    user_mock = mocker.patch("auth_lib.fastapi.UnionAuth.__call__")
+    user_mock.return_value = {
+        "session_scopes": [
+            {"id": 53, "name": "pinger.alert.create"},
+            {"id": 56, "name": "pinger.receiver.create"},
+            {"id": 61, "name": "pinger.fetcher.update"},
+            {"id": 62, "name": "pinger.metric.create"},
+            {"id": 60, "name": "pinger.fetcher.delete"},
+            {"id": 57, "name": "pinger.receiver.delete"},
+            {"id": 54, "name": "pinger.alert.delete"},
+            {"id": 58, "name": "pinger.receiver.update"},
+            {"id": 59, "name": "pinger.fetcher.create"},
+            {"id": 55, "name": "pinger.alert.update"},
+        ],
+        "user_scopes": [
+            {"id": 53, "name": "pinger.alert.create"},
+            {"id": 56, "name": "pinger.receiver.create"},
+            {"id": 61, "name": "pinger.fetcher.update"},
+            {"id": 62, "name": "pinger.metric.create"},
+            {"id": 60, "name": "pinger.fetcher.delete"},
+            {"id": 57, "name": "pinger.receiver.delete"},
+            {"id": 54, "name": "pinger.alert.delete"},
+            {"id": 58, "name": "pinger.receiver.update"},
+            {"id": 59, "name": "pinger.fetcher.create"},
+            {"id": 55, "name": "pinger.alert.update"},
+        ],
+        "indirect_groups": [{"id": 0, "name": "string", "parent_id": 0}],
+        "groups": [{"id": 0, "name": "string", "parent_id": 0}],
+        "id": 0,
+        "email": "string",
+    }
+    client = TestClient(app)
+    return client
