@@ -33,8 +33,7 @@ router = APIRouter()
 @router.post("", response_model=PostResponseSchema)
 async def create(
     create_schema: CreateSchema,
-    receiver: ReceiverServiceInterface = Depends(receiver_service),
-    user=Depends(UnionAuth(["pinger.receiver.create"])),
+    receiver: ReceiverServiceInterface = Depends(receiver_service)
 ):
     id_ = await receiver.create(create_schema.dict())
     return PostResponseSchema(**create_schema.dict(), id=id_)

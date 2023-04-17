@@ -38,7 +38,6 @@ router = APIRouter()
 async def create(
     create_schema: CreateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
-    user=Depends(UnionAuth(["pinger.alert.create"])),
 ):
     id_ = await alert.create(create_schema.dict(exclude_unset=True))
     return PostResponseSchema(**create_schema.dict(), id=id_)

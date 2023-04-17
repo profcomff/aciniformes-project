@@ -1,6 +1,7 @@
 import uvicorn
+from aiogram import executor
 
-from .asgi import app
+from .asgi import app, dp
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=8002)
+    executor.start_polling(dp, skip_updates=True)

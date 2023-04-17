@@ -145,7 +145,5 @@ class TestReceiver:
 
     def test_patch_by_id_not_found(self, client):
         body = {"name": "st", "chat_id": 0}
-        res = client.patch(
-            f"{self._url}/{888}", data=json.dumps(body)
-        )
+        res = client.patch(f"{self._url}/{888}", data=json.dumps(body))
         assert res.status_code == status.HTTP_404_NOT_FOUND

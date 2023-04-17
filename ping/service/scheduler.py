@@ -1,6 +1,5 @@
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
 
 import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
@@ -47,8 +46,8 @@ class SchedulerServiceInterface(ABC):
         await self.crud_service.add_metric(metric)
 
     @property
-    async def alerts(self):
-        return await self.crud_service.get_alerts()
+    def alerts(self):
+        return self.crud_service.get_alerts()
 
 
 class FakeSchedulerService(SchedulerServiceInterface):
@@ -75,7 +74,7 @@ class FakeSchedulerService(SchedulerServiceInterface):
         self.scheduler["started"] = False
 
     async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        httpx.post(f"{settings.BOT_URL}/alert", data=metric_log.json())
+        httpx.post(f"{settings.BOT_URL}/alert", json=metric_log.json())
 
 
 class ApSchedulerService(SchedulerServiceInterface):
@@ -102,13 +101,20 @@ class ApSchedulerService(SchedulerServiceInterface):
     async def start(self):
         if self.scheduler.running:
             raise AlreadyRunning
+        fetchers = httpx.get(f"{settings.BACKEND_URL}/fetcher").json()
         self.scheduler.start()
+        for fetcher in fetchers:
+            fetcher = Fetcher(**fetcher)
+            await self.add_fetcher(fetcher)
+            await self._fetch_it(fetcher)
 
     async def stop(self):
         self.scheduler.shutdown()
+        for job in self.scheduler.get_jobs():
+            job.remove()
 
     async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        httpx.post(f"{settings.BOT_URL}/alert", data=metric_log.json())
+        httpx.post(f"{settings.BOT_URL}/alert", json=metric_log.json())
 
     @staticmethod
     async def _parse_timedelta(fetcher: Fetcher):
