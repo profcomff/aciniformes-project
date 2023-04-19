@@ -63,7 +63,6 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
-    user=Depends(UnionAuth(["pinger.alert.update"])),
 ):
     try:
         res = await alert.update(id, update_schema.dict(exclude_unset=True))
@@ -76,6 +75,5 @@ async def update(
 async def delete(
     id: int,
     alert: AlertServiceInterface = Depends(alert_service),
-    user=Depends(UnionAuth(["pinger.alert.delete"])),
 ):
     await alert.delete(id)

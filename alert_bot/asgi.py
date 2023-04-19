@@ -57,11 +57,12 @@ class BotScheduler(SchedulerServiceInterface):
         for job in self.scheduler.get_jobs():
             job.remove()
 
-    async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        for receiver in httpx.get(f"{settings.BACKEND_URL}/receiver").json():
-            await bot.send_message(
-                chat_id=receiver["chat_id"], text=str(metric_log.metrics)
-            )
+    async def write_alert(self, metric_log: MetricCreateSchema, alert: AlertCreateSchema):
+        receiver = alert.receiver
+        # await bot.send_message(
+        #     chat_id=receiver, text=str(metric_log.metrics)
+        # )
+        print('not ok', alert)
 
     @staticmethod
     async def _parse_timedelta(fetcher: Fetcher):
@@ -70,49 +71,40 @@ class BotScheduler(SchedulerServiceInterface):
     async def _fetch_it(self, fetcher: Fetcher):
         prev = time.time()
         res = None
-        try:
-            match fetcher.type_:
-                case FetcherType.GET:
-                    res = httpx.get(fetcher.address)
-                case FetcherType.POST:
-                    res = httpx.post(fetcher.address, data=fetcher.fetch_data)
-                case FetcherType.PING:
-                    res = httpx.head(fetcher.address)
-        except:
-            for receiver in httpx.get(f"{settings.BACKEND_URL}/receiver").json():
-                print(receiver)
-                alert = {'data': {
-                    "status_code": 500,
-                    "url": fetcher.address
-                },
-                         'receiver': receiver["chat_id"],
-                         'filter': "fail"}
-                httpx.post(f"{settings.BACKEND_URL}/alert", json=alert)
+        match fetcher.type_:
+            case FetcherType.GET:
+                res = httpx.get(fetcher.address)
+            case FetcherType.POST:
+                res = httpx.post(fetcher.address, data=fetcher.fetch_data)
+            case FetcherType.PING:
+                res = httpx.head(fetcher.address)
         cur = time.time()
         timing = cur - prev
         metric = MetricCreateSchema(
             metrics={
-                "status_code": res.status_code if res else 500,
+                "status_code": res.status_code,
                 "url": fetcher.address,
                 "body": fetcher.fetch_data,
                 "timing_ms": timing,
             }
         )
-        self.scheduler.reschedule_job(
-            f"{fetcher.name} {fetcher.create_ts}",
-            seconds=fetcher.delay_ok,
-            trigger="interval",
-        )
-        for alert in httpx.get(f"{settings.BACKEND_URL}/alert").json():
-            print(alert)
-            if alert.filter == str(res.status_code):
+        await self.crud_service.add_metric(metric)
+        if metric.metrics["status_code"] != 200:
+            for receiver in httpx.get(f"{settings.BACKEND_URL}/receiver").json():
+                alert = AlertCreateSchema(data=metric, receiver=receiver["chat_id"], filter=res.status_code)
                 self.scheduler.reschedule_job(
                     f"{fetcher.name} {fetcher.create_ts}",
                     seconds=fetcher.delay_fail,
                     trigger="interval",
                 )
                 await self.write_alert(metric, alert)
-        await self.crud_service.add_metric(metric)
+        else:
+            self.scheduler.reschedule_job(
+                f"{fetcher.name} {fetcher.create_ts}",
+                seconds=fetcher.delay_ok,
+                trigger="interval",
+            )
+            print('ok', metric)
 
 
 class AlertPostSchema(BaseModel):

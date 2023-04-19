@@ -1,4 +1,3 @@
-from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
@@ -10,21 +9,19 @@ from aciniformes_backend.serivce import receiver_service
 
 
 class CreateSchema(BaseModel):
-    name: str
-    chat_id: int
+    url: str
 
 
 class PostResponseSchema(CreateSchema):
-    id: int | None
+    url: str | None
 
 
 class UpdateSchema(BaseModel):
-    name: str | None
-    chat_id: int | None
+    url: str | None
 
 
 class GetSchema(BaseModel):
-    id: int
+    url: str
 
 
 router = APIRouter()
@@ -61,7 +58,6 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    user=Depends(UnionAuth(["pinger.receiver.update"])),
 ):
     try:
         res = await receiver.update(id, update_schema.dict(exclude_unset=True))
@@ -74,6 +70,5 @@ async def update(
 async def delete(
     id: int,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    user=Depends(UnionAuth(["pinger.receiver.delete"])),
 ):
     await receiver.delete(id)

@@ -48,7 +48,6 @@ class GetSchema(BaseModel):
 async def create(
     create_schema: CreateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    user=Depends(UnionAuth(["pinger.fetcher.create"])),
 ):
     id_ = await fetcher.create(create_schema.dict())
     return ResponsePostSchema(**create_schema.dict(), id=id_)
@@ -79,7 +78,6 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    user=Depends(UnionAuth(["pinger.fetcher.update"])),
 ):
     try:
         res = await fetcher.update(id, update_schema.dict(exclude_unset=True))
@@ -92,6 +90,5 @@ async def update(
 async def delete(
     id: int,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    user=Depends(UnionAuth(["pinger.fetcher.delete"])),
 ):
     await fetcher.delete(id)
