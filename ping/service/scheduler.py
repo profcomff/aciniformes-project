@@ -128,18 +128,36 @@ class ApSchedulerService(SchedulerServiceInterface):
     async def _fetch_it(self, fetcher: Fetcher):
         prev = time.time()
         res = None
-        match fetcher.type_:
-            case FetcherType.GET:
-                res = httpx.get(fetcher.address)
-            case FetcherType.POST:
-                res = httpx.post(fetcher.address, data=fetcher.fetch_data)
-            case FetcherType.PING:
-                res = httpx.head(fetcher.address)
+        try:
+            match fetcher.type_:
+                case FetcherType.GET:
+                    res = httpx.get(fetcher.address)
+                case FetcherType.POST:
+                    res = httpx.post(fetcher.address, data=fetcher.fetch_data)
+                case FetcherType.PING:
+                    res = httpx.head(fetcher.address)
+        except:
+            cur = time.time()
+            timing = cur - prev
+            metric = MetricCreateSchema(
+                name=fetcher.address,
+                ok=True if res and res.status_code == 200 else False,
+                time_delta=timing
+            )
+            await self.crud_service.add_metric(metric)
+            alert = AlertCreateSchema(data=metric, filter=500)
+            self.scheduler.reschedule_job(
+                f"{fetcher.address} {fetcher.create_ts}",
+                seconds=fetcher.delay_fail,
+                trigger="interval",
+            )
+            await self.write_alert(metric, alert)
+            return
         cur = time.time()
         timing = cur - prev
         metric = MetricCreateSchema(
             name=fetcher.address,
-            ok=True if res.status_code == 200 else False,
+            ok=True if res and res.status_code == 200 else False,
             time_delta=timing
         )
         await self.crud_service.add_metric(metric)
