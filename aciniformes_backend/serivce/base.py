@@ -65,24 +65,3 @@ class MetricServiceInterface(BaseService):
     @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Metric:
         raise NotImplementedError
-
-
-# class AuthServiceInterface(ABC):
-#     def __init__(self, session: sqlalchemy.orm.Session | None):
-#         self.session = session
-#
-#     @abstractmethod
-#     async def registrate_user(self, username, password) -> db_models.Auth | None:
-#         raise NotImplementedError
-#
-#     @abstractmethod
-#     async def authenticate_user(self, username, password) -> db_models.Auth | None:
-#         raise NotImplementedError
-#
-#     @abstractmethod
-#     async def get_user(self, username) -> db_models.Auth | None:
-#         raise NotImplementedError
-#
-#     @staticmethod
-#     async def _validate_password(db_password, inp_password):
-#         raise NotImplementedError

@@ -5,6 +5,7 @@ import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
 
 from aciniformes_backend.models import Alert, Fetcher, FetcherType
+from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from ping.settings import get_settings
 
@@ -87,7 +88,7 @@ class ApSchedulerService(SchedulerServiceInterface):
         self.scheduler.add_job(
             self._fetch_it,
             args=[fetcher],
-            id=f"{fetcher.name} {fetcher.create_ts}",
+            id=f"{fetcher.address} {fetcher.create_ts}",
             seconds=fetcher.delay_ok,
             trigger="interval",
         )
@@ -100,6 +101,7 @@ class ApSchedulerService(SchedulerServiceInterface):
 
     async def start(self):
         if self.scheduler.running:
+            self.scheduler.shutdown()
             raise AlreadyRunning
         fetchers = httpx.get(f"{settings.BACKEND_URL}/fetcher").json()
         self.scheduler.start()
@@ -109,12 +111,15 @@ class ApSchedulerService(SchedulerServiceInterface):
             await self._fetch_it(fetcher)
 
     async def stop(self):
-        self.scheduler.shutdown()
         for job in self.scheduler.get_jobs():
             job.remove()
+        self.scheduler.shutdown()
 
-    async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        httpx.post(f"{settings.BOT_URL}/alert", json=metric_log.json())
+    async def write_alert(self, metric_log: MetricCreateSchema, alert: AlertCreateSchema):
+        receivers = httpx.get(f"{settings.BACKEND_URL}/receiver").json()
+        for receiver in receivers:
+            receiver['receiver_body']['text'] = metric_log
+            httpx.post(receiver['url'], data=receiver['receiver_body'])
 
     @staticmethod
     async def _parse_timedelta(fetcher: Fetcher):
@@ -133,24 +138,23 @@ class ApSchedulerService(SchedulerServiceInterface):
         cur = time.time()
         timing = cur - prev
         metric = MetricCreateSchema(
-            metrics={
-                "status_code": res.status_code,
-                "url": fetcher.address,
-                "body": fetcher.fetch_data,
-                "timing_ms": timing,
-            }
+            name=fetcher.address,
+            ok=True if res.status_code == 200 else False,
+            time_delta=timing
         )
-        self.scheduler.reschedule_job(
-            f"{fetcher.name} {fetcher.create_ts}",
-            seconds=fetcher.delay_ok,
-            trigger="interval",
-        )
-        for alert in await self.alerts:
-            if alert.filter == str(res.status_code):
-                self.scheduler.reschedule_job(
-                    f"{fetcher.name} {fetcher.create_ts}",
-                    seconds=fetcher.delay_fail,
-                    trigger="interval",
-                )
-                await self.write_alert(metric, alert)
         await self.crud_service.add_metric(metric)
+        if not metric.ok:
+            alert = AlertCreateSchema(data=metric, filter=res.status_code)
+            self.scheduler.reschedule_job(
+                f"{fetcher.address} {fetcher.create_ts}",
+                seconds=fetcher.delay_fail,
+                trigger="interval",
+            )
+            await self.write_alert(metric, alert)
+        else:
+            self.scheduler.reschedule_job(
+                f"{fetcher.address} {fetcher.create_ts}",
+                seconds=fetcher.delay_ok,
+                trigger="interval",
+            )
+

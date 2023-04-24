@@ -1,10 +1,10 @@
 import logging
 
-from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, HttpUrl
 from starlette import status
+from aciniformes_backend.models.fetcher import FetcherType
 
 from aciniformes_backend.serivce import FetcherServiceInterface
 from aciniformes_backend.serivce import exceptions as exc
@@ -15,12 +15,9 @@ router = APIRouter()
 
 
 class CreateSchema(BaseModel):
-    name: str
-    type_: str
+    type_: FetcherType
     address: str
     fetch_data: str
-    metrics: dict
-    metric_name: str
     delay_ok: int
     delay_fail: int
 
@@ -30,12 +27,9 @@ class ResponsePostSchema(CreateSchema):
 
 
 class UpdateSchema(BaseModel):
-    name: str | None
-    type_: str | None
+    type_: FetcherType | None
     address: HttpUrl | None
     fetch_data: str | None
-    metrics: dict | None
-    metric_name: str | None
     delay_ok: int | None
     delay_fail: int | None
 

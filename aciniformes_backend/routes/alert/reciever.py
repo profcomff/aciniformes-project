@@ -2,26 +2,40 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
+import enum
 
 from aciniformes_backend.serivce import ReceiverServiceInterface
 from aciniformes_backend.serivce import exceptions as exc
 from aciniformes_backend.serivce import receiver_service
 
 
+class Method(str, enum.Enum):
+    POST: str = "post"
+    GET: str = "get"
+
+
 class CreateSchema(BaseModel):
     url: str
+    method: Method
+    receiver_body: dict
 
 
 class PostResponseSchema(CreateSchema):
     url: str | None
+    method: Method
+    receiver_body: dict | None
 
 
 class UpdateSchema(BaseModel):
     url: str | None
+    method: Method | None
+    receiver_body: dict | None
 
 
 class GetSchema(BaseModel):
     url: str
+    method: Method
+    receiver_body: dict
 
 
 router = APIRouter()

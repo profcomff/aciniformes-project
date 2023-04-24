@@ -40,12 +40,9 @@ class FakeCrudService(CrudServiceInterface):
     fetcher_repo: dict[int, Fetcher] = {
         0: Fetcher(
             **{
-                "name": "https://www.python.org",
                 "type_": "get_ok",
                 "address": "https://www.python.org",
-                "fetch_data": "string",
-                "metrics": {},
-                "metric_name": "string",
+                "fetch_data": None,
                 "delay_ok": 30,
                 "delay_fail": 40,
             }

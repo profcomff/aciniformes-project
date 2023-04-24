@@ -1,6 +1,10 @@
-import uvicorn
+import asyncio
 
-from .api.asgi import ping_app
+from ping.service.scheduler import ApSchedulerService
+from ping.service.crud import CrudService
 
 if __name__ == "__main__":
-    uvicorn.run(ping_app, port=8001)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.create_task(ApSchedulerService(CrudService()).start())
+    loop.run_forever()

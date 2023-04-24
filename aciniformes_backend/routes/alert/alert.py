@@ -1,16 +1,15 @@
-from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
 
+from aciniformes_backend.models.alerts import Receiver
 from aciniformes_backend.serivce import AlertServiceInterface, alert_service
 from aciniformes_backend.serivce import exceptions as exc
 
 
 class CreateSchema(BaseModel):
     data: dict
-    receiver: int
     filter: str
 
 
@@ -20,7 +19,6 @@ class PostResponseSchema(CreateSchema):
 
 class UpdateSchema(BaseModel):
     data: dict | None
-    receiver: int | None
     filter: str | None
 
 

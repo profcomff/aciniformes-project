@@ -1,8 +1,8 @@
-from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
+from datetime import datetime
 
 from aciniformes_backend.serivce import MetricServiceInterface
 from aciniformes_backend.serivce import exceptions as exc
@@ -10,7 +10,9 @@ from aciniformes_backend.serivce import metric_service
 
 
 class CreateSchema(BaseModel):
-    metrics: dict
+    name: str
+    ok: bool
+    time_delta: float
 
 
 class ResponsePostSchema(CreateSchema):
@@ -19,6 +21,9 @@ class ResponsePostSchema(CreateSchema):
 
 class GetSchema(BaseModel):
     id: int
+    name: str
+    ok: bool
+    time_delta: float
 
 
 router = APIRouter()
