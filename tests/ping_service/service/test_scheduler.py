@@ -8,12 +8,9 @@ from aciniformes_backend.models import Fetcher
 def fetcher_obj():
     yield Fetcher(
         **{
-            "name": "https://www.python.org",
             "type_": "get_ok",
             "address": "https://www.python.org",
             "fetch_data": "string",
-            "metrics": {},
-            "metric_name": "string",
             "delay_ok": 30,
             "delay_fail": 40,
         }
@@ -32,7 +29,7 @@ class TestSchedulerService:
         self, pg_scheduler_service, fake_crud_service, fetcher_obj
     ):
         pg_scheduler_service.delete_fetcher(
-            f"{fetcher_obj.name} {fetcher_obj.create_ts}"
+            f"{fetcher_obj.address} {fetcher_obj.create_ts}"
         )
 
     @pytest.mark.asyncio
@@ -43,7 +40,7 @@ class TestSchedulerService:
     @pytest.mark.asyncio
     async def test_start_success(self, pg_scheduler_service, fake_crud_service):
         await pg_scheduler_service.start()
-        assert pg_scheduler_service.scheduler.running
+        assert pg_scheduler_service.scheduler['started']
         await pg_scheduler_service.stop()
 
     @pytest.mark.asyncio

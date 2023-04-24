@@ -8,7 +8,11 @@ from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchem
 
 @pytest.fixture
 def metric_schema():
-    body = {"id": 44, "metrics": {}}
+    body = {"id": 44,
+              "name": "string",
+              "ok": True,
+              "time_delta": 0
+            }
     schema = MetricCreateSchema(**body)
     return schema
 
@@ -46,4 +50,5 @@ class TestMetricService:
     @pytest.mark.asyncio
     async def test_get_by_id(self, pg_metric_service, db_metric):
         res = await pg_metric_service.get_by_id(db_metric.id_)
-        assert res.metrics == db_metric.metrics
+        assert res.name == db_metric.name
+        assert res.ok == db_metric.ok

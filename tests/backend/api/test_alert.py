@@ -21,7 +21,6 @@ def this_alert():
     body = {
         "id": 666,
         "data": {"type": "string", "name": "string"},
-        "receiver": 0,
         "filter": "string",
     }
     alert_service().repository[666] = body
@@ -37,16 +36,13 @@ class TestAlert:
     def test_post_success(self, client):
         body = {
             "data": {"type": "string", "name": "string"},
-            "receiver": 0,
             "filter": "string",
         }
-        res = client.post(self._url, data=json.dumps(body))
+        res = client.post(self._url, json=body)
         res_body = res.json()
         assert res.status_code == status.HTTP_200_OK
         assert res_body["data"] == body["data"]
-        assert res_body["id"] is not None
         assert res_body["filter"] == body["filter"]
-        assert res_body["receiver"] == body["receiver"]
 
     def test_get_by_id_success(self, client, this_alert):
         body = this_alert
@@ -54,7 +50,6 @@ class TestAlert:
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
         assert res_body["data"] == body["data"]
-        assert res_body["receiver"] == body["receiver"]
         assert res_body["filter"] == body["filter"]
 
     def test_delete_by_id_success(self, client, this_alert):
@@ -92,7 +87,12 @@ class TestAlert:
 
 @pytest.fixture
 def this_receiver():
-    body = {"id": 66, "name": "string", "chat_id": 0}
+    body = {
+          "id": 4,
+          "url": "string",
+          "method": "post",
+          "receiver_body": {}
+        }
     receiver_service().repository[body["id"]] = body
     return body
 
@@ -103,20 +103,23 @@ class TestReceiver:
     s = receiver_service()
 
     def test_post_success(self, client):
-        body = {"name": "test", "chat_id": 0}
-        res = client.post(self._url, data=json.dumps(body))
+        body = {
+              "url": "string",
+              "method": "post",
+              "receiver_body": {}
+            }
+        res = client.post(self._url, json=body)
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
-        assert res_body["name"] == body["name"]
-        assert res_body["id"] is not None
-        assert res_body["chat_id"] == body["chat_id"]
+        assert res_body["url"] == body["url"]
+        assert res_body["receiver_body"] == body["receiver_body"]
 
     def test_get_by_id_success(self, client, this_receiver):
         res = client.get(f"{self._url}/{this_receiver['id']}")
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
-        assert res_body["name"] == this_receiver["name"]
-        assert res_body["chat_id"] == this_receiver["chat_id"]
+        assert res_body["url"] == this_receiver["url"]
+        assert res_body["receiver_body"] == this_receiver["receiver_body"]
 
     def test_delete_by_id_success(self, client, this_receiver):
         res = client.delete(f"{self._url}/{this_receiver['id']}")
@@ -129,15 +132,19 @@ class TestReceiver:
         assert len(res.json())
 
     def test_patch_by_id_success(self, client, this_receiver):
-        body = {"name": "s", "chat_id": 11}
+        body = {
+              "url": "sdasd",
+              "method": "post",
+              "receiver_body": {}
+            }
         res = client.patch(
             f"{self._url}/{this_receiver['id']}",
             data=json.dumps(body),
         )
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
-        assert res_body["name"] == body["name"]
-        assert res_body["chat_id"] == body["chat_id"]
+        assert res_body["url"] == body["url"]
+        assert res_body["receiver_body"] == body["receiver_body"]
 
     def test_get_by_id_not_found(self, client):
         res = client.get(f"{self._url}/{888}")

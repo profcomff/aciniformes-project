@@ -3,7 +3,7 @@ from .scheduler import ApSchedulerService, FakeSchedulerService
 
 
 class Config:
-    fake: bool = False
+    fake: bool = True
 
 
 def crud_service():

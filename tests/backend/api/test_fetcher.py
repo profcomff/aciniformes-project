@@ -16,12 +16,9 @@ def test_fake_service(fake_config):
 def this_fetcher():
     body = {
         "id": 6,
-        "name": "string",
-        "type_": "get_ok",
+        "type_": "get",
         "address": "string",
         "fetch_data": "string",
-        "metrics": {},
-        "metric_name": "string",
         "delay_ok": 0,
         "delay_fail": 0,
     }
@@ -36,16 +33,13 @@ class TestFetcher:
 
     def test_post_success(self, client):
         body = {
-            "name": "string",
-            "type_": "get_ok",
+            "type_": "get",
             "address": "string",
             "fetch_data": "string",
-            "metrics": {},
-            "metric_name": "string",
-            "delay_ok": 0,
-            "delay_fail": 0,
+            "delay_ok": 300,
+            "delay_fail": 30,
         }
-        res = client.post(self._url, data=json.dumps(body))
+        res = client.post(self._url, json=body)
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
         assert res_body["id"] is not None
@@ -66,14 +60,20 @@ class TestFetcher:
         assert len(res.json())
 
     def test_patch_by_id_success(self, client, this_fetcher):
-        body = {"name": "string", "type_": "post_ok", "delay_fail": 0}
+        body = {
+              "type_": "post",
+              "address": "https://api.test.profcomff.com/services/category",
+              "fetch_data": "string",
+              "delay_ok": 300,
+              "delay_fail": 30
+            }
         res = client.patch(
             f"{self._url}/{this_fetcher['id']}",
-            data=json.dumps(body),
+            json=body,
         )
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
-        assert res_body["name"] == body["name"]
+        assert res_body["address"] == body["address"]
         assert res_body["type_"] == body["type_"]
 
     def test_get_by_id_not_found(self, client):

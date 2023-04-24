@@ -110,7 +110,7 @@ class FakeMetricService(MetricServiceInterface):
         super().__init__(session)
 
     async def create(self, item: dict) -> int:
-        self.repository[self.id_incr] = db_models.Fetcher(**item)
+        self.repository[self.id_incr] = db_models.Metric(**item)
         self.id_incr += 1
         return self.id_incr
 

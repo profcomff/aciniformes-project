@@ -13,7 +13,11 @@ from aciniformes_backend.routes.alert.reciever import (
 
 @pytest.fixture
 def receiver_schema():
-    body = {"name": "string", "chat_id": 0}
+    body = {
+          "url": "string",
+          "method": "post",
+          "receiver_body": {}
+        }
     schema = ReceiverCreateSchema(**body)
     return schema
 
@@ -34,10 +38,9 @@ def db_receiver(dbsession, receiver_schema):
 
 
 @pytest.fixture
-def alert_schema(receiver_schema, db_receiver):
+def alert_schema(receiver_schema):
     body = {
         "data": {"type": "string", "name": "string"},
-        "receiver": db_receiver.id_,
         "filter": "string",
     }
     schema = AlertCreateSchema(**body)
@@ -79,7 +82,7 @@ class TestReceiverService:
     async def test_get_by_id(self, pg_receiver_service, db_receiver):
         res = await pg_receiver_service.get_by_id(db_receiver.id_)
         assert res is not None
-        assert res.name == db_receiver.name
+        assert res.url == db_receiver.url
         with pytest.raises(exc.ObjectNotFound):
             await pg_receiver_service.get_by_id(db_receiver.id_ + 1000)
 
@@ -90,10 +93,14 @@ class TestReceiverService:
     @pytest.mark.asyncio
     async def test_update(self, pg_receiver_service, db_receiver, dbsession):
         res = await pg_receiver_service.update(
-            db_receiver.id_, {"name": "Alex", "chat_id": 11}
+            db_receiver.id_, {
+              "url": "Alex",
+              "method": "post",
+              "receiver_body": {}
+            }
         )
-        assert res.name == "Alex"
-        assert res.chat_id == 11
+        assert res.url == "Alex"
+        assert res.receiver_body == {}
 
 
 class TestAlertService:
@@ -115,7 +122,8 @@ class TestAlertService:
     async def test_get_by_id(self, pg_alert_service, db_alert):
         res = await pg_alert_service.get_by_id(db_alert.id_)
         assert res is not None
-        assert res.receiver == db_alert.receiver
+        assert res.data == db_alert.data
+        assert res.filter == db_alert.filter
         with pytest.raises(exc.ObjectNotFound):
             await pg_alert_service.get_by_id(db_alert.id_ + 1000)
 

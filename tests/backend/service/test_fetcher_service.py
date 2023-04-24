@@ -9,12 +9,9 @@ from aciniformes_backend.routes.fetcher import CreateSchema as FetcherCreateSche
 def fetcher_schema():
     body = {
         "id": 6,
-        "name": "string",
-        "type_": "get_ok",
+        "type_": "get",
         "address": "string",
         "fetch_data": "string",
-        "metrics": {},
-        "metric_name": "string",
         "delay_ok": 0,
         "delay_fail": 0,
     }
@@ -55,7 +52,7 @@ class TestFetcherService:
     @pytest.mark.asyncio
     async def test_get_by_id(self, pg_fetcher_service, db_fetcher):
         res = await pg_fetcher_service.get_by_id(db_fetcher.id_)
-        assert res.name == db_fetcher.name
+        assert res.address == db_fetcher.address
         assert res.type_ == db_fetcher.type_
 
     @pytest.mark.asyncio
@@ -64,5 +61,5 @@ class TestFetcherService:
 
     @pytest.mark.asyncio
     async def test_update(self, pg_fetcher_service, db_fetcher):
-        res = await pg_fetcher_service.update(db_fetcher.id_, {"type_": "post_ok"})
-        assert res.type_ == "post_ok"
+        res = await pg_fetcher_service.update(db_fetcher.id_, {"type_": "post"})
+        assert res.type_ == "post"
