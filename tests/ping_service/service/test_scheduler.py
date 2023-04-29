@@ -1,14 +1,15 @@
 import pytest
-
+import httpx
 import ping.service.exceptions as exc
 from aciniformes_backend.models import Fetcher
+from ping.settings import get_settings
 
 
 @pytest.fixture()
 def fetcher_obj():
     yield Fetcher(
         **{
-            "type_": "get_ok",
+            "type_": "ping",
             "address": "https://www.python.org",
             "fetch_data": "string",
             "delay_ok": 30,
@@ -22,7 +23,9 @@ class TestSchedulerService:
     async def test_add_fetcher_success(
         self, pg_scheduler_service, fake_crud_service, fetcher_obj
     ):
-        pg_scheduler_service.add_fetcher(fetcher_obj)
+        await pg_scheduler_service.add_fetcher(fetcher_obj)
+        fetchers = await pg_scheduler_service.get_jobs()
+        assert f'{fetcher_obj.address} None' in fetchers
 
     @pytest.mark.asyncio
     async def test_delete_fetcher(
@@ -31,6 +34,8 @@ class TestSchedulerService:
         pg_scheduler_service.delete_fetcher(
             f"{fetcher_obj.address} {fetcher_obj.create_ts}"
         )
+        fetchers = await pg_scheduler_service.get_jobs()
+        assert fetcher_obj not in fetchers
 
     @pytest.mark.asyncio
     async def test_get_jobs(self, pg_scheduler_service, fake_crud_service):
@@ -40,21 +45,38 @@ class TestSchedulerService:
     @pytest.mark.asyncio
     async def test_start_success(self, pg_scheduler_service, fake_crud_service):
         await pg_scheduler_service.start()
-        assert pg_scheduler_service.scheduler['started']
+        assert pg_scheduler_service.scheduler.running
         await pg_scheduler_service.stop()
+        assert not pg_scheduler_service.scheduler.running
 
     @pytest.mark.asyncio
     async def test_start_already_started(self, pg_scheduler_service, fake_crud_service):
-        pass
-
-    @pytest.mark.asyncio
-    async def test_stop(self, pg_scheduler_service, fake_crud_service):
-        pass
+        fail = False
+        try:
+            await pg_scheduler_service.start()
+        except:
+            fail = True
+        assert fail
 
     @pytest.mark.asyncio
     async def test_stop_already_stopped(self, pg_scheduler_service, fake_crud_service):
-        pass
+        assert not pg_scheduler_service.scheduler.running
+        fail = False
+        try:
+            await pg_scheduler_service.stop()
+        except:
+            fail = True
+        assert fail
 
     @pytest.mark.asyncio
-    async def test_write_alert(self, pg_scheduler_service, fake_crud_service):
-        pass
+    async def test_ping(self, pg_scheduler_service, fake_crud_service):
+        fetcher = Fetcher(**{
+            "type_": "get_ok",
+            "address": "https://www.python.org",
+            "fetch_data": "string",
+            "delay_ok": 30,
+            "delay_fail": 40,
+            }
+        )
+        pg_scheduler_service.add_fetcher(fetcher)
+        pg_scheduler_service._fetch_it(fetcher)

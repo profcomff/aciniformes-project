@@ -5,7 +5,7 @@ from ping.service import Config, crud_service, scheduler_service
 
 @pytest.fixture
 def pg_config():
-    Config.fake = True
+    Config.fake = False
     yield Config()
 
 
@@ -18,7 +18,7 @@ def pg_scheduler_service(pg_config):
 
 @pytest.fixture
 def fake_crud_service(pg_config):
-    Config.fake = True
+    Config.fake = False
     s = crud_service()
     yield s
     Config.fake = False

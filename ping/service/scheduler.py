@@ -10,7 +10,7 @@ from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchem
 from ping.settings import get_settings
 
 from .crud import CrudServiceInterface
-from .exceptions import AlreadyRunning
+from .exceptions import AlreadyRunning, AlreadyStopped
 
 settings = get_settings()
 
@@ -72,6 +72,8 @@ class FakeSchedulerService(SchedulerServiceInterface):
         self.scheduler["started"] = True
 
     async def stop(self):
+        if not self.scheduler["started"]:
+            raise AlreadyStopped
         self.scheduler["started"] = False
 
     async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
@@ -101,7 +103,6 @@ class ApSchedulerService(SchedulerServiceInterface):
 
     async def start(self):
         if self.scheduler.running:
-            self.scheduler.shutdown()
             raise AlreadyRunning
         fetchers = httpx.get(f"{settings.BACKEND_URL}/fetcher").json()
         self.scheduler.start()
@@ -111,6 +112,8 @@ class ApSchedulerService(SchedulerServiceInterface):
             await self._fetch_it(fetcher)
 
     async def stop(self):
+        if not self.scheduler.running:
+            raise AlreadyStopped
         for job in self.scheduler.get_jobs():
             job.remove()
         self.scheduler.shutdown()
@@ -175,4 +178,3 @@ class ApSchedulerService(SchedulerServiceInterface):
                 seconds=fetcher.delay_ok,
                 trigger="interval",
             )
-

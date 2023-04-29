@@ -4,9 +4,10 @@ from fastapi.testclient import TestClient
 from aciniformes_backend.routes import app
 from ping.service import Config
 
+
 @pytest.fixture(scope="session")
 def fake_config():
-    Config.fake = True
+    Config.fake = False
     conf = Config()
     yield conf
 

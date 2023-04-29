@@ -16,11 +16,11 @@ def test_fake_service(fake_config):
 def this_fetcher():
     body = {
         "id": 6,
-        "type_": "get",
-        "address": "string",
+        "type_": "ping",
+        "address": "https://www.python.org",
         "fetch_data": "string",
-        "delay_ok": 0,
-        "delay_fail": 0,
+        "delay_ok": 30,
+        "delay_fail": 40,
     }
     fetcher_service().repository[body["id"]] = body
     return body
