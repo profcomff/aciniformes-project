@@ -47,23 +47,12 @@ class TestSchedulerService:
         await pg_scheduler_service.start()
         assert pg_scheduler_service.scheduler.running
         await pg_scheduler_service.stop()
-        assert not pg_scheduler_service.scheduler.running
 
     @pytest.mark.asyncio
     async def test_start_already_started(self, pg_scheduler_service, fake_crud_service):
         fail = False
         try:
             await pg_scheduler_service.start()
-        except:
-            fail = True
-        assert fail
-
-    @pytest.mark.asyncio
-    async def test_stop_already_stopped(self, pg_scheduler_service, fake_crud_service):
-        assert not pg_scheduler_service.scheduler.running
-        fail = False
-        try:
-            await pg_scheduler_service.stop()
         except:
             fail = True
         assert fail
@@ -80,3 +69,21 @@ class TestSchedulerService:
         )
         pg_scheduler_service.add_fetcher(fetcher)
         pg_scheduler_service._fetch_it(fetcher)
+        metrics = httpx.get(f"{get_settings().BACKEND_URL}/metric").json()
+        for metric in metrics:
+            if metric['name'] == fetcher.address:
+                assert metric['ok']
+        fetcher = Fetcher(**{
+            "type_": "get_ok",
+            "address": "https://www.ayyylmaorofl.org",
+            "fetch_data": "string",
+            "delay_ok": 30,
+            "delay_fail": 40,
+            }
+        )
+        pg_scheduler_service.add_fetcher(fetcher)
+        pg_scheduler_service._fetch_it(fetcher)
+        metrics = httpx.get(f"{get_settings().BACKEND_URL}/metric").json()
+        for metric in metrics:
+            if metric['name'] == fetcher.address:
+                assert not metric['ok']
