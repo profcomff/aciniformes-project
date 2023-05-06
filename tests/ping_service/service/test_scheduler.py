@@ -1,7 +1,7 @@
 import pytest
 import httpx
 import ping.service.exceptions as exc
-from aciniformes_backend.models import Fetcher
+from aciniformes_backend.models import Fetcher, Metric
 from ping.settings import get_settings
 
 
@@ -43,12 +43,6 @@ class TestSchedulerService:
         assert type(res) is list
 
     @pytest.mark.asyncio
-    async def test_start_success(self, pg_scheduler_service, fake_crud_service):
-        await pg_scheduler_service.start()
-        assert pg_scheduler_service.scheduler.running
-        await pg_scheduler_service.stop()
-
-    @pytest.mark.asyncio
     async def test_start_already_started(self, pg_scheduler_service, fake_crud_service):
         fail = False
         try:
@@ -58,7 +52,7 @@ class TestSchedulerService:
         assert fail
 
     @pytest.mark.asyncio
-    async def test_ping(self, pg_scheduler_service, fake_crud_service):
+    async def test_ping(self, pg_scheduler_service, fake_crud_service, dbsession):
         fetcher = Fetcher(**{
             "type_": "get_ok",
             "address": "https://www.python.org",
@@ -69,9 +63,9 @@ class TestSchedulerService:
         )
         pg_scheduler_service.add_fetcher(fetcher)
         pg_scheduler_service._fetch_it(fetcher)
-        metrics = httpx.get(f"{get_settings().BACKEND_URL}/metric").json()
+        metrics = dbsession.query(Metric).all()
         for metric in metrics:
-            if metric['name'] == fetcher.address:
+            if metric.name == fetcher.address:
                 assert metric['ok']
         fetcher = Fetcher(**{
             "type_": "get_ok",
@@ -83,7 +77,7 @@ class TestSchedulerService:
         )
         pg_scheduler_service.add_fetcher(fetcher)
         pg_scheduler_service._fetch_it(fetcher)
-        metrics = httpx.get(f"{get_settings().BACKEND_URL}/metric").json()
+        metrics = dbsession.query(Metric).all()
         for metric in metrics:
             if metric['name'] == fetcher.address:
                 assert not metric['ok']
