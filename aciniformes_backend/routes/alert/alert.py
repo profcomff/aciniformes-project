@@ -2,10 +2,13 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
+import logging
 
-from aciniformes_backend.models.alerts import Receiver
 from aciniformes_backend.serivce import AlertServiceInterface, alert_service
 from aciniformes_backend.serivce import exceptions as exc
+
+
+logger = logging.getLogger(__name__)
 
 
 class CreateSchema(BaseModel):
@@ -37,18 +40,21 @@ async def create(
     create_schema: CreateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
 ):
+    logger.info(f"Someone triggered create_schema")
     id_ = await alert.create(create_schema.dict(exclude_unset=True))
     return PostResponseSchema(**create_schema.dict(), id=id_)
 
 
 @router.get("")
 async def get_all(alert: AlertServiceInterface = Depends(alert_service)):
+    logger.info(f"Someone triggered get_schemas")
     res = await alert.get_all()
     return res
 
 
 @router.get("/{id}")
 async def get(id: int, alert: AlertServiceInterface = Depends(alert_service)):
+    logger.info(f"Someone triggered get_schema")
     try:
         res = await alert.get_by_id(id)
     except exc.ObjectNotFound:
@@ -62,6 +68,7 @@ async def update(
     update_schema: UpdateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
 ):
+    logger.info(f"Someone triggered update_schema")
     try:
         res = await alert.update(id, update_schema.dict(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -74,4 +81,5 @@ async def delete(
     id: int,
     alert: AlertServiceInterface = Depends(alert_service),
 ):
+    logger.info(f"Someone triggered delete_schema")
     await alert.delete(id)

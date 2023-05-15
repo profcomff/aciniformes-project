@@ -7,12 +7,8 @@ class Config:
 
 
 def crud_service():
-    if Config.fake:
-        return FakeCrudService()
-    return CrudService()
+    return FakeCrudService() if Config.fake else CrudService()
 
 
 def scheduler_service():
-    if Config.fake:
-        return FakeSchedulerService(crud_service())
-    return ApSchedulerService(crud_service())
+    return FakeSchedulerService(crud_service()) if Config.fake else ApSchedulerService(crud_service())

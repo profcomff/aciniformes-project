@@ -1,6 +1,6 @@
 import pytest
 
-from ping.service import Config, crud_service, scheduler_service
+from pinger_backend.service import Config, crud_service, scheduler_service
 
 
 @pytest.fixture

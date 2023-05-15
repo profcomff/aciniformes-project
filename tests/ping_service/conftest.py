@@ -6,7 +6,7 @@ from aciniformes_backend.settings import get_settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from aciniformes_backend.models.base import BaseModel
-from ping.service import Config
+from pinger_backend.service import Config
 
 
 @pytest.fixture(scope="session")

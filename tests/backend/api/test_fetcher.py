@@ -16,7 +16,7 @@ def test_fake_service(fake_config):
 def this_fetcher():
     body = {
         "id": 6,
-        "type_": "ping",
+        "type_": "pinger_backend",
         "address": "https://www.python.org",
         "fetch_data": "string",
         "delay_ok": 30,
