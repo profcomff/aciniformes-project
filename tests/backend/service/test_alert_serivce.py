@@ -80,11 +80,11 @@ class TestReceiverService:
 
     @pytest.mark.asyncio
     async def test_get_by_id(self, pg_receiver_service, db_receiver):
-        res = await pg_receiver_service.get_by_id(db_receiver.id_)
+        res = pg_receiver_service.get_by_id(db_receiver.id_)
         assert res is not None
         assert res.url == db_receiver.url
         with pytest.raises(exc.ObjectNotFound):
-            await pg_receiver_service.get_by_id(db_receiver.id_ + 1000)
+            pg_receiver_service.get_by_id(db_receiver.id_ + 1000)
 
     @pytest.mark.asyncio
     async def test_delete(self, pg_receiver_service, db_receiver):

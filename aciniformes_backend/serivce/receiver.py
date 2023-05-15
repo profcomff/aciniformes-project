@@ -15,7 +15,7 @@ class PgReceiverService(ReceiverServiceInterface):
         self.session.flush()
         return receiver.id_
 
-    async def get_by_id(self, id_: int) -> Type[db_models.Receiver]:
+    def get_by_id(self, id_: int) -> Type[db_models.Receiver]:
         q = sa.select(db_models.Receiver).where(db_models.Receiver.id_ == id_)
         res = self.session.scalar(q)
         if not res:
