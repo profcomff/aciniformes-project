@@ -26,12 +26,7 @@ class PgFetcherService(FetcherServiceInterface):
         self.session.flush()
 
     async def update(self, id_: int, item: dict) -> db_models.Fetcher:
-        q = (
-            sa.update(db_models.Fetcher)
-            .where(db_models.Fetcher.id_ == id_)
-            .values(**item)
-            .returning(db_models.Fetcher)
-        )
+        q = sa.update(db_models.Fetcher).where(db_models.Fetcher.id_ == id_).values(**item).returning(db_models.Fetcher)
         if not await self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
         res = self.session.execute(q).scalar()

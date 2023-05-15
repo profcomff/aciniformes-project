@@ -8,22 +8,14 @@ from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchem
 
 @pytest.fixture
 def metric_schema():
-    body = {"id": 44,
-              "name": "string",
-              "ok": True,
-              "time_delta": 0
-            }
+    body = {"id": 44, "name": "string", "ok": True, "time_delta": 0}
     schema = MetricCreateSchema(**body)
     return schema
 
 
 @pytest.fixture()
 def db_metric(dbsession, metric_schema):
-    q = (
-        sqlalchemy.insert(Metric)
-        .values(**metric_schema.dict(exclude_unset=True))
-        .returning(Metric)
-    )
+    q = sqlalchemy.insert(Metric).values(**metric_schema.dict(exclude_unset=True)).returning(Metric)
     metric = dbsession.scalar(q)
     dbsession.flush()
     yield metric

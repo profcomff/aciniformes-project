@@ -1,12 +1,14 @@
 """Классы хранения настроек нотификаций
 """
 from datetime import datetime
+from enum import Enum
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Enum as DbEnum
+from sqlalchemy import JSON, DateTime
+from sqlalchemy import Enum as DbEnum
+from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import BaseModel
-from enum import Enum
 
 
 class Method(str, Enum):

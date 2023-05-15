@@ -1,8 +1,9 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
-from datetime import datetime
 
 from aciniformes_backend.serivce import MetricServiceInterface
 from aciniformes_backend.serivce import exceptions as exc

@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, HttpUrl
 from starlette import status
-from aciniformes_backend.models.fetcher import FetcherType
 
+from aciniformes_backend.models.fetcher import FetcherType
 from aciniformes_backend.serivce import FetcherServiceInterface
 from aciniformes_backend.serivce import exceptions as exc
 from aciniformes_backend.serivce import fetcher_service
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

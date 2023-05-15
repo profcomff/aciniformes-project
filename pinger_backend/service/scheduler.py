@@ -12,6 +12,7 @@ from pinger_backend.settings import get_settings
 from .crud import CrudServiceInterface
 from .exceptions import AlreadyRunning, AlreadyStopped, ConnectionFail
 
+
 settings = get_settings()
 
 
@@ -143,9 +144,7 @@ class ApSchedulerService(SchedulerServiceInterface):
             cur = time.time()
             timing = cur - prev
             metric = MetricCreateSchema(
-                name=fetcher.address,
-                ok=True if res and res.status_code == 200 else False,
-                time_delta=timing
+                name=fetcher.address, ok=True if res and res.status_code == 200 else False, time_delta=timing
             )
             self.crud_service.add_metric(metric)
             alert = AlertCreateSchema(data=metric, filter=500)
@@ -159,9 +158,7 @@ class ApSchedulerService(SchedulerServiceInterface):
         cur = time.time()
         timing = cur - prev
         metric = MetricCreateSchema(
-            name=fetcher.address,
-            ok=True if res and (200 <= res.status_code <= 300) else False,
-            time_delta=timing
+            name=fetcher.address, ok=True if res and (200 <= res.status_code <= 300) else False, time_delta=timing
         )
         self.crud_service.add_metric(metric)
         if not metric.ok:

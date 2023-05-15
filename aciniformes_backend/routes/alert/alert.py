@@ -1,8 +1,9 @@
+import logging
+
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
-import logging
 
 from aciniformes_backend.serivce import AlertServiceInterface, alert_service
 from aciniformes_backend.serivce import exceptions as exc

@@ -6,6 +6,7 @@ from sqlalchemy import engine_from_config, pool
 from aciniformes_backend.models import BaseModel
 from aciniformes_backend.settings import get_settings
 
+
 config = context.config
 settings = get_settings()
 

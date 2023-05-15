@@ -6,29 +6,19 @@ import sqlalchemy
 import aciniformes_backend.serivce.exceptions as exc
 from aciniformes_backend.models import Alert, Receiver
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
-from aciniformes_backend.routes.alert.reciever import (
-    CreateSchema as ReceiverCreateSchema,
-)
+from aciniformes_backend.routes.alert.reciever import CreateSchema as ReceiverCreateSchema
 
 
 @pytest.fixture
 def receiver_schema():
-    body = {
-          "url": "string",
-          "method": "post",
-          "receiver_body": {}
-        }
+    body = {"url": "string", "method": "post", "receiver_body": {}}
     schema = ReceiverCreateSchema(**body)
     return schema
 
 
 @pytest.fixture
 def db_receiver(dbsession, receiver_schema):
-    q = (
-        sqlalchemy.insert(Receiver)
-        .values(**receiver_schema.dict(exclude_unset=True))
-        .returning(Receiver)
-    )
+    q = sqlalchemy.insert(Receiver).values(**receiver_schema.dict(exclude_unset=True)).returning(Receiver)
     receiver = dbsession.execute(q).scalar()
     dbsession.flush()
     yield receiver
@@ -49,11 +39,7 @@ def alert_schema(receiver_schema):
 
 @pytest.fixture
 def db_alert(db_receiver, dbsession, alert_schema):
-    q = (
-        sqlalchemy.insert(Alert)
-        .values(**alert_schema.dict(exclude_unset=True))
-        .returning(Alert)
-    )
+    q = sqlalchemy.insert(Alert).values(**alert_schema.dict(exclude_unset=True)).returning(Alert)
     alert = dbsession.execute(q).scalar()
     dbsession.flush()
     yield alert
@@ -92,13 +78,7 @@ class TestReceiverService:
 
     @pytest.mark.asyncio
     async def test_update(self, pg_receiver_service, db_receiver, dbsession):
-        res = await pg_receiver_service.update(
-            db_receiver.id_, {
-              "url": "Alex",
-              "method": "post",
-              "receiver_body": {}
-            }
-        )
+        res = await pg_receiver_service.update(db_receiver.id_, {"url": "Alex", "method": "post", "receiver_body": {}})
         assert res.url == "Alex"
         assert res.receiver_body == {}
 
@@ -133,7 +113,5 @@ class TestAlertService:
 
     @pytest.mark.asyncio
     async def test_update(self, pg_alert_service, db_alert):
-        res = await pg_alert_service.update(
-            db_alert.id_, {"data": {"type": "stig", "name": "stig"}}
-        )
+        res = await pg_alert_service.update(db_alert.id_, {"data": {"type": "stig", "name": "stig"}})
         assert res.data == {"type": "stig", "name": "stig"}

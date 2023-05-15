@@ -18,13 +18,9 @@ class FetcherType(str, Enum):
 
 class Fetcher(BaseModel):
     id_: Mapped[int] = mapped_column("id", Integer, primary_key=True)
-    type_: Mapped[FetcherType] = mapped_column(
-        "type", sqlalchemy.Enum(FetcherType, native_enum=False), nullable=False
-    )
+    type_: Mapped[FetcherType] = mapped_column("type", sqlalchemy.Enum(FetcherType, native_enum=False), nullable=False)
     address: Mapped[str] = mapped_column(String, nullable=False)
-    fetch_data: Mapped[str] = mapped_column(
-        String, nullable=True
-    )  # Данные, которые передаются в теле POST запроса
+    fetch_data: Mapped[str] = mapped_column(String, nullable=True)  # Данные, которые передаются в теле POST запроса
     delay_ok: Mapped[int] = mapped_column(
         Integer, default=300, nullable=False
     )  # Через сколько секунд повторить запрос, если предыдущий успешный

@@ -8,12 +8,7 @@ from aciniformes_backend.serivce import Config, metric_service
 
 @pytest.fixture
 def this_metric():
-    body = {
-          "id": 5,
-          "name": "string",
-          "ok": True,
-          "time_delta": 0
-        }
+    body = {"id": 5, "name": "string", "ok": True, "time_delta": 0}
     metric_service().repository[body["id"]] = body
     return body
 
@@ -24,11 +19,7 @@ class TestMetric:
     s = metric_service()
 
     def test_post_success(self, client):
-        body = {
-              "name": "string",
-              "ok": True,
-              "time_delta": 0
-            }
+        body = {"name": "string", "ok": True, "time_delta": 0}
         print(self._url)
         res = client.post(self._url, json=body)
         assert res.status_code == status.HTTP_200_OK

@@ -8,24 +8,20 @@ from aciniformes_backend.routes.fetcher import CreateSchema as FetcherCreateSche
 @pytest.fixture
 def fetcher_schema():
     body = {
-            "id": 6,
-            "type_": "ping",
-            "address": "https://www.python.org",
-            "fetch_data": "string",
-            "delay_ok": 30,
-            "delay_fail": 40,
-        }
+        "id": 6,
+        "type_": "ping",
+        "address": "https://www.python.org",
+        "fetch_data": "string",
+        "delay_ok": 30,
+        "delay_fail": 40,
+    }
     schema = FetcherCreateSchema(**body)
     return schema
 
 
 @pytest.fixture()
 def db_fetcher(dbsession, fetcher_schema):
-    q = (
-        sqlalchemy.insert(Fetcher)
-        .values(**fetcher_schema.dict(exclude_unset=True))
-        .returning(Fetcher)
-    )
+    q = sqlalchemy.insert(Fetcher).values(**fetcher_schema.dict(exclude_unset=True)).returning(Fetcher)
     fetcher = dbsession.scalar(q)
     dbsession.flush()
     yield fetcher

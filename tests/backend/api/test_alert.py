@@ -87,12 +87,7 @@ class TestAlert:
 
 @pytest.fixture
 def this_receiver():
-    body = {
-          "id": 4,
-          "url": "string",
-          "method": "post",
-          "receiver_body": {}
-        }
+    body = {"id": 4, "url": "string", "method": "post", "receiver_body": {}}
     receiver_service().repository[body["id"]] = body
     return body
 
@@ -103,11 +98,7 @@ class TestReceiver:
     s = receiver_service()
 
     def test_post_success(self, client):
-        body = {
-              "url": "string",
-              "method": "post",
-              "receiver_body": {}
-            }
+        body = {"url": "string", "method": "post", "receiver_body": {}}
         res = client.post(self._url, json=body)
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
@@ -132,11 +123,7 @@ class TestReceiver:
         assert len(res.json())
 
     def test_patch_by_id_success(self, client, this_receiver):
-        body = {
-              "url": "sdasd",
-              "method": "post",
-              "receiver_body": {}
-            }
+        body = {"url": "sdasd", "method": "post", "receiver_body": {}}
         res = client.patch(
             f"{self._url}/{this_receiver['id']}",
             data=json.dumps(body),

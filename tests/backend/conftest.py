@@ -12,9 +12,7 @@ from pinger_backend.settings import get_settings as settings_backend
 
 @pytest.fixture(scope="session")
 def engine():
-    return create_engine(
-        get_settings().DB_DSN, execution_options={"isolation_level": "AUTOCOMMIT"}
-    )
+    return create_engine(get_settings().DB_DSN, execution_options={"isolation_level": "AUTOCOMMIT"})
 
 
 @pytest.fixture(scope="session")

@@ -1,4 +1,5 @@
 import pytest
+
 from aciniformes_backend.models import Fetcher, Metric
 
 
@@ -17,17 +18,13 @@ def fetcher_obj():
 
 class TestSchedulerService:
     @pytest.mark.asyncio
-    async def test_add_fetcher_success(
-        self, pg_scheduler_service, fake_crud_service, fetcher_obj
-    ):
+    async def test_add_fetcher_success(self, pg_scheduler_service, fake_crud_service, fetcher_obj):
         pg_scheduler_service.add_fetcher(fetcher_obj)
         fetchers = pg_scheduler_service.get_jobs()
         assert f'{fetcher_obj.address} None' in fetchers
 
     @pytest.mark.asyncio
-    async def test_delete_fetcher(
-        self, pg_scheduler_service, fake_crud_service, fetcher_obj
-    ):
+    async def test_delete_fetcher(self, pg_scheduler_service, fake_crud_service, fetcher_obj):
         pg_scheduler_service.add_fetcher(fetcher_obj)
         fetchers = pg_scheduler_service.get_jobs()
         assert f"{fetcher_obj.address} {fetcher_obj.create_ts}" in fetchers
@@ -59,12 +56,13 @@ class TestSchedulerService:
         for metric in metrics:
             if metric.name == fetcher_obj.address:
                 assert metric['ok']
-        fetcher = Fetcher(**{
-            "type_": "ping",
-            "address": "https://www.ayyylmaorofl.org",
-            "fetch_data": "string",
-            "delay_ok": 30,
-            "delay_fail": 40,
+        fetcher = Fetcher(
+            **{
+                "type_": "ping",
+                "address": "https://www.ayyylmaorofl.org",
+                "fetch_data": "string",
+                "delay_ok": 30,
+                "delay_fail": 40,
             }
         )
         pg_scheduler_service.add_fetcher(fetcher)

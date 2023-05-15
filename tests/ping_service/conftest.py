@@ -1,11 +1,11 @@
 import pytest
 from fastapi.testclient import TestClient
-
-from aciniformes_backend.routes import app
-from aciniformes_backend.settings import get_settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+
 from aciniformes_backend.models.base import BaseModel
+from aciniformes_backend.routes import app
+from aciniformes_backend.settings import get_settings
 from pinger_backend.service import Config
 
 

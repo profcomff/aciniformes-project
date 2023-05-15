@@ -1,9 +1,10 @@
+import enum
+import logging
+
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
-import enum
-import logging
 
 from aciniformes_backend.serivce import ReceiverServiceInterface
 from aciniformes_backend.serivce import exceptions as exc
@@ -46,10 +47,7 @@ router = APIRouter()
 
 
 @router.post("", response_model=PostResponseSchema)
-async def create(
-    create_schema: CreateSchema,
-    receiver: ReceiverServiceInterface = Depends(receiver_service)
-):
+async def create(create_schema: CreateSchema, receiver: ReceiverServiceInterface = Depends(receiver_service)):
     logger.info(f"Someone triggered create_receiver")
     id_ = await receiver.create(create_schema.dict())
     return PostResponseSchema(**create_schema.dict(), id=id_)

@@ -61,12 +61,12 @@ class TestFetcher:
 
     def test_patch_by_id_success(self, client, this_fetcher):
         body = {
-              "type_": "post",
-              "address": "https://api.test.profcomff.com/services/category",
-              "fetch_data": "string",
-              "delay_ok": 300,
-              "delay_fail": 30
-            }
+            "type_": "post",
+            "address": "https://api.test.profcomff.com/services/category",
+            "fetch_data": "string",
+            "delay_ok": 300,
+            "delay_fail": 30,
+        }
         res = client.patch(
             f"{self._url}/{this_fetcher['id']}",
             json=body,
