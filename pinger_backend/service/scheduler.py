@@ -4,16 +4,14 @@ from abc import ABC, abstractmethod
 import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
 
-from aciniformes_backend.models import Alert, Fetcher, FetcherType
+from aciniformes_backend.models import Alert, Fetcher, FetcherType, Receiver
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from pinger_backend.settings import get_settings
+from pinger_backend.settings import get_settings as backend_settings
 
 from .crud import CrudServiceInterface
 from .exceptions import AlreadyRunning, AlreadyStopped, ConnectionFail
-
-
-settings = get_settings()
+from pinger_backend.service.session import dbsession
 
 
 class SchedulerServiceInterface(ABC):
@@ -78,11 +76,12 @@ class FakeSchedulerService(SchedulerServiceInterface):
         self.scheduler["started"] = False
 
     def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        httpx.post(f"{settings.BOT_URL}/alert", json=metric_log.json())
+        httpx.post(f"{backend_settings.BOT_URL}/alert", json=metric_log.json())
 
 
 class ApSchedulerService(SchedulerServiceInterface):
     scheduler = AsyncIOScheduler()
+    backend_url = str
 
     def __init__(self, crud_service: CrudServiceInterface):
         self.crud_service = crud_service
@@ -105,10 +104,9 @@ class ApSchedulerService(SchedulerServiceInterface):
     def start(self):
         if self.scheduler.running:
             raise AlreadyRunning
-        fetchers = httpx.get(f"{settings.BACKEND_URL}/fetcher").json()
+        fetchers = dbsession().query(Fetcher).all()
         self.scheduler.start()
         for fetcher in fetchers:
-            fetcher = Fetcher(**fetcher)
             self.add_fetcher(fetcher)
             self._fetch_it(fetcher)
 
@@ -120,10 +118,10 @@ class ApSchedulerService(SchedulerServiceInterface):
         self.scheduler.shutdown()
 
     def write_alert(self, metric_log: MetricCreateSchema, alert: AlertCreateSchema):
-        receivers = httpx.get(f"{settings.BACKEND_URL}/receiver").json()
+        receivers = dbsession().query(Receiver).all()
         for receiver in receivers:
-            receiver['receiver_body']['text'] = metric_log
-            httpx.post(receiver['url'], data=receiver['receiver_body'])
+            receiver.receiver_body['text'] = metric_log
+            httpx.post(receiver.url, data=receiver['receiver_body'])
 
     @staticmethod
     def _parse_timedelta(fetcher: Fetcher):

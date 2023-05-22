@@ -12,6 +12,7 @@ def pg_config():
 @pytest.fixture
 def pg_scheduler_service(pg_config):
     s = scheduler_service()
+    s.backend_url = "http://testserver"
     assert s.scheduler is not dict
     yield s
 
@@ -20,5 +21,6 @@ def pg_scheduler_service(pg_config):
 def fake_crud_service(pg_config):
     Config.fake = False
     s = crud_service()
+    s.backend_url = "http://testserver"
     yield s
     Config.fake = False

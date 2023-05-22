@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
 
-import httpx
-
-from aciniformes_backend.models import Alert, Fetcher
+from aciniformes_backend.models import Alert, Fetcher, Metric
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from pinger_backend.settings import get_settings
+from pinger_backend.service.session import dbsession
 
 
 class CrudServiceInterface(ABC):
@@ -28,13 +27,17 @@ class CrudService(CrudServiceInterface):
         self.backend_url = get_settings().BACKEND_URL
 
     def get_fetchers(self) -> list[Fetcher]:
-        return [Fetcher(**d) for d in httpx.get(f"{self.backend_url}/fetcher").json()]
+        return [Fetcher(**d) for d in dbsession().query(Fetcher).all()]
 
     def add_metric(self, metric: MetricCreateSchema):
-        return httpx.post(f"{self.backend_url}/metric", data=metric.json())
+        metric = Metric(**metric.dict(exclude_none=True))
+        dbsession().add(metric)
+        dbsession().commit()
+        dbsession().flush()
+        return metric
 
     def get_alerts(self) -> list[Alert]:
-        return httpx.get(f"{self.backend_url}/alert").json()
+        return [Alert(**d) for d in dbsession().query(Alert).all()]
 
 
 class FakeCrudService(CrudServiceInterface):

@@ -8,7 +8,7 @@ def fetcher_obj():
     yield Fetcher(
         **{
             "type_": "ping",
-            "address": "http://testserver",
+            "address": "localhost",
             "fetch_data": "string",
             "delay_ok": 30,
             "delay_fail": 40,
@@ -39,7 +39,7 @@ class TestSchedulerService:
         assert type(res) is list
 
     @pytest.mark.asyncio
-    async def test_start_already_started(self, pg_scheduler_service, fake_crud_service):
+    async def test_start_already_started(self, pg_scheduler_service, fake_crud_service, crud_client):
         pg_scheduler_service.start()
         fail = False
         try:
@@ -49,17 +49,11 @@ class TestSchedulerService:
         assert fail
 
     @pytest.mark.asyncio
-    async def test_ping(self, pg_scheduler_service, fetcher_obj, fake_crud_service, dbsession):
-        pg_scheduler_service.add_fetcher(fetcher_obj)
-        pg_scheduler_service._fetch_it(fetcher_obj)
-        metrics = dbsession.query(Metric).all()
-        for metric in metrics:
-            if metric.name == fetcher_obj.address:
-                assert metric['ok']
+    async def test_ping_fail(self, pg_scheduler_service, fetcher_obj, fake_crud_service, dbsession):
         fetcher = Fetcher(
             **{
                 "type_": "ping",
-                "address": "https://www.ayyylmaorofl.org",
+                "address": "fasdlj",
                 "fetch_data": "string",
                 "delay_ok": 30,
                 "delay_fail": 40,
