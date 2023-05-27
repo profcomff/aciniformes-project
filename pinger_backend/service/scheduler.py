@@ -7,11 +7,11 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
 from aciniformes_backend.models import Alert, Fetcher, FetcherType, Receiver
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
+from pinger_backend.service.session import dbsession
 from pinger_backend.settings import get_settings as backend_settings
 
 from .crud import CrudServiceInterface
 from .exceptions import AlreadyRunning, AlreadyStopped, ConnectionFail
-from pinger_backend.service.session import dbsession
 
 
 class SchedulerServiceInterface(ABC):

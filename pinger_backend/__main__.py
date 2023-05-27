@@ -1,8 +1,9 @@
 import asyncio
 
-from .settings import get_settings
 from pinger_backend.service.crud import CrudService
 from pinger_backend.service.scheduler import ApSchedulerService
+
+from .settings import get_settings
 
 
 if __name__ == "__main__":

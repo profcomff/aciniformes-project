@@ -1,6 +1,7 @@
 import pytest
 
 from aciniformes_backend.models import Fetcher, Metric
+from pinger_backend.service.exceptions import AlreadyRunning
 
 
 @pytest.fixture()
@@ -44,9 +45,10 @@ class TestSchedulerService:
         fail = False
         try:
             pg_scheduler_service.start()
-        except:
+        except AlreadyRunning:
             fail = True
         assert fail
+        pg_scheduler_service.stop()
 
     @pytest.mark.asyncio
     async def test_ping_fail(self, pg_scheduler_service, fetcher_obj, fake_crud_service, dbsession):

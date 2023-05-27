@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 
 from aciniformes_backend.models import Alert, Fetcher, Metric
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from pinger_backend.settings import get_settings
 from pinger_backend.service.session import dbsession
+from pinger_backend.settings import get_settings
 
 
 class CrudServiceInterface(ABC):
