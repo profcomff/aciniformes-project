@@ -101,14 +101,14 @@ class ApSchedulerService(SchedulerServiceInterface):
     def get_jobs(self):
         return [j.id for j in self.scheduler.get_jobs()]
 
-    def start(self):
+    async def start(self):
         if self.scheduler.running:
             raise AlreadyRunning
         fetchers = dbsession().query(Fetcher).all()
         self.scheduler.start()
         for fetcher in fetchers:
             self.add_fetcher(fetcher)
-            self._fetch_it(fetcher)
+            await self._fetch_it(fetcher)
 
     def stop(self):
         if not self.scheduler.running:
@@ -127,7 +127,7 @@ class ApSchedulerService(SchedulerServiceInterface):
     def _parse_timedelta(fetcher: Fetcher):
         return fetcher.delay_ok, fetcher.delay_fail
 
-    def _fetch_it(self, fetcher: Fetcher):
+    async def _fetch_it(self, fetcher: Fetcher):
         prev = time.time()
         res = None
         try:

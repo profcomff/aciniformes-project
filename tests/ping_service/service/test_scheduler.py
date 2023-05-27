@@ -41,10 +41,10 @@ class TestSchedulerService:
 
     @pytest.mark.asyncio
     async def test_start_already_started(self, pg_scheduler_service, fake_crud_service, crud_client):
-        pg_scheduler_service.start()
+        await pg_scheduler_service.start()
         fail = False
         try:
-            pg_scheduler_service.start()
+            await pg_scheduler_service.start()
         except AlreadyRunning:
             fail = True
         assert fail
