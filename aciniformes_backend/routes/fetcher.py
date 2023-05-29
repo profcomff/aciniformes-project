@@ -44,7 +44,6 @@ async def create(
     create_schema: CreateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
-    logger.info(f"Someone triggered create_fetcher")
     id_ = await fetcher.create(create_schema.dict())
     return ResponsePostSchema(**create_schema.dict(), id=id_)
 
@@ -53,7 +52,6 @@ async def create(
 async def get_all(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
-    logger.info(f"Someone triggered get_fetchers")
     res = await fetcher.get_all()
     return res
 
@@ -63,7 +61,6 @@ async def get(
     id: int,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
-    logger.info(f"Someone triggered get_fetcher")
     try:
         res = await fetcher.get_by_id(id)
     except exc.ObjectNotFound:
@@ -77,7 +74,6 @@ async def update(
     update_schema: UpdateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
-    logger.info(f"Someone triggered update_fetcher")
     try:
         res = await fetcher.update(id, update_schema.dict(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -90,5 +86,4 @@ async def delete(
     id: int,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
-    logger.info(f"Someone triggered delete_fetcher")
     await fetcher.delete(id)

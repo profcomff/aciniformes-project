@@ -48,7 +48,6 @@ router = APIRouter()
 
 @router.post("", response_model=PostResponseSchema)
 async def create(create_schema: CreateSchema, receiver: ReceiverServiceInterface = Depends(receiver_service)):
-    logger.info(f"Someone triggered create_receiver")
     id_ = await receiver.create(create_schema.dict())
     return PostResponseSchema(**create_schema.dict(), id=id_)
 
@@ -57,14 +56,12 @@ async def create(create_schema: CreateSchema, receiver: ReceiverServiceInterface
 async def get_all(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
 ):
-    logger.info(f"Someone triggered get_receivers")
     res = await receiver.get_all()
     return res
 
 
 @router.get("/{id}")
 async def get(id: int, receiver: ReceiverServiceInterface = Depends(receiver_service)):
-    logger.info(f"Someone triggered get_receiver")
     try:
         res = await receiver.get_by_id(id)
         return res
@@ -78,7 +75,6 @@ async def update(
     update_schema: UpdateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
 ):
-    logger.info(f"Someone triggered update_receiver")
     try:
         res = await receiver.update(id, update_schema.dict(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -91,5 +87,4 @@ async def delete(
     id: int,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
 ):
-    logger.info(f"Someone triggered delete_receiver")
     await receiver.delete(id)
