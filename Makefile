@@ -1,5 +1,5 @@
 run:
-	source ./venv/bin/activate && uvicorn --reload --log-config logging_dev.conf pinger_backend.routes.base:app
+	source ./venv/bin/activate && uvicorn --reload --log-config logging_dev.conf aciniformes_backend.routes.base:app
 
 configure: venv
 	source ./venv/bin/activate && pip install -r requirements.dev.txt -r requirements.txt
