@@ -3,7 +3,8 @@ from abc import ABC
 
 import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from aciniformes_backend.models import Fetcher, FetcherType, Receiver, Alert, Metric
+
+from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from pinger_backend.service.session import dbsession

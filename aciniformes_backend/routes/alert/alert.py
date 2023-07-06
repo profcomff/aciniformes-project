@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class CreateSchema(BaseModel):
-    data: dict
+    data: dict[str, str]
     filter: str
 
 
@@ -22,7 +22,7 @@ class PostResponseSchema(CreateSchema):
 
 
 class UpdateSchema(BaseModel):
-    data: dict | None
+    data: dict[str, str] | None
     filter: str | None
 
 
