@@ -1,5 +1,5 @@
-from .crud import CrudService, FakeCrudService
-from .scheduler import ApSchedulerService, FakeSchedulerService
+from .crud import CrudService
+from .scheduler import ApSchedulerService
 
 
 class Config:
@@ -7,8 +7,8 @@ class Config:
 
 
 def crud_service():
-    return FakeCrudService() if Config.fake else CrudService()
+    return CrudService()
 
 
 def scheduler_service():
-    return FakeSchedulerService(crud_service()) if Config.fake else ApSchedulerService(crud_service())
+    return ApSchedulerService(crud_service())

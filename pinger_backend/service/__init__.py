@@ -1,11 +1,11 @@
 from .bootstrap import Config, crud_service, scheduler_service
-from .crud import CrudServiceInterface
-from .scheduler import SchedulerServiceInterface
+from .crud import CrudService
+from .scheduler import ApSchedulerService
 
 
 __all__ = [
-    "CrudServiceInterface",
-    "SchedulerServiceInterface",
+    "CrudService",
+    "ApSchedulerService",
     "crud_service",
     "scheduler_service",
     "Config",

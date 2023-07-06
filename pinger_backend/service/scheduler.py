@@ -1,89 +1,22 @@
 import time
-from abc import ABC, abstractmethod
+from abc import ABC
 
-import httpx
-from apscheduler.schedulers.asyncio import AsyncIOScheduler, BaseScheduler
-
-from aciniformes_backend.models import Alert, Fetcher, FetcherType, Receiver
+import requests
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from aciniformes_backend.models import Fetcher, FetcherType, Receiver, Alert, Metric
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from pinger_backend.service.session import dbsession
-from pinger_backend.settings import get_settings as backend_settings
 
-from .crud import CrudServiceInterface
-from .exceptions import AlreadyRunning, AlreadyStopped, ConnectionFail
-
-
-class SchedulerServiceInterface(ABC):
-    crud_service: CrudServiceInterface
-    scheduler: BaseScheduler | dict
-
-    @abstractmethod
-    async def add_fetcher(self, fetcher: Fetcher):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def delete_fetcher(self, fetcher: Fetcher):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def get_jobs(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def start(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def stop(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        raise NotImplementedError
-
-    async def _add_metric(self, metric: MetricCreateSchema):
-        await self.crud_service.add_metric(metric)
-
-    @property
-    def alerts(self):
-        return self.crud_service.get_alerts()
+from .crud import CrudService
+from .exceptions import AlreadyRunning, AlreadyStopped
 
 
-class FakeSchedulerService(SchedulerServiceInterface):
-    scheduler = dict()
-
-    def __init__(self, crud_service: CrudServiceInterface):
-        self.crud_service = crud_service
-
-    def add_fetcher(self, fetcher: Fetcher):
-        self.scheduler[fetcher.id_] = fetcher
-
-    def delete_fetcher(self, fetcher: Fetcher):
-        del self.scheduler[fetcher.id_]
-
-    def get_jobs(self):
-        return self.crud_service.get_fetchers()
-
-    def start(self):
-        if "started" in self.scheduler:
-            raise AlreadyRunning
-        self.scheduler["started"] = True
-
-    def stop(self):
-        if not self.scheduler["started"]:
-            raise AlreadyStopped
-        self.scheduler["started"] = False
-
-    def write_alert(self, metric_log: MetricCreateSchema, alert: Alert):
-        httpx.post(f"{backend_settings.BOT_URL}/alert", json=metric_log.json())
-
-
-class ApSchedulerService(SchedulerServiceInterface):
+class ApSchedulerService(ABC):
     scheduler = AsyncIOScheduler()
     backend_url = str
 
-    def __init__(self, crud_service: CrudServiceInterface):
+    def __init__(self, crud_service: CrudService):
         self.crud_service = crud_service
 
     def add_fetcher(self, fetcher: Fetcher):
@@ -119,9 +52,14 @@ class ApSchedulerService(SchedulerServiceInterface):
 
     def write_alert(self, metric_log: MetricCreateSchema, alert: AlertCreateSchema):
         receivers = dbsession().query(Receiver).all()
+        session = dbsession()
+        alert = Alert(**alert.dict(exclude_none=True))
+        session.add(alert)
+        session.commit()
+        session.flush()
         for receiver in receivers:
             receiver.receiver_body['text'] = metric_log
-            httpx.post(receiver.url, data=receiver['receiver_body'])
+            requests.request(method="POST", url=receiver.url, data=receiver['receiver_body'])
 
     @staticmethod
     def _parse_timedelta(fetcher: Fetcher):
@@ -133,32 +71,43 @@ class ApSchedulerService(SchedulerServiceInterface):
         try:
             match fetcher.type_:
                 case FetcherType.GET:
-                    res = httpx.get(fetcher.address)
+                    res = requests.request(method="GET", url=fetcher.address)
                 case FetcherType.POST:
-                    res = httpx.post(fetcher.address, data=fetcher.fetch_data)
+                    res = requests.request(method="POST", url=fetcher.address, data=fetcher.fetch_data)
                 case FetcherType.PING:
-                    res = httpx.head(fetcher.address)
+                    res = requests.request(method="HEAD", url=fetcher.address)
         except:
             cur = time.time()
             timing = cur - prev
             metric = MetricCreateSchema(
-                name=fetcher.address, ok=True if res and res.status_code == 200 else False, time_delta=timing
+                name=fetcher.address, ok=True if res and (200 <= res.status_code <= 300) else False, time_delta=timing
             )
-            self.crud_service.add_metric(metric)
+            if metric.name not in [item.name for item in dbsession().query(Metric).all()]:
+                self.crud_service.add_metric(metric)
+            else:
+                if metric.ok != dbsession().query(Metric).filter(Metric.name == metric.name).one_or_none().ok:
+                    dbsession().query(Metric).filter(Metric.name == metric.name).delete()
+                    self.crud_service.add_metric(metric)
             alert = AlertCreateSchema(data=metric, filter=500)
+            if alert.data["name"] not in [item.data["name"] for item in dbsession().query(Alert).all()]:
+                self.write_alert(metric, alert)
             self.scheduler.reschedule_job(
                 f"{fetcher.address} {fetcher.create_ts}",
                 seconds=fetcher.delay_fail,
                 trigger="interval",
             )
-            self.write_alert(metric, alert)
             return
         cur = time.time()
         timing = cur - prev
         metric = MetricCreateSchema(
             name=fetcher.address, ok=True if res and (200 <= res.status_code <= 300) else False, time_delta=timing
         )
-        self.crud_service.add_metric(metric)
+        if metric.name not in [item.name for item in dbsession().query(Metric).all()]:
+            self.crud_service.add_metric(metric)
+        else:
+            if metric.ok != dbsession().query(Metric).filter(Metric.name == metric.name).one_or_none().ok:
+                dbsession().query(Metric).filter(Metric.name == metric.name).delete()
+                self.crud_service.add_metric(metric)
         if not metric.ok:
             alert = AlertCreateSchema(data=metric, filter=res.status_code)
             self.scheduler.reschedule_job(

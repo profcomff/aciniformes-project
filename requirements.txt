@@ -15,4 +15,4 @@ APScheduler
 jose
 auth-lib-profcomff
 asyncio
-httpx
+requests
