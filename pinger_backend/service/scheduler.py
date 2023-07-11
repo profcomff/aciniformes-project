@@ -106,14 +106,16 @@ class ApSchedulerService(ABC):
             # Проверка на удаление фетчера
             for fetcher in old_fetchers:
                 if (fetcher.address not in [ftch.address for ftch in new_fetchers]) and (
-                        f"{fetcher.address} {fetcher.create_ts}" in jobs):
+                    f"{fetcher.address} {fetcher.create_ts}" in jobs
+                ):
                     self.scheduler.remove_job(job_id=f"{fetcher.address} {fetcher.create_ts}")
 
             jobs = [job.id for job in self.scheduler.get_jobs()]
             # Проверка на добавление нового фетчера
             for fetcher in new_fetchers:
                 if (f"{fetcher.address} {fetcher.create_ts}" not in jobs) and (
-                        fetcher.address not in [ftch.address for ftch in old_fetchers]):
+                    fetcher.address not in [ftch.address for ftch in old_fetchers]
+                ):
                     self.add_fetcher(fetcher)
                     self.fetchers.append(fetcher)
 
@@ -151,12 +153,16 @@ class ApSchedulerService(ABC):
 
         # Проверка на удаление фетчера
         for fetcher in old_fetchers:
-            if (fetcher.address not in [ftch.address for ftch in new_fetchers]) and (f"{fetcher.address} {fetcher.create_ts}" in jobs):
+            if (fetcher.address not in [ftch.address for ftch in new_fetchers]) and (
+                f"{fetcher.address} {fetcher.create_ts}" in jobs
+            ):
                 self.scheduler.remove_job(job_id=f"{fetcher.address} {fetcher.create_ts}")
 
         # Проверка на добавление нового фетчера
         jobs = [job.id for job in self.scheduler.get_jobs()]
         for fetcher in new_fetchers:
-            if (f"{fetcher.address} {fetcher.create_ts}" not in jobs) and (fetcher.address not in [ftch.address for ftch in old_fetchers]):
+            if (f"{fetcher.address} {fetcher.create_ts}" not in jobs) and (
+                fetcher.address not in [ftch.address for ftch in old_fetchers]
+            ):
                 self.add_fetcher(fetcher)
                 self.fetchers.append(fetcher)
