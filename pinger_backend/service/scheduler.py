@@ -16,6 +16,7 @@ from .exceptions import AlreadyRunning, AlreadyStopped
 class ApSchedulerService(ABC):
     scheduler = AsyncIOScheduler()
     backend_url = str
+    fetchers = set
 
     def __init__(self, crud_service: CrudService):
         self.crud_service = crud_service
@@ -38,9 +39,9 @@ class ApSchedulerService(ABC):
     async def start(self):
         if self.scheduler.running:
             raise AlreadyRunning
-        fetchers = dbsession().query(Fetcher).all()
+        self.fetchers = dbsession().query(Fetcher).all()
         self.scheduler.start()
-        for fetcher in fetchers:
+        for fetcher in self.fetchers:
             self.add_fetcher(fetcher)
             await self._fetch_it(fetcher)
 
@@ -97,6 +98,25 @@ class ApSchedulerService(ABC):
                 seconds=fetcher.delay_fail,
                 trigger="interval",
             )
+
+            jobs = [job.id for job in self.scheduler.get_jobs()]
+            old_fetchers = self.fetchers
+            new_fetchers = dbsession().query(Fetcher).all()
+
+            # Проверка на удаление фетчера
+            for fetcher in old_fetchers:
+                if (fetcher.address not in [ftch.address for ftch in new_fetchers]) and (
+                        f"{fetcher.address} {fetcher.create_ts}" in jobs):
+                    self.scheduler.remove_job(job_id=f"{fetcher.address} {fetcher.create_ts}")
+
+            jobs = [job.id for job in self.scheduler.get_jobs()]
+            # Проверка на добавление нового фетчера
+            for fetcher in new_fetchers:
+                if (f"{fetcher.address} {fetcher.create_ts}" not in jobs) and (
+                        fetcher.address not in [ftch.address for ftch in old_fetchers]):
+                    self.add_fetcher(fetcher)
+                    self.fetchers.append(fetcher)
+
             return
         cur = time.time()
         timing = cur - prev
@@ -111,15 +131,32 @@ class ApSchedulerService(ABC):
                 self.crud_service.add_metric(metric)
         if not metric.ok:
             alert = AlertCreateSchema(data=metric, filter=res.status_code)
+            if alert.data["name"] not in [item.data["name"] for item in dbsession().query(Alert).all()]:
+                self.write_alert(metric, alert)
             self.scheduler.reschedule_job(
                 f"{fetcher.address} {fetcher.create_ts}",
                 seconds=fetcher.delay_fail,
                 trigger="interval",
             )
-            self.write_alert(metric, alert)
         else:
             self.scheduler.reschedule_job(
                 f"{fetcher.address} {fetcher.create_ts}",
                 seconds=fetcher.delay_ok,
                 trigger="interval",
             )
+
+        jobs = [job.id for job in self.scheduler.get_jobs()]
+        old_fetchers = self.fetchers
+        new_fetchers = dbsession().query(Fetcher).all()
+
+        # Проверка на удаление фетчера
+        for fetcher in old_fetchers:
+            if (fetcher.address not in [ftch.address for ftch in new_fetchers]) and (f"{fetcher.address} {fetcher.create_ts}" in jobs):
+                self.scheduler.remove_job(job_id=f"{fetcher.address} {fetcher.create_ts}")
+
+        # Проверка на добавление нового фетчера
+        jobs = [job.id for job in self.scheduler.get_jobs()]
+        for fetcher in new_fetchers:
+            if (f"{fetcher.address} {fetcher.create_ts}" not in jobs) and (fetcher.address not in [ftch.address for ftch in old_fetchers]):
+                self.add_fetcher(fetcher)
+                self.fetchers.append(fetcher)
