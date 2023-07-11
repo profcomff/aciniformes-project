@@ -1,6 +1,7 @@
 fastapi
 sqlalchemy
 pydantic
+pydantic-settings
 uvicorn
 alembic
 python-dotenv
