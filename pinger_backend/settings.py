@@ -1,17 +1,13 @@
 from functools import lru_cache
 
-from pydantic import BaseSettings, HttpUrl
+from pydantic import ConfigDict, HttpUrl
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     BACKEND_URL: HttpUrl = "http://127.0.0.1:8000"
     BOT_URL: HttpUrl = "http://127.0.0.1:8001"
-
-    class Config:
-        """Pydantic BaseSettings config"""
-
-        case_sensitive = True
-        env_file = ".env"
+    model_config = ConfigDict(case_sensitive=True, env_file=".env", extra="ignore")
 
 
 @lru_cache()

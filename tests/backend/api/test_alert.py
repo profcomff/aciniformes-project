@@ -64,9 +64,7 @@ class TestAlert:
         assert len(res_body)
 
     def test_patch_by_id_success(self, client, this_alert):
-        body = {
-            "data": {"type": "g", "name": "s"},
-        }
+        body = {"data": {"name": "g", "ok": True, "time_delta": 0.1}, "filter": 200}
         res = client.patch(f"{self._url}/{this_alert['id']}", data=json.dumps(body))
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()

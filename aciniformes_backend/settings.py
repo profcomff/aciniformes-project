@@ -1,17 +1,12 @@
 from functools import lru_cache
 
-from pydantic import PostgresDsn
+from pydantic import ConfigDict, PostgresDsn
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     DB_DSN: PostgresDsn
-
-    class Config:
-        """Pydantic BaseSettings config"""
-
-        case_sensitive = True
-        env_file = ".env"
+    model_config = ConfigDict(case_sensitive=True, env_file=".env", extra="ignore")
 
 
 @lru_cache()

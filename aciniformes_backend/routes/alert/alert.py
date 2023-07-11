@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class CreateSchema(BaseModel):
-    data: dict[str, str]
+    data: dict
     filter: str
 
 

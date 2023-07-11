@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-import pydantic
 import sqlalchemy.orm
 
 import aciniformes_backend.models as db_models

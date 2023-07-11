@@ -55,7 +55,7 @@ class ApSchedulerService(ABC):
     def write_alert(self, metric_log: MetricCreateSchema, alert: AlertCreateSchema):
         receivers = dbsession().query(Receiver).all()
         session = dbsession()
-        alert = Alert(**alert.dict(exclude_none=True))
+        alert = Alert(**alert.model_dump(exclude_none=True))
         session.add(alert)
         session.commit()
         session.flush()
@@ -90,7 +90,7 @@ class ApSchedulerService(ABC):
                 if metric.ok != dbsession().query(Metric).filter(Metric.name == metric.name).one_or_none().ok:
                     dbsession().query(Metric).filter(Metric.name == metric.name).delete()
                     self.crud_service.add_metric(metric)
-            alert = AlertCreateSchema(data=metric, filter=500)
+            alert = AlertCreateSchema(data=metric.model_dump(), filter='500')
             if alert.data["name"] not in [item.data["name"] for item in dbsession().query(Alert).all()]:
                 self.write_alert(metric, alert)
             self.scheduler.reschedule_job(
