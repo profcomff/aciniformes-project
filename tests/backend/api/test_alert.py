@@ -64,7 +64,10 @@ class TestAlert:
         assert len(res_body)
 
     def test_patch_by_id_success(self, client, this_alert):
-        body = {"data": {"name": "g", "ok": True, "time_delta": 0.1}, "filter": 200}
+        body = {
+            "data": {"type": "string", "name": "string"},
+            "filter": "string",
+        }
         res = client.patch(f"{self._url}/{this_alert['id']}", data=json.dumps(body))
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
@@ -77,7 +80,8 @@ class TestAlert:
 
     def test_patch_by_id_not_found(self, client, this_alert):
         body = {
-            "data": {},
+            "data": {"type": "string", "name": "string"},
+            "filter": "string",
         }
         res = client.patch(f"{self._url}/{888}", data=json.dumps(body))
         assert res.status_code == status.HTTP_404_NOT_FOUND
@@ -136,6 +140,6 @@ class TestReceiver:
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
     def test_patch_by_id_not_found(self, client):
-        body = {"name": "st", "chat_id": 0}
+        body = {"url": "sdasd", "method": "post", "receiver_body": {}}
         res = client.patch(f"{self._url}/{888}", data=json.dumps(body))
         assert res.status_code == status.HTTP_404_NOT_FOUND

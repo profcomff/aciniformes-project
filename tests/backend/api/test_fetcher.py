@@ -81,6 +81,12 @@ class TestFetcher:
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
     def test_patch_by_id_not_found(self, client):
-        body = {"name": "s"}
+        body = {
+            "type_": "post",
+            "address": "https://api.test.profcomff.com/services/category",
+            "fetch_data": "string",
+            "delay_ok": 300,
+            "delay_fail": 30,
+        }
         res = client.patch(f"{self._url}/{888}", data=json.dumps(body))
         assert res.status_code == status.HTTP_404_NOT_FOUND

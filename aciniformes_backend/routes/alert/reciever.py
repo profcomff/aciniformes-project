@@ -22,25 +22,25 @@ class Method(str, enum.Enum):
 class CreateSchema(BaseModel):
     url: str
     method: Method
-    receiver_body: dict
+    receiver_body: dict[str, str | int | list]
 
 
 class PostResponseSchema(CreateSchema):
     url: str | None
     method: Method
-    receiver_body: dict | None
+    receiver_body: dict[str, str | int | list] | None
 
 
 class UpdateSchema(BaseModel):
     url: str | None
     method: Method | None
-    receiver_body: dict | None
+    receiver_body: dict[str, str | int | list] | None
 
 
 class GetSchema(BaseModel):
     url: str
     method: Method
-    receiver_body: dict
+    receiver_body: dict[str, str | int | list]
 
 
 router = APIRouter()
