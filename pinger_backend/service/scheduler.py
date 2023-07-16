@@ -1,6 +1,7 @@
 import time
 from abc import ABC
 
+import ping3
 import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -77,12 +78,15 @@ class ApSchedulerService(ABC):
                 case FetcherType.POST:
                     res = requests.request(method="POST", url=fetcher.address, data=fetcher.fetch_data)
                 case FetcherType.PING:
-                    res = requests.request(method="HEAD", url=fetcher.address)
+                    res = ping3.ping(fetcher.address)
+
         except:
             cur = time.time()
             timing = cur - prev
             metric = MetricCreateSchema(
-                name=fetcher.address, ok=True if res and (200 <= res.status_code <= 300) else False, time_delta=timing
+                name=fetcher.address,
+                ok=True if (res and (200 <= res.status_code <= 300)) or (res == 0) else False,
+                time_delta=timing,
             )
             if metric.name not in [item.name for item in dbsession().query(Metric).all()]:
                 self.crud_service.add_metric(metric)
@@ -123,7 +127,9 @@ class ApSchedulerService(ABC):
         cur = time.time()
         timing = cur - prev
         metric = MetricCreateSchema(
-            name=fetcher.address, ok=True if res and (200 <= res.status_code <= 300) else False, time_delta=timing
+            name=fetcher.address,
+            ok=True if (res and (200 <= res.status_code <= 300)) or (res == 0) else False,
+            time_delta=timing,
         )
         if metric.name not in [item.name for item in dbsession().query(Metric).all()]:
             self.crud_service.add_metric(metric)
