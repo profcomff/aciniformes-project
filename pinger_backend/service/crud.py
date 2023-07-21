@@ -1,9 +1,15 @@
+import os
+import sys
 from abc import ABC
 
-from aciniformes_backend.models import Alert, Fetcher, Metric
-from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from pinger_backend.service.session import dbsession
-from pinger_backend.settings import get_settings
+
+sys.path.append(os.path.realpath('..'))
+
+from models import Alert, Fetcher, Metric
+from routes.mectric import CreateSchema as MetricCreateSchema
+
+from .session import dbsession
+from .settings import get_settings
 
 
 class CrudService(ABC):
@@ -17,7 +23,7 @@ class CrudService(ABC):
 
     def add_metric(self, metric: MetricCreateSchema):
         session = dbsession()
-        metric = Metric(**metric.dict(exclude_none=True))
+        metric = Metric(**metric.model_dump(exclude_none=True))
         session.add(metric)
         session.commit()
         session.flush()

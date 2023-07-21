@@ -1,9 +1,12 @@
 import asyncio
+import os
+import sys
 
-from pinger_backend.service.crud import CrudService
-from pinger_backend.service.scheduler import ApSchedulerService
 
-from .settings import get_settings
+sys.path.insert(0, f'{os.path.dirname(os.path.realpath(__file__))}/')
+from service.crud import CrudService
+from service.scheduler import ApSchedulerService
+from service.settings import get_settings
 
 
 if __name__ == "__main__":

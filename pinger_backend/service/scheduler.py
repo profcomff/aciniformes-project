@@ -1,3 +1,5 @@
+import os
+import sys
 import time
 from abc import ABC
 
@@ -5,13 +7,16 @@ import ping3
 import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
-from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
-from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from pinger_backend.service.session import dbsession
-
 from .crud import CrudService
 from .exceptions import AlreadyRunning, AlreadyStopped
+from .session import dbsession
+
+
+sys.path.append(os.path.realpath('..'))
+
+from models import Alert, Fetcher, FetcherType, Metric, Receiver
+from routes.alert.alert import CreateSchema as AlertCreateSchema
+from routes.mectric import CreateSchema as MetricCreateSchema
 
 
 class ApSchedulerService(ABC):

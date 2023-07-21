@@ -7,7 +7,8 @@ ENV APP_MODULE=${APP_NAME}.service.scheduler:ApSchedulerService().start()
 COPY ./requirements.txt /app/
 COPY ./logging_prod.conf /app/
 COPY ./logging_test.conf /app/
-
+COPY ./.env /app/
 RUN pip install -U -r /app/requirements.txt
 
-COPY ./${APP_NAME} /app/${APP_NAME}
+COPY . .
+CMD python /${APP_NAME}

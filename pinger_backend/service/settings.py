@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 from dotenv import load_dotenv
-from pydantic import ConfigDict, PostgresDsn
+from pydantic import ConfigDict, HttpUrl
 from pydantic_settings import BaseSettings
 
 
@@ -9,7 +9,8 @@ load_dotenv(verbose=True)
 
 
 class Settings(BaseSettings):
-    DB_DSN: PostgresDsn
+    BACKEND_URL: HttpUrl = "http://127.0.0.1:8000"
+    BOT_URL: HttpUrl = "http://127.0.0.1:8001"
     model_config = ConfigDict(case_sensitive=True, env_file="../.env", extra="ignore")
 
 
