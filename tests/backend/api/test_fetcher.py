@@ -3,17 +3,10 @@ import json
 import pytest
 from starlette import status
 
-from aciniformes_backend.serivce import Config, fetcher_service
-
-
-def test_fake_service(fake_config):
-    s = fetcher_service()
-    assert s.session is None
-    assert type(s.repository) is dict
-
+from aciniformes_backend.serivce.fetcher import PgFetcherService
 
 @pytest.fixture
-def this_fetcher():
+def this_fetcher(dbsession):
     body = {
         "id": 6,
         "type_": "pinger_backend",
@@ -22,14 +15,11 @@ def this_fetcher():
         "delay_ok": 30,
         "delay_fail": 40,
     }
-    fetcher_service().repository[body["id"]] = body
     return body
 
 
 class TestFetcher:
     _url = "/fetcher"
-    Config.fake = True
-    s = fetcher_service()
 
     def test_post_success(self, client):
         body = {

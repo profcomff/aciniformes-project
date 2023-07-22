@@ -5,7 +5,7 @@ from enum import Enum
 
 from sqlalchemy import JSON, DateTime
 from sqlalchemy import Enum as DbEnum
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import BaseModel

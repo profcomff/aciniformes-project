@@ -67,7 +67,7 @@ async def update(
     alert: AlertServiceInterface = Depends(alert_service),
 ):
     try:
-        res = await alert.update(id, update_schema.dict(exclude_unset=True))
+        res = await alert.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res

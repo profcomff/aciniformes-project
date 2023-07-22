@@ -1,12 +1,7 @@
-import os
-import sys
 from abc import ABC
 
-
-sys.path.append(os.path.realpath('..'))
-
-from models import Alert, Fetcher, Metric
-from routes.mectric import CreateSchema as MetricCreateSchema
+from aciniformes_backend.models import Alert, Fetcher, Metric
+from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 
 from .session import dbsession
 from .settings import get_settings

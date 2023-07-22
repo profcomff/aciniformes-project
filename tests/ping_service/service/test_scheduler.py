@@ -1,7 +1,7 @@
 import pytest
 
 from aciniformes_backend.models import Fetcher, Metric
-from pinger_backend.service.exceptions import AlreadyRunning
+from pinger_backend.exceptions import AlreadyRunning
 
 
 @pytest.fixture()

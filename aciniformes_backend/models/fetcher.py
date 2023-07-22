@@ -4,16 +4,16 @@ from datetime import datetime
 from enum import Enum
 
 import sqlalchemy
-from sqlalchemy import JSON, DateTime, Integer, String
+from sqlalchemy import DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import BaseModel
 
 
 class FetcherType(str, Enum):
-    GET = "get"  # Пишет True, если GET запрос вернул статус 200..299
-    POST = "post"  # Пишет True, если POST запрос вернул статус 200..299
-    PING = "ping"  # Пишет True, если PING успешный
+    GET = "get"  # Пишет положительную метрику, если GET запрос вернул статус 200..299
+    POST = "post"  # Пишет положительную метрику, если POST запрос вернул статус 200..299
+    PING = "ping"  # Пишет положительную метрику, если PING успешный
 
 
 class Fetcher(BaseModel):

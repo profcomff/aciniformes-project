@@ -6,14 +6,6 @@ from sqlalchemy.orm import Session, sessionmaker
 from aciniformes_backend.models.base import BaseModel
 from aciniformes_backend.routes import app
 from aciniformes_backend.settings import get_settings
-from pinger_backend.service import Config
-
-
-@pytest.fixture(scope="session")
-def fake_config():
-    Config.fake = False
-    conf = Config()
-    yield conf
 
 
 @pytest.fixture(scope="session")

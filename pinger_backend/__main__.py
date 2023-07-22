@@ -1,9 +1,5 @@
 import asyncio
-import os
-import sys
 
-
-sys.path.insert(0, f'{os.path.dirname(os.path.realpath(__file__))}/')
 from service.crud import CrudService
 from service.scheduler import ApSchedulerService
 from service.settings import get_settings

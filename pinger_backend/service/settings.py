@@ -1,11 +1,7 @@
 from functools import lru_cache
 
-from dotenv import load_dotenv
 from pydantic import ConfigDict, HttpUrl
 from pydantic_settings import BaseSettings
-
-
-load_dotenv(verbose=True)
 
 
 class Settings(BaseSettings):

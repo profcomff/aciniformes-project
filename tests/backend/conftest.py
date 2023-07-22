@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from aciniformes_backend.models.base import BaseModel
 from aciniformes_backend.routes.base import app
-from aciniformes_backend.serivce import Config
 from aciniformes_backend.settings import get_settings
 from pinger_backend.service.settings import get_settings as settings_backend
 
@@ -32,12 +31,6 @@ def dbsession(engine, tables):
     session.close()
     connection.close()
 
-
-@pytest.fixture(scope="session")
-def fake_config():
-    Config.fake = True
-    conf = Config()
-    yield conf
 
 
 @pytest.fixture

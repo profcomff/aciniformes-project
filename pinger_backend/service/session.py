@@ -1,13 +1,7 @@
-import os
-import sys
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-
-sys.path.append(os.path.realpath('..'))
-
-from settings import get_settings as db_settings
+from .settings import get_settings as db_settings
 
 
 def dbsession() -> Session:

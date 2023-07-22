@@ -1,13 +1,6 @@
 import pytest
 
-from aciniformes_backend.serivce import Config, alert_service, fetcher_service, metric_service, receiver_service
-
-
-@pytest.fixture
-def pg_config():
-    Config.fake = False
-    yield Config()
-
+from aciniformes_backend.serivce import alert_service, fetcher_service, metric_service, receiver_service
 
 @pytest.fixture
 def pg_alert_service(pg_config):

@@ -1,22 +1,17 @@
-import json
 
 import pytest
 from starlette import status
-
-from aciniformes_backend.serivce import Config, metric_service
+from aciniformes_backend.serivce.metric import PgMetricService
 
 
 @pytest.fixture
-def this_metric():
+def this_metric(dbsession):
     body = {"id": 5, "name": "string", "ok": True, "time_delta": 0}
-    metric_service().repository[body["id"]] = body
     return body
 
 
 class TestMetric:
     _url = "/metric"
-    Config.fake = True
-    s = metric_service()
 
     def test_post_success(self, client):
         body = {"name": "string", "ok": True, "time_delta": 0}

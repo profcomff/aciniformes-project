@@ -1,11 +1,10 @@
 from .base import (
     AlertServiceInterface,
-    BaseService,
     FetcherServiceInterface,
     MetricServiceInterface,
     ReceiverServiceInterface,
 )
-from .bootstrap import Config, alert_service, fetcher_service, metric_service, receiver_service
+from .bootstrap import alert_service, fetcher_service, metric_service, receiver_service
 
 
 __all__ = [
@@ -18,5 +17,4 @@ __all__ = [
     "alert_service",
     "fetcher_service",
     "exceptions",
-    "Config",
 ]
