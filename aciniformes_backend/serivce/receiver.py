@@ -34,7 +34,7 @@ class PgReceiverService(ReceiverServiceInterface):
             .values(**item)
             .returning(db_models.Receiver)
         )
-        if not self.get_by_id(id_):
+        if not await self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
         res = self.session.execute(q).scalar()
         return res

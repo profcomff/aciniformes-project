@@ -2,9 +2,9 @@ from abc import ABC
 
 from aciniformes_backend.models import Alert, Fetcher, Metric
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
+from settings import get_settings
 
 from .session import dbsession
-from .settings import get_settings
 
 
 class CrudService(ABC):

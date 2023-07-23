@@ -5,8 +5,7 @@ from sqlalchemy.orm import Session
 
 from aciniformes_backend.models.base import BaseModel
 from aciniformes_backend.routes.base import app
-from aciniformes_backend.settings import get_settings
-from pinger_backend.service.settings import get_settings as settings_backend
+from settings import get_settings
 
 
 @pytest.fixture(scope="session")
@@ -32,10 +31,9 @@ def dbsession(engine, tables):
     connection.close()
 
 
-
 @pytest.fixture
-def client(fake_config):
+def crud_client():
     client = TestClient(app)
-    settings = settings_backend()
+    settings = get_settings()
     settings.BACKEND_URL = "http://testserver"
     return client

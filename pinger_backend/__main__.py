@@ -2,7 +2,8 @@ import asyncio
 
 from service.crud import CrudService
 from service.scheduler import ApSchedulerService
-from service.settings import get_settings
+
+from settings import get_settings
 
 
 if __name__ == "__main__":

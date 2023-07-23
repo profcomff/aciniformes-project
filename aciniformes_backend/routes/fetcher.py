@@ -3,7 +3,9 @@ import logging
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, HttpUrl
+from pydantic.functional_serializers import PlainSerializer
 from starlette import status
+from typing_extensions import Annotated
 
 from aciniformes_backend.models.fetcher import FetcherType
 from aciniformes_backend.serivce import FetcherServiceInterface
@@ -29,7 +31,7 @@ class ResponsePostSchema(CreateSchema):
 
 class UpdateSchema(BaseModel):
     type_: FetcherType | None
-    address: HttpUrl | None
+    address: Annotated[HttpUrl, PlainSerializer(lambda x: str(x), return_type=str)] | None
     fetch_data: str | None
     delay_ok: int | None
     delay_fail: int | None
@@ -44,8 +46,8 @@ async def create(
     create_schema: CreateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
-    id_ = await fetcher.create(create_schema.dict())
-    return ResponsePostSchema(**create_schema.dict(), id=id_)
+    id_ = await fetcher.create(create_schema.model_dump())
+    return ResponsePostSchema(**create_schema.model_dump(), id=id_)
 
 
 @router.get("")
@@ -75,7 +77,7 @@ async def update(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
 ):
     try:
-        res = await fetcher.update(id, update_schema.dict(exclude_unset=True))
+        res = await fetcher.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res

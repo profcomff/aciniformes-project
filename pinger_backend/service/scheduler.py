@@ -5,7 +5,7 @@ import ping3
 import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
+from aciniformes_backend.models import Alert, Fetcher, FetcherType, Receiver
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from pinger_backend.exceptions import AlreadyRunning, AlreadyStopped
@@ -58,11 +58,10 @@ class ApSchedulerService(ABC):
         session = dbsession()
         alert = Alert(**alert.model_dump(exclude_none=True))
         session.add(alert)
-        session.commit()
         session.flush()
         for receiver in receivers:
             receiver.receiver_body['text'] = metric_log
-            requests.request(method="POST", url=receiver.url, data=receiver['receiver_body'])
+            requests.request(method="POST", url=receiver.url, data=receiver.receiver_body)
 
     @staticmethod
     def _parse_timedelta(fetcher: Fetcher):
@@ -80,7 +79,7 @@ class ApSchedulerService(ABC):
                 case FetcherType.PING:
                     res = ping3.ping(fetcher.address)
 
-        except:
+        except Exception:
             cur = time.time()
             timing = cur - prev
             metric = MetricCreateSchema(
@@ -88,12 +87,7 @@ class ApSchedulerService(ABC):
                 ok=True if (res and (200 <= res.status_code <= 300)) or (res == 0) else False,
                 time_delta=timing,
             )
-            if metric.name not in [item.name for item in dbsession().query(Metric).all()]:
-                self.crud_service.add_metric(metric)
-            else:
-                if metric.ok != dbsession().query(Metric).filter(Metric.name == metric.name).one_or_none().ok:
-                    dbsession().query(Metric).filter(Metric.name == metric.name).delete()
-                    self.crud_service.add_metric(metric)
+            self.crud_service.add_metric(metric)
             alert = AlertCreateSchema(data=metric.model_dump(), filter='500')
             if alert.data["name"] not in [item.data["name"] for item in dbsession().query(Alert).all()]:
                 self.write_alert(metric, alert)
@@ -131,14 +125,9 @@ class ApSchedulerService(ABC):
             ok=True if (res and (200 <= res.status_code <= 300)) or (res == 0) else False,
             time_delta=timing,
         )
-        if metric.name not in [item.name for item in dbsession().query(Metric).all()]:
-            self.crud_service.add_metric(metric)
-        else:
-            if metric.ok != dbsession().query(Metric).filter(Metric.name == metric.name).one_or_none().ok:
-                dbsession().query(Metric).filter(Metric.name == metric.name).delete()
-                self.crud_service.add_metric(metric)
+        self.crud_service.add_metric(metric)
         if not metric.ok:
-            alert = AlertCreateSchema(data=metric, filter=res.status_code)
+            alert = AlertCreateSchema(data=metric.model_dump(), filter=str(res.status_code))
             if alert.data["name"] not in [item.data["name"] for item in dbsession().query(Alert).all()]:
                 self.write_alert(metric, alert)
             self.scheduler.reschedule_job(

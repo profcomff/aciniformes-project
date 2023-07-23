@@ -27,7 +27,7 @@ class PgAlertService(AlertServiceInterface):
 
     async def update(self, id_: int, item: dict) -> db_models.Alert:
         q = sa.update(db_models.Alert).where(db_models.Alert.id_ == id_).values(**item).returning(db_models.Alert)
-        if not self.get_by_id(id_):
+        if not await self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
         res = self.session.execute(q).scalar()
         return res
