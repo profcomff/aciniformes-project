@@ -3,7 +3,7 @@ from abc import ABC
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-import ping3
+import aiohttp
 import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -13,6 +13,7 @@ from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchem
 from pinger_backend.exceptions import AlreadyRunning, AlreadyStopped
 from settings import get_settings
 
+from .ping import ping
 from .session import dbsession
 
 
@@ -103,13 +104,13 @@ class ApSchedulerService(ABC):
             pass
 
     @staticmethod
-    def create_metric(prev: float, fetcher: Fetcher, res: requests.Response) -> MetricCreateSchema:
+    def create_metric(prev: float, fetcher: Fetcher, res: aiohttp.ClientResponse) -> MetricCreateSchema:
         cur = time.time()
         timing = cur - prev
         if fetcher.type_ != FetcherType.PING:
             return MetricCreateSchema(
                 name=fetcher.address,
-                ok=True if res and (200 <= res.status_code <= 300) else False,
+                ok=True if res and (200 <= res.status <= 300) else False,
                 time_delta=timing,
             )
         return MetricCreateSchema(
@@ -125,9 +126,11 @@ class ApSchedulerService(ABC):
             trigger="interval",
         )
 
-    def _process_fail(self, fetcher: Fetcher, metric: MetricCreateSchema, res: requests.Response | None) -> None:
+    def _process_fail(
+        self, fetcher: Fetcher, metric: MetricCreateSchema, res: aiohttp.ClientResponse | None | float
+    ) -> None:
         if fetcher.type_ != FetcherType.PING:
-            alert = AlertCreateSchema(data=metric.model_dump(), filter="500" if res is None else str(res.status_code))
+            alert = AlertCreateSchema(data=metric.model_dump(), filter="500" if res is None else str(res.status))
         else:
             _filter = "Service Unavailable" if res is False else "Timeout Error" if res is None else "Unknown Error"
             alert = AlertCreateSchema(data=metric.model_dump(), filter=_filter)
@@ -148,11 +151,15 @@ class ApSchedulerService(ABC):
         try:
             match fetcher.type_:
                 case FetcherType.GET:
-                    res = requests.get(url=fetcher.address)
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(url=fetcher.address) as res:
+                            pass
                 case FetcherType.POST:
-                    res = requests.post(url=fetcher.address, data=fetcher.fetch_data)
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post(url=fetcher.address, data=fetcher.fetch_data) as res:
+                            pass
                 case FetcherType.PING:
-                    res = ping3.ping(fetcher.address)
+                    res = await ping(fetcher.address)
         except Exception:
             metric = ApSchedulerService.create_metric(prev, fetcher, res)
             self.add_metric(metric)
