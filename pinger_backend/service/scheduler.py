@@ -7,13 +7,12 @@ import ping3
 import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from aciniformes_backend.models import Alert, Fetcher, FetcherType, Receiver
+from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from pinger_backend.exceptions import AlreadyRunning, AlreadyStopped
 from settings import get_settings
 
-from .crud import CrudService
 from .session import dbsession
 
 
@@ -22,9 +21,6 @@ class ApSchedulerService(ABC):
     settings = get_settings()
     backend_url = str
     fetchers: list
-
-    def __init__(self, crud_service: CrudService):
-        self.crud_service = crud_service
 
     def add_fetcher(self, fetcher: Fetcher):
         self.scheduler.add_job(
@@ -138,6 +134,14 @@ class ApSchedulerService(ABC):
         self.write_alert(alert)
         self._reschedule_job(fetcher, False)
 
+    def add_metric(self, metric: MetricCreateSchema):
+        session = dbsession()
+        metric = Metric(**metric.model_dump(exclude_none=True))
+        session.add(metric)
+        session.commit()
+        session.flush()
+        return metric
+
     async def _fetch_it(self, fetcher: Fetcher):
         prev = time.time()
         res = None
@@ -151,11 +155,11 @@ class ApSchedulerService(ABC):
                     res = ping3.ping(fetcher.address)
         except Exception:
             metric = ApSchedulerService.create_metric(prev, fetcher, res)
-            self.crud_service.add_metric(metric)
+            self.add_metric(metric)
             self._process_fail(fetcher, metric, None)
         else:
             metric = ApSchedulerService.create_metric(prev, fetcher, res)
-            self.crud_service.add_metric(metric)
+            self.add_metric(metric)
             if not metric.ok:
                 self._process_fail(fetcher, metric, res)
             else:
