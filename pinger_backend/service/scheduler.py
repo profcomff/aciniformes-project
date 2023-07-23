@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 import aiohttp
-import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
@@ -60,14 +59,16 @@ class ApSchedulerService(ABC):
             job.remove()
         self.scheduler.shutdown()
 
-    def write_alert(self, alert: AlertCreateSchema):
+    async def write_alert(self, alert: AlertCreateSchema):
         receivers = dbsession().query(Receiver).all()
         session = dbsession()
         alert = Alert(**alert.model_dump(exclude_none=True))
         session.add(alert)
         session.flush()
         for receiver in receivers:
-            requests.request(method=receiver.method, url=receiver.url, data=receiver.receiver_body)
+            async with aiohttp.ClientSession() as s:
+                async with s.request(method=receiver.method, url=receiver.url, data=receiver.receiver_body):
+                    pass
 
     @staticmethod
     def _parse_timedelta(fetcher: Fetcher) -> tuple[int, int]:
@@ -126,7 +127,7 @@ class ApSchedulerService(ABC):
             trigger="interval",
         )
 
-    def _process_fail(
+    async def _process_fail(
         self, fetcher: Fetcher, metric: MetricCreateSchema, res: aiohttp.ClientResponse | None | float
     ) -> None:
         if fetcher.type_ != FetcherType.PING:
@@ -134,7 +135,7 @@ class ApSchedulerService(ABC):
         else:
             _filter = "Service Unavailable" if res is False else "Timeout Error" if res is None else "Unknown Error"
             alert = AlertCreateSchema(data=metric.model_dump(), filter=_filter)
-        self.write_alert(alert)
+        await self.write_alert(alert)
         self._reschedule_job(fetcher, False)
 
     def add_metric(self, metric: MetricCreateSchema):
@@ -163,11 +164,11 @@ class ApSchedulerService(ABC):
         except Exception:
             metric = ApSchedulerService.create_metric(prev, fetcher, res)
             self.add_metric(metric)
-            self._process_fail(fetcher, metric, None)
+            await self._process_fail(fetcher, metric, None)
         else:
             metric = ApSchedulerService.create_metric(prev, fetcher, res)
             self.add_metric(metric)
             if not metric.ok:
-                self._process_fail(fetcher, metric, res)
+                await self._process_fail(fetcher, metric, res)
             else:
                 self._reschedule_job(fetcher, True)
