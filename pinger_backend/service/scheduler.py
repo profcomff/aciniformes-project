@@ -110,9 +110,15 @@ class ApSchedulerService(ABC):
     def create_metric(prev: float, fetcher: Fetcher, res: requests.Response) -> MetricCreateSchema:
         cur = time.time()
         timing = cur - prev
+        if fetcher.type_ != FetcherType.PING:
+            return MetricCreateSchema(
+                name=fetcher.address,
+                ok=True if res and (200 <= res.status_code <= 300) else False,
+                time_delta=timing,
+            )
         return MetricCreateSchema(
             name=fetcher.address,
-            ok=True if (res and (200 <= res.status_code <= 300)) or (res == 0) else False,
+            ok=res is not False and res is not None,
             time_delta=timing,
         )
 
@@ -124,7 +130,10 @@ class ApSchedulerService(ABC):
         )
 
     def _process_fail(self, fetcher: Fetcher, metric: MetricCreateSchema, res: requests.Response | None) -> None:
-        alert = AlertCreateSchema(data=metric.model_dump(), filter="500" if res is None else str(res.status_code))
+        if fetcher.type_ != FetcherType.PING:
+            alert = AlertCreateSchema(data=metric.model_dump(), filter="500" if res is None else str(res.status_code))
+        else:
+            alert = AlertCreateSchema(data=metric.model_dump(), filter=str(res))
         self.write_alert(alert)
         self._reschedule_job(fetcher, False)
 
