@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import ConfigDict, PostgresDsn, HttpUrl
+from pydantic import ConfigDict, HttpUrl, PostgresDsn
 from pydantic_settings import BaseSettings
 
 
