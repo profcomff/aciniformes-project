@@ -133,7 +133,8 @@ class ApSchedulerService(ABC):
         if fetcher.type_ != FetcherType.PING:
             alert = AlertCreateSchema(data=metric.model_dump(), filter="500" if res is None else str(res.status_code))
         else:
-            alert = AlertCreateSchema(data=metric.model_dump(), filter=str(res))
+            _filter = "Service Unavailable" if res is False else "Timeout Error" if res is None else "Unknown Error"
+            alert = AlertCreateSchema(data=metric.model_dump(), filter=_filter)
         self.write_alert(alert)
         self._reschedule_job(fetcher, False)
 
