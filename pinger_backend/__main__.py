@@ -1,9 +1,17 @@
 import asyncio
-
-from service.crud import CrudService
-from service.scheduler import ApSchedulerService
+from logging.config import fileConfig
+from pathlib import Path
 
 from settings import get_settings
+
+from .service.crud import CrudService
+from .service.scheduler import ApSchedulerService
+
+
+path = Path(__file__).resolve().parents[1]
+
+
+fileConfig(f"{path}/logging_pinger.conf")
 
 
 if __name__ == "__main__":

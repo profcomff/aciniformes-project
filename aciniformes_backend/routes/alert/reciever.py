@@ -1,5 +1,5 @@
-import enum
 import logging
+from enum import Enum
 
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
@@ -14,7 +14,7 @@ from aciniformes_backend.serivce import receiver_service
 logger = logging.getLogger(__name__)
 
 
-class Method(str, enum.Enum):
+class Method(str, Enum):
     POST: str = "post"
     GET: str = "get"
 

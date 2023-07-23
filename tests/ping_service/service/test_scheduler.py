@@ -42,12 +42,8 @@ class TestSchedulerService:
     @pytest.mark.asyncio
     async def test_start_already_started(self, pg_scheduler_service, crud_client):
         await pg_scheduler_service.start()
-        fail = False
-        try:
+        with pytest.raises(AlreadyRunning):
             await pg_scheduler_service.start()
-        except AlreadyRunning:
-            fail = True
-        assert fail
         pg_scheduler_service.stop()
 
     @pytest.mark.asyncio

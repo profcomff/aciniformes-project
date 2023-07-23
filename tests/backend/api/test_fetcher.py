@@ -27,7 +27,7 @@ class TestFetcher:
     def test_post_success(self, crud_client):
         body = {
             "type_": "get",
-            "address": "string",
+            "address": "https://google.com",
             "fetch_data": "string",
             "delay_ok": 300,
             "delay_fail": 30,

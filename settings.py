@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DB_DSN: PostgresDsn
     BACKEND_URL: HttpUrl = "http://127.0.0.1:8000"
     BOT_URL: HttpUrl = "http://127.0.0.1:8001"
+    FETCHERS_UPDATE_DELAY_IN_SECONDS: int = 10
     model_config = ConfigDict(case_sensitive=True, env_file=".env", extra="ignore")
 
 
