@@ -26,15 +26,15 @@ class CreateSchema(BaseModel):
 
 
 class ResponsePostSchema(CreateSchema):
-    id: int | None
+    id: int | None = None
 
 
 class UpdateSchema(BaseModel):
-    type_: FetcherType | None
-    address: Annotated[HttpUrl, PlainSerializer(lambda x: str(x), return_type=str)] | None
-    fetch_data: str | None
-    delay_ok: int | None
-    delay_fail: int | None
+    type_: FetcherType | None = None
+    address: Annotated[HttpUrl, PlainSerializer(lambda x: str(x), return_type=str)] | None = None
+    fetch_data: str | None = None
+    delay_ok: int | None = None
+    delay_fail: int | None = None
 
 
 class GetSchema(BaseModel):

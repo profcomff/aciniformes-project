@@ -15,7 +15,7 @@ class CreateSchema(BaseModel):
 
 
 class ResponsePostSchema(CreateSchema):
-    id: int | None
+    id: int | None = None
 
 
 class GetSchema(BaseModel):
@@ -33,8 +33,8 @@ async def create(
     metric_schema: CreateSchema,
     metric: MetricServiceInterface = Depends(metric_service),
 ):
-    id_ = await metric.create(metric_schema.dict())
-    return ResponsePostSchema(**metric_schema.dict(), id=id_)
+    id_ = await metric.create(metric_schema.model_dump())
+    return ResponsePostSchema(**metric_schema.model_dump(), id=id_)
 
 
 @router.get("")

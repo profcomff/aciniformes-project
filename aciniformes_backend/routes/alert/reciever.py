@@ -26,21 +26,21 @@ class CreateSchema(BaseModel):
 
 
 class PostResponseSchema(CreateSchema):
-    url: str | None
+    url: str | None = None
     method: Method
-    receiver_body: dict[str, str | int | list] | None
+    receiver_body: dict[str, str | int | list] | None = None
 
 
 class UpdateSchema(BaseModel):
     url: str | None
     method: Method | None
-    receiver_body: dict[str, str | int | list] | None
+    receiver_body: dict[str, str | int | list] | None = None
 
 
 class GetSchema(BaseModel):
     url: str
     method: Method
-    receiver_body: dict[str, str | int | list]
+    receiver_body: dict[str, str | int | list] | None = None
 
 
 router = APIRouter()
@@ -48,8 +48,8 @@ router = APIRouter()
 
 @router.post("", response_model=PostResponseSchema)
 async def create(create_schema: CreateSchema, receiver: ReceiverServiceInterface = Depends(receiver_service)):
-    id_ = await receiver.create(create_schema.dict())
-    return PostResponseSchema(**create_schema.dict(), id=id_)
+    id_ = await receiver.create(create_schema.model_dump())
+    return PostResponseSchema(**create_schema.model_dump(), id=id_)
 
 
 @router.get("")
@@ -76,7 +76,7 @@ async def update(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
 ):
     try:
-        res = await receiver.update(id, update_schema.dict(exclude_unset=True))
+        res = await receiver.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res
