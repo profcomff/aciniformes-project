@@ -7,7 +7,6 @@ ENV APP_MODULE=${APP_NAME}.routes.base:app
 COPY ./requirements.txt /app/
 COPY ./logging_prod.conf /app/
 COPY ./logging_test.conf /app/
-COPY ./.env /app/
 RUN pip install -U -r /app/requirements.txt
 
 COPY ./alembic.ini /alembic.ini
