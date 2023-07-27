@@ -1,29 +1,31 @@
-from fastapi import APIRouter
+from __future__ import annotations
+
+import logging
+
+from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
-from fastapi import Depends
 from starlette import status
-from aciniformes_backend.serivce import (
-    alert_service,
-    AlertServiceInterface,
-    exceptions as exc,
-)
+
+from aciniformes_backend.serivce import AlertServiceInterface, alert_service
+from aciniformes_backend.serivce import exceptions as exc
+
+
+logger = logging.getLogger(__name__)
 
 
 class CreateSchema(BaseModel):
-    data: dict[str, int | str | list]
-    receiver: int
+    data: dict[str, str | list | dict | bool | int | float]
     filter: str
 
 
 class PostResponseSchema(CreateSchema):
-    id: int | None
+    id: int | None = None
 
 
 class UpdateSchema(BaseModel):
-    data: dict[str, int | str | list] | None
-    receiver: int | None
-    filter: str | None
+    data: dict[str, str | list | dict] | None = None
+    filter: str | None = None
 
 
 class GetSchema(BaseModel):
@@ -41,8 +43,8 @@ async def create(
     create_schema: CreateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
 ):
-    id_ = await alert.create(create_schema.dict(exclude_unset=True))
-    return PostResponseSchema(**create_schema.dict(), id=id_)
+    id_ = await alert.create(create_schema.model_dump(exclude_unset=True))
+    return PostResponseSchema(**create_schema.model_dump(), id=id_)
 
 
 @router.get("")
@@ -67,12 +69,15 @@ async def update(
     alert: AlertServiceInterface = Depends(alert_service),
 ):
     try:
-        res = await alert.update(id, update_schema.dict(exclude_unset=True))
+        res = await alert.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res
 
 
 @router.delete("/{id}")
-async def delete(id: int, alert: AlertServiceInterface = Depends(alert_service)):
+async def delete(
+    id: int,
+    alert: AlertServiceInterface = Depends(alert_service),
+):
     await alert.delete(id)

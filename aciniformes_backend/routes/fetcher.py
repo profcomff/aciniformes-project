@@ -1,58 +1,53 @@
+import logging
+
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from starlette import status
 from pydantic import BaseModel, HttpUrl
-from .auth import get_current_user
-from aciniformes_backend.serivce import (
-    FetcherServiceInterface,
-    fetcher_service,
-    exceptions as exc,
-)
+from pydantic.functional_serializers import PlainSerializer
+from starlette import status
+from typing_extensions import Annotated
+
+from aciniformes_backend.models.fetcher import FetcherType
+from aciniformes_backend.serivce import FetcherServiceInterface
+from aciniformes_backend.serivce import exceptions as exc
+from aciniformes_backend.serivce import fetcher_service
+
+
+logger = logging.getLogger(__name__)
+router = APIRouter()
 
 
 class CreateSchema(BaseModel):
-    name: str
-    type_: str
+    type_: FetcherType
     address: str
     fetch_data: str
-    metrics: dict[str, int | str | list]
-    metric_name: str
     delay_ok: int
     delay_fail: int
 
 
 class ResponsePostSchema(CreateSchema):
-    id: int | None
+    id: int | None = None
 
 
 class UpdateSchema(BaseModel):
-    name: str | None
-    type_: str | None
-    address: HttpUrl | None
-    fetch_data: str | None
-    metrics: dict[str, int | str | list] | None
-    metric_name: str | None
-    delay_ok: int | None
-    delay_fail: int | None
+    type_: FetcherType | None = None
+    address: Annotated[HttpUrl, PlainSerializer(lambda x: str(x), return_type=str)] | None = None
+    fetch_data: str | None = None
+    delay_ok: int | None = None
+    delay_fail: int | None = None
 
 
 class GetSchema(BaseModel):
     id: int
 
 
-router = APIRouter()
-
-
 @router.post("", response_model=ResponsePostSchema)
 async def create(
     create_schema: CreateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    id_ = await fetcher.create(create_schema.dict())
-    return ResponsePostSchema(**create_schema.dict(), id=id_)
+    id_ = await fetcher.create(create_schema.model_dump())
+    return ResponsePostSchema(**create_schema.model_dump(), id=id_)
 
 
 @router.get("")
@@ -80,12 +75,9 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     try:
-        res = await fetcher.update(id, update_schema.dict(exclude_unset=True))
+        res = await fetcher.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res
@@ -95,8 +87,5 @@ async def update(
 async def delete(
     id: int,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    token=Depends(get_current_user),
 ):
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     await fetcher.delete(id)

@@ -1,25 +1,28 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from pydantic import BaseModel
 from starlette import status
-from pydantic import BaseModel, Json
-from typing import Any
-from aciniformes_backend.serivce import (
-    MetricServiceInterface,
-    metric_service,
-    exceptions as exc,
-)
+
+from aciniformes_backend.serivce import MetricServiceInterface
+from aciniformes_backend.serivce import exceptions as exc
+from aciniformes_backend.serivce import metric_service
 
 
 class CreateSchema(BaseModel):
-    metrics: dict[str, int | str | list]
+    name: str
+    ok: bool
+    time_delta: float
 
 
 class ResponsePostSchema(CreateSchema):
-    id: int | None
+    id: int | None = None
 
 
 class GetSchema(BaseModel):
     id: int
+    name: str
+    ok: bool
+    time_delta: float
 
 
 router = APIRouter()
@@ -30,8 +33,8 @@ async def create(
     metric_schema: CreateSchema,
     metric: MetricServiceInterface = Depends(metric_service),
 ):
-    id_ = await metric.create(metric_schema.metrics)
-    return ResponsePostSchema(**metric_schema.dict(), id=id_)
+    id_ = await metric.create(metric_schema.model_dump())
+    return ResponsePostSchema(**metric_schema.model_dump(), id=id_)
 
 
 @router.get("")

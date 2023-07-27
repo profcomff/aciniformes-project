@@ -1,150 +1,147 @@
 import json
-import pytest
+
+import pytest_asyncio
 from starlette import status
-from aciniformes_backend.settings import get_settings
-from aciniformes_backend.serivce import alert_service, receiver_service, Config
+
+from aciniformes_backend.serivce.alert import PgAlertService
+from aciniformes_backend.serivce.receiver import PgReceiverService
+from settings import get_settings
 
 
-def test_fake_service(fake_config):
-    s1 = alert_service()
-    s2 = receiver_service()
-    assert s1.session is None
-    assert s2.session is None
-    assert type(s1.repository) is dict
-    assert type(s2.repository) is dict
+alert = {
+    "data": {"type": "string", "name": "string"},
+    "filter": "string",
+}
 
 
-@pytest.fixture
-def this_alert():
-    body = {
-        "id": 666,
-        "data": {"type": "string", "name": "string"},
-        "receiver": 0,
-        "filter": "string",
-    }
-    alert_service().repository[666] = body
-    return body
+@pytest_asyncio.fixture
+async def this_alert(dbsession):
+    global alert
+    _alert = await PgAlertService(dbsession).create(item=alert)
+    yield _alert
 
 
 class TestAlert:
     _url = "/alert"
     settings = get_settings()
-    Config.fake = True
-    s = alert_service()
 
-    def test_post_success(self, client):
+    def test_post_success(self, crud_client):
         body = {
             "data": {"type": "string", "name": "string"},
-            "receiver": 0,
             "filter": "string",
         }
-        res = client.post(self._url, data=json.dumps(body))
+        res = crud_client.post(self._url, json=body)
         res_body = res.json()
         assert res.status_code == status.HTTP_200_OK
         assert res_body["data"] == body["data"]
-        assert res_body["id"] is not None
         assert res_body["filter"] == body["filter"]
-        assert res_body["receiver"] == body["receiver"]
 
-    def test_get_by_id_success(self, client, this_alert):
-        body = this_alert
-        res = client.get(f"{self._url}/{body['id']}")
+    def test_get_by_id_success(self, crud_client, this_alert):
+        res = crud_client.get(f"{self._url}/{this_alert}")
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
-        assert res_body["data"] == body["data"]
-        assert res_body["receiver"] == body["receiver"]
-        assert res_body["filter"] == body["filter"]
+        assert res_body["data"] == alert["data"]
+        assert res_body["filter"] == alert["filter"]
 
-    def test_delete_by_id_success(self, client, this_alert):
-        res = client.delete(f"{self._url}/{this_alert['id']}")
+    def test_delete_by_id_success(self, crud_client, this_alert):
+        res = crud_client.delete(f"{self._url}/{this_alert}")
         assert res.status_code == status.HTTP_200_OK
-        assert self.s.repository[666] is None
+        get = crud_client.get(f"{self._url}/{this_alert}")
+        assert get.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_get_success(self, client, this_alert):
-        res = client.get(self._url)
+    def test_get_success(self, crud_client, this_alert):
+        res = crud_client.get(self._url)
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
         assert len(res_body)
+        get = crud_client.get(f"{self._url}/{this_alert}")
+        assert get.json() in res_body
 
-    def test_patch_by_id_success(self, client, this_alert):
+    def test_patch_by_id_success(self, crud_client, this_alert):
         body = {
-            "data": {"type": "g", "name": "s"},
+            "data": {"type": "string", "name": "string"},
+            "filter": "string",
         }
-        res = client.patch(f"{self._url}/{this_alert['id']}", data=json.dumps(body))
+        res = crud_client.patch(f"{self._url}/{this_alert}", data=json.dumps(body))
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
         assert res_body["data"] == body["data"]
-        assert self.s.repository[this_alert["id"]].data == body["data"]
+        get = crud_client.get(f"{self._url}/{this_alert}")
+        assert get.status_code == status.HTTP_200_OK
+        assert get.json() == res_body
 
-    def test_get_by_id_not_found(self, client, this_alert):
-        res = client.get(f"{self._url}/{888}")
+    def test_get_by_id_not_found(self, crud_client, this_alert):
+        res = crud_client.get(f"{self._url}/{this_alert+2}")
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_patch_by_id_not_found(self, client, this_alert):
+    def test_patch_by_id_not_found(self, crud_client, this_alert):
         body = {
-            "data": {},
+            "data": {"type": "string", "name": "string"},
+            "filter": "string",
         }
-        res = client.patch(f"{self._url}/{888}", data=json.dumps(body))
+        res = crud_client.patch(f"{self._url}/{888}", data=json.dumps(body))
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
-@pytest.fixture
-def this_receiver():
-    body = {"id": 66, "name": "string", "chat_id": 0}
-    receiver_service().repository[body["id"]] = body
-    return body
+reciever = {"url": "https://google.com", "method": "post", "receiver_body": {}}
+
+
+@pytest_asyncio.fixture
+async def this_receiver(dbsession):
+    global reciever
+    _reciever = await PgReceiverService(dbsession).create(item=reciever)
+    yield _reciever
 
 
 class TestReceiver:
     _url = "/receiver"
-    Config.fake = True
-    s = receiver_service()
 
-    def test_post_success(self, client, auth_header):
-        body = {"name": "string", "chat_id": 0}
-        res = client.post(self._url, data=json.dumps(body), headers=auth_header)
+    def test_post_success(self, crud_client):
+        body = {"url": "https://google.com", "method": "post", "receiver_body": {}}
+        res = crud_client.post(self._url, json=body)
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
-        assert res_body["name"] == body["name"]
-        assert res_body["id"] is not None
-        assert res_body["chat_id"] == body["chat_id"]
+        assert res_body["url"] == body["url"]
+        assert res_body["receiver_body"] == body["receiver_body"]
 
-    def test_get_by_id_success(self, client, this_receiver):
-        res = client.get(f"{self._url}/{this_receiver['id']}")
+    def test_get_by_id_success(self, crud_client, this_receiver):
+        res = crud_client.get(f"{self._url}/{this_receiver}")
         assert res.status_code == status.HTTP_200_OK
         res_body = res.json()
-        assert res_body["name"] == this_receiver["name"]
-        assert res_body["chat_id"] == this_receiver["chat_id"]
+        assert res_body["url"] == reciever["url"]
+        assert res_body["receiver_body"] == reciever["receiver_body"]
 
-    def test_delete_by_id_success(self, client, this_receiver, auth_header):
-        res = client.delete(f"{self._url}/{this_receiver['id']}", headers=auth_header)
+    def test_delete_by_id_success(self, crud_client, this_receiver):
+        res = crud_client.delete(f"{self._url}/{this_receiver}")
         assert res.status_code == status.HTTP_200_OK
-        assert self.s.repository[this_receiver["id"]] is None
-
-    def test_get_success(self, client, this_receiver):
-        res = client.get(self._url)
-        assert res.status_code == status.HTTP_200_OK
-        assert len(res.json())
-
-    def test_patch_by_id_success(self, client, this_receiver, auth_header):
-        body = {"name": "s", "chat_id": 11}
-        res = client.patch(
-            f"{self._url}/{this_receiver['id']}",
-            data=json.dumps(body),
-            headers=auth_header,
-        )
-        assert res.status_code == status.HTTP_200_OK
-        res_body = res.json()
-        assert res_body["name"] == body["name"]
-        assert res_body["chat_id"] == body["chat_id"]
-
-    def test_get_by_id_not_found(self, client):
-        res = client.get(f"{self._url}/{888}")
+        res = crud_client.get(f"{self._url}/{this_receiver}")
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_patch_by_id_not_found(self, client, auth_header):
-        body = {"name": "st", "chat_id": 0}
-        res = client.patch(
-            f"{self._url}/{888}", data=json.dumps(body), headers=auth_header
+    def test_get_success(self, crud_client, this_receiver):
+        res = crud_client.get(self._url)
+        assert res.status_code == status.HTTP_200_OK
+        assert len(res.json())
+        get = crud_client.get(f"{self._url}/{this_receiver}")
+        assert get.json() in res.json()
+
+    def test_patch_by_id_success(self, crud_client, this_receiver):
+        body = {"url": "https://google.ru", "method": "post", "receiver_body": {}}
+        res = crud_client.patch(
+            f"{self._url}/{this_receiver}",
+            data=json.dumps(body),
         )
+        assert res.status_code == status.HTTP_200_OK
+        res_body = res.json()
+        assert res_body["url"] == body["url"]
+        assert res_body["receiver_body"] == body["receiver_body"]
+        get = crud_client.get(f"{self._url}/{this_receiver}")
+        assert get.json() == res.json()
+
+    def test_get_by_id_not_found(self, crud_client):
+        res = crud_client.get(f"{self._url}/{888}")
+        assert res.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_patch_by_id_not_found(self, crud_client):
+        body = {"url": "https://nf.nf", "method": "post", "receiver_body": {}}
+        res = crud_client.patch(f"{self._url}/{888}", data=json.dumps(body))
         assert res.status_code == status.HTTP_404_NOT_FOUND

@@ -1,14 +1,14 @@
 from logging.config import fileConfig
-from aciniformes_backend.settings import get_settings
-from aciniformes_backend.models import BaseModel
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+
+from aciniformes_backend.models import BaseModel
+from settings import get_settings
 
 
 config = context.config
 settings = get_settings()
-
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -48,7 +48,7 @@ def run_migrations_online() -> None:
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = settings.DB_DSN
+    configuration["sqlalchemy.url"] = str(settings.DB_DSN)
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",

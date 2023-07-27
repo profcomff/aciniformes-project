@@ -1,8 +1,9 @@
 import sqlalchemy as sa
 
-from .base import AlertServiceInterface
-import aciniformes_backend.serivce.exceptions as exc
 import aciniformes_backend.models as db_models
+import aciniformes_backend.serivce.exceptions as exc
+
+from .base import AlertServiceInterface
 
 
 class PgAlertService(AlertServiceInterface):
@@ -25,13 +26,8 @@ class PgAlertService(AlertServiceInterface):
         self.session.flush()
 
     async def update(self, id_: int, item: dict) -> db_models.Alert:
-        q = (
-            sa.update(db_models.Alert)
-            .where(db_models.Alert.id_ == id_)
-            .values(**item)
-            .returning(db_models.Alert)
-        )
-        if not self.get_by_id(id_):
+        q = sa.update(db_models.Alert).where(db_models.Alert.id_ == id_).values(**item).returning(db_models.Alert)
+        if not await self.get_by_id(id_):
             raise exc.ObjectNotFound(id_)
         res = self.session.execute(q).scalar()
         return res
