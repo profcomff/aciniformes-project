@@ -1,8 +1,8 @@
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
-from auth_lib.fastapi import UnionAuth
 
 from aciniformes_backend.serivce import MetricServiceInterface
 from aciniformes_backend.serivce import exceptions as exc
@@ -33,7 +33,7 @@ router = APIRouter()
 async def create(
     metric_schema: CreateSchema,
     metric: MetricServiceInterface = Depends(metric_service),
-    _: dict[str, str] = Depends(UnionAuth(['pinger.metric.create'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.metric.create'])),
 ):
     id_ = await metric.create(metric_schema.model_dump())
     return ResponsePostSchema(**metric_schema.model_dump(), id=id_)
@@ -42,7 +42,7 @@ async def create(
 @router.get("")
 async def get_all(
     metric: MetricServiceInterface = Depends(metric_service),
-    _: dict[str, str] = Depends(UnionAuth(['pinger.metric.read'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
     res = await metric.get_all()
     return res
@@ -52,7 +52,7 @@ async def get_all(
 async def get(
     id: int,
     metric: MetricServiceInterface = Depends(metric_service),
-    _: dict[str, str] = Depends(UnionAuth(['pinger.metric.delete'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.metric.delete'])),
 ):
     try:
         res = await metric.get_by_id(id)

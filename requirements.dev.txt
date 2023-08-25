@@ -1,5 +1,10 @@
-pytest
-pytest-cov
-pytest-asyncio
-pytest_mock
+autoflake
+black
+flake8
 httpx
+isort
+pytest
+pytest_mock
+pytest-asyncio
+pytest-cov
+requests

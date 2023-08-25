@@ -1,12 +1,12 @@
 import logging
 
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, HttpUrl
 from pydantic.functional_serializers import PlainSerializer
 from starlette import status
 from typing_extensions import Annotated
-from auth_lib.fastapi import UnionAuth
 
 from aciniformes_backend.models.fetcher import FetcherType
 from aciniformes_backend.serivce import FetcherServiceInterface
@@ -46,7 +46,7 @@ class GetSchema(BaseModel):
 async def create(
     create_schema: CreateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    _: dict[str, str] = Depends(UnionAuth(['pinger.fetcher.create'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.fetcher.create'])),
 ):
     id_ = await fetcher.create(create_schema.model_dump())
     return ResponsePostSchema(**create_schema.model_dump(), id=id_)
@@ -55,7 +55,7 @@ async def create(
 @router.get("")
 async def get_all(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    _: dict[str, str] = Depends(UnionAuth(['pinger.fetcher.read'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
     res = await fetcher.get_all()
     return res
@@ -65,7 +65,7 @@ async def get_all(
 async def get(
     id: int,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    _: dict[str, str] = Depends(UnionAuth(['pinger.fetcher.read'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
     try:
         res = await fetcher.get_by_id(id)
@@ -79,7 +79,7 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    _: dict[str, str] = Depends(UnionAuth(['pinger.fetcher.update'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.fetcher.update'])),
 ):
     try:
         res = await fetcher.update(id, update_schema.model_dump(exclude_unset=True))
@@ -92,6 +92,6 @@ async def update(
 async def delete(
     id: int,
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
-    _: dict[str, str] = Depends(UnionAuth(['pinger.fetcher.delete'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.fetcher.delete'])),
 ):
     await fetcher.delete(id)
