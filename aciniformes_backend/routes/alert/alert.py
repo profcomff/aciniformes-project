@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
+from auth_lib.fastapi import UnionAuth
 
 from aciniformes_backend.serivce import AlertServiceInterface, alert_service
 from aciniformes_backend.serivce import exceptions as exc
@@ -35,26 +36,31 @@ class GetSchema(BaseModel):
 router = APIRouter()
 
 
-@router.post(
-    "",
-    response_model=PostResponseSchema,
-)
+@router.post("")
 async def create(
     create_schema: CreateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
-):
+    _: dict[str, str] = Depends(UnionAuth(['pinger.alert.create'])),
+) -> PostResponseSchema:
     id_ = await alert.create(create_schema.model_dump(exclude_unset=True))
     return PostResponseSchema(**create_schema.model_dump(), id=id_)
 
 
 @router.get("")
-async def get_all(alert: AlertServiceInterface = Depends(alert_service)):
+async def get_all(
+    alert: AlertServiceInterface = Depends(alert_service),
+    _: dict[str, str] = Depends(UnionAuth(['pinger.alert.read'])),
+):
     res = await alert.get_all()
     return res
 
 
 @router.get("/{id}")
-async def get(id: int, alert: AlertServiceInterface = Depends(alert_service)):
+async def get(
+    id: int,
+    alert: AlertServiceInterface = Depends(alert_service),
+    _: dict[str, str] = Depends(UnionAuth(['pinger.alert.read'])),
+):
     try:
         res = await alert.get_by_id(id)
     except exc.ObjectNotFound:
@@ -67,6 +73,7 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     alert: AlertServiceInterface = Depends(alert_service),
+    _: dict[str, str] = Depends(UnionAuth(['pinger.alert.update'])),
 ):
     try:
         res = await alert.update(id, update_schema.model_dump(exclude_unset=True))
@@ -79,5 +86,6 @@ async def update(
 async def delete(
     id: int,
     alert: AlertServiceInterface = Depends(alert_service),
+    _: dict[str, str] = Depends(UnionAuth(['pinger.alert.delete'])),
 ):
     await alert.delete(id)
