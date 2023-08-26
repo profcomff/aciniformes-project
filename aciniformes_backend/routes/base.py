@@ -4,9 +4,9 @@ from fastapi_sqlalchemy import DBSessionMiddleware
 from aciniformes_backend.settings import get_settings
 
 from .alert import router as alert_router
-from .reciever import router as receiver_router
 from .fetcher import router as fetcher_router
 from .mectric import router as metric_router
+from .reciever import router as receiver_router
 
 
 app = FastAPI()

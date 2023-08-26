@@ -1,4 +1,6 @@
 from logging.config import fileConfig
+
+
 fileConfig('./logging_prod.conf')
 
 from .cli import process

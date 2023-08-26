@@ -7,10 +7,10 @@ from typing import AsyncIterator
 import aiohttp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from aciniformes_backend.exceptions import AlreadyRunning, AlreadyStopped
 from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
 from aciniformes_backend.routes.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from aciniformes_backend.exceptions import AlreadyRunning, AlreadyStopped
 from aciniformes_backend.settings import get_settings
 
 from .ping import ping

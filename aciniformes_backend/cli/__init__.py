@@ -22,6 +22,7 @@ def process():
 
     if args.command == "api":
         import uvicorn
+
         from aciniformes_backend.routes import app
 
         logger.debug("API starting")
@@ -33,8 +34,8 @@ def process():
 
         import asyncio
         import signal
-        from aciniformes_backend.worker.scheduler import ApSchedulerService
 
+        from aciniformes_backend.worker.scheduler import ApSchedulerService
 
         def sigint_callback(scheduler: ApSchedulerService) -> None:
             try:

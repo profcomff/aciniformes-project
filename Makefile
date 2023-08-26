@@ -13,18 +13,19 @@ configure: venv
 venv:
 	python3.11 -m venv venv
 
-atomic-format:
-	autoflake -r --in-place --remove-all-unused-imports ./$(module)
-	isort ./$(module)
-	black ./$(module)
-
 format:
-	make atomic-format module=pinger_backend
-	make atomic-format module=aciniformes_backend
-	make atomic-format module=settings.py
+	autoflake -r --in-place --remove-all-unused-imports aciniformes_backend
+	isort aciniformes_backend
+	black aciniformes_backend
 
 format-dev:
-	make atomic-format module=tests
+	autoflake -r --in-place --remove-all-unused-imports tests
+	isort tests
+	black tests
+
+	autoflake -r --in-place --remove-all-unused-imports migrations
+	isort migrations
+	black migrations
 
 db:
 	docker run -d -p 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust --name db-pinger_backend postgres:15

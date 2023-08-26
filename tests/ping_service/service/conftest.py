@@ -1,5 +1,4 @@
 import pytest
-
 from pinger_backend.service.scheduler import ApSchedulerService
 
 
