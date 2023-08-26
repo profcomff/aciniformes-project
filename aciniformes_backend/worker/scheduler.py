@@ -63,7 +63,6 @@ class ApSchedulerService(ABC):
         for job in self.scheduler.get_jobs():
             job.remove()
         self.scheduler.shutdown()
-        exit(0)
 
     async def write_alert(self, alert: AlertCreateSchema):
         receivers = dbsession().query(Receiver).all()

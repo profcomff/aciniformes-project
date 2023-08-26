@@ -1,6 +1,6 @@
 import pytest
-from pinger_backend.exceptions import AlreadyRunning
 
+from aciniformes_backend.exceptions import AlreadyRunning
 from aciniformes_backend.models import Fetcher, Metric
 
 

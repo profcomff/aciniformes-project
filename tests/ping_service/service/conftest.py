@@ -1,5 +1,6 @@
 import pytest
-from pinger_backend.service.scheduler import ApSchedulerService
+
+from aciniformes_backend.worker.scheduler import ApSchedulerService
 
 
 @pytest.fixture
