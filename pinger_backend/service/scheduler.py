@@ -10,7 +10,7 @@ from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Rece
 from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from pinger_backend.exceptions import AlreadyRunning, AlreadyStopped
-from settings import get_settings
+from aciniformes_backend.settings import get_settings
 
 from .ping import ping
 from .session import dbsession

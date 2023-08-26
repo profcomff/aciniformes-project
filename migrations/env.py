@@ -4,7 +4,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from aciniformes_backend.models import BaseModel
-from settings import get_settings
+from aciniformes_backend.settings import get_settings
 
 
 config = context.config

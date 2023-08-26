@@ -3,7 +3,7 @@ import signal
 from logging.config import fileConfig
 from pathlib import Path
 
-from settings import get_settings
+from aciniformes_backend.settings import get_settings
 
 from .service.scheduler import ApSchedulerService
 

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi_sqlalchemy import DBSessionMiddleware
 
-from settings import get_settings
+from aciniformes_backend.settings import get_settings
 
 from .alert.alert import router as alert_router
 from .alert.reciever import router as receiver_router
