@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
-import pytest
 
+import pytest
 import pytest_asyncio
 from starlette import status
 

@@ -1,11 +1,12 @@
 import json
-import pytest
 
+import pytest
 import pytest_asyncio
 from starlette import status
 
 from aciniformes_backend.serivce.alert import PgAlertService
 from settings import get_settings
+
 
 settings = get_settings()
 

@@ -1,5 +1,3 @@
-import json
-
 import pytest
 import pytest_asyncio
 from starlette import status
