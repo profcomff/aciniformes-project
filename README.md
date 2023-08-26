@@ -26,6 +26,48 @@ Backend разработка – https://github.com/profcomff/.github/wiki/%5Bde
 
 
 # Использование
+## Настройка сервиса через Docker Compose
+```yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    restart: always
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: pinger
+      POSTGRES_PASSWORD: qwerty123
+
+  backend:
+    image: ghcr.io/profcomff/aciniformes-project:latest
+    restart: always
+    ports:
+      - 80:80
+    depends_on:
+      - postgres
+      - migration
+    environment:
+      - DB_DSN=postgresql://pinger:qwerty123@postgres:5432/postgres
+      - AUTH_URL=https://api.profcomff.com/auth
+
+  pinger:
+    image: ghcr.io/profcomff/aciniformes-project:latest
+    restart: always
+    depends_on:
+      - postgres
+      - migration
+    environment:
+      - DB_DSN=postgresql://pinger:qwerty123@postgres:5432/postgres
+      - AUTH_URL=https://api.profcomff.com/auth
+    command: python -m aciniformes_project worker
+
+volumes:
+  postgres:
+```
+
+## API запросы
 1. Создание получателя сообщений
    1. Получить или узнать токен telegram бота, через которого будет посылаться сообщение
    2. Узнать id чата-получателя в telegram
@@ -45,5 +87,4 @@ BOT_TOKEN - токен бота-отправителя отчетов
 
 # Ссылки
 Документация проекта - https://api.test.profcomff.com/?urls.primaryName=pinger#
-
 Backend разработка – https://github.com/profcomff/.github/wiki/%5Bdev%5D-Backend-разработка

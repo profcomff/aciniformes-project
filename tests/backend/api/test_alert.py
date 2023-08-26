@@ -5,7 +5,7 @@ import pytest_asyncio
 from starlette import status
 
 from aciniformes_backend.serivce.alert import PgAlertService
-from settings import get_settings
+from aciniformes_backend.settings import get_settings
 
 
 settings = get_settings()

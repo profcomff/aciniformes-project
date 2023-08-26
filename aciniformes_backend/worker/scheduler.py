@@ -1,3 +1,4 @@
+import logging
 import time
 from abc import ABC
 from contextlib import asynccontextmanager
@@ -6,20 +7,22 @@ from typing import AsyncIterator
 import aiohttp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from aciniformes_backend.exceptions import AlreadyRunning, AlreadyStopped
 from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
-from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
+from aciniformes_backend.routes.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from pinger_backend.exceptions import AlreadyRunning, AlreadyStopped
-from settings import get_settings
+from aciniformes_backend.settings import get_settings
 
 from .ping import ping
 from .session import dbsession
 
 
+logger = logging.getLogger(__name__)
+
+
 class ApSchedulerService(ABC):
     scheduler = AsyncIOScheduler()
     settings = get_settings()
-    backend_url = str
     fetchers: list
 
     def add_fetcher(self, fetcher: Fetcher):
@@ -38,6 +41,7 @@ class ApSchedulerService(ABC):
         return [j.id for j in self.scheduler.get_jobs()]
 
     async def start(self):
+        logger.info("Starting scheduler service")
         if self.scheduler.running:
             raise AlreadyRunning
         self.scheduler.add_job(
@@ -53,6 +57,7 @@ class ApSchedulerService(ABC):
             await self._fetch_it(fetcher)
 
     def stop(self):
+        logger.info("Stopping scheduler service")
         if not self.scheduler.running:
             raise AlreadyStopped
         for job in self.scheduler.get_jobs():
@@ -143,7 +148,6 @@ class ApSchedulerService(ABC):
         metric = Metric(**metric.model_dump(exclude_none=True))
         session.add(metric)
         session.commit()
-        session.flush()
         return metric
 
     async def _fetch_it(self, fetcher: Fetcher):

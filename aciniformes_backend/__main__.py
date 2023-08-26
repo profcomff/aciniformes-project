@@ -1,7 +1,10 @@
-import uvicorn
+from logging.config import fileConfig
 
-from .routes import app
+
+fileConfig('./logging_prod.conf')
+
+from .cli import process
 
 
 if __name__ == "__main__":
-    uvicorn.run(app)
+    process()

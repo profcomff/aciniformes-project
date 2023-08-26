@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from aciniformes_backend.models.base import BaseModel
 from aciniformes_backend.routes.base import app
-from settings import get_settings
+from aciniformes_backend.settings import get_settings
 
 
 @pytest.fixture(scope="session")

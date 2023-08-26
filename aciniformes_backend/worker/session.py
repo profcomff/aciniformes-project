@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from settings import get_settings
+from aciniformes_backend.settings import get_settings
 
 
 settings = get_settings()
