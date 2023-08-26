@@ -34,10 +34,6 @@ services:
   postgres:
     image: postgres:14
     restart: always
-    networks:
-      web:
-        aliases:
-          - profcomff_pinger-postgres
     volumes:
       - postgres:/var/lib/postgresql/data
     environment:
@@ -53,7 +49,7 @@ services:
       - postgres
       - migration
     environment:
-      - DB_DSN=postgresql://pinger:qwerty123@profcomff_pinger-postgres:5432/postgres
+      - DB_DSN=postgresql://pinger:qwerty123@postgres:5432/postgres
       - AUTH_URL=https://api.profcomff.com/auth
 
   pinger:
@@ -63,7 +59,7 @@ services:
       - postgres
       - migration
     environment:
-      - DB_DSN=postgresql://pinger:qwerty123@profcomff_pinger-postgres:5432/postgres
+      - DB_DSN=postgresql://pinger:qwerty123@postgres:5432/postgres
       - AUTH_URL=https://api.profcomff.com/auth
     command: python -m aciniformes_project worker
 
