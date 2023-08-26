@@ -52,7 +52,7 @@ async def get_all(
 async def get(
     id: int,
     metric: MetricServiceInterface = Depends(metric_service),
-    _: dict[str] = Depends(UnionAuth(['pinger.metric.delete'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
     try:
         res = await metric.get_by_id(id)
