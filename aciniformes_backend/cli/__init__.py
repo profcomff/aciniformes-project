@@ -37,8 +37,10 @@ def process():
 
 
         def sigint_callback(scheduler: ApSchedulerService) -> None:
-            scheduler.stop()
-            exit(0)
+            try:
+                scheduler.stop()
+            finally:
+                exit(0)
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
