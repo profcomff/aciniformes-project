@@ -1,5 +1,11 @@
 run:
+	make run-api & make run-worker
+
+run-api:
 	source ./venv/bin/activate && uvicorn --reload --log-config logging_dev.conf aciniformes_backend.routes.base:app
+
+run-worker:
+	source ./venv/bin/activate && python -m aciniformes_backend worker --logger-config ./logging_dev.conf
 
 configure: venv
 	source ./venv/bin/activate && pip install -r requirements.dev.txt -r requirements.txt
