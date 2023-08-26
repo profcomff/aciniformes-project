@@ -1,3 +1,4 @@
+import logging
 import time
 from abc import ABC
 from contextlib import asynccontextmanager
@@ -14,6 +15,9 @@ from aciniformes_backend.settings import get_settings
 
 from .ping import ping
 from .session import dbsession
+
+
+logger = logging.getLogger(__name__)
 
 
 class ApSchedulerService(ABC):
@@ -37,6 +41,7 @@ class ApSchedulerService(ABC):
         return [j.id for j in self.scheduler.get_jobs()]
 
     async def start(self):
+        logger.info("Starting scheduler service")
         if self.scheduler.running:
             raise AlreadyRunning
         self.scheduler.add_job(
@@ -52,6 +57,7 @@ class ApSchedulerService(ABC):
             await self._fetch_it(fetcher)
 
     def stop(self):
+        logger.info("Stopping scheduler service")
         if not self.scheduler.running:
             raise AlreadyStopped
         for job in self.scheduler.get_jobs():
@@ -142,7 +148,6 @@ class ApSchedulerService(ABC):
         metric = Metric(**metric.model_dump(exclude_none=True))
         session.add(metric)
         session.commit()
-        session.flush()
         return metric
 
     async def _fetch_it(self, fetcher: Fetcher):

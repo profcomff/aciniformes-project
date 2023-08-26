@@ -29,11 +29,12 @@ def process():
         exit(0)
 
     if args.command == "worker":
+        fileConfig(args.logger_config, disable_existing_loggers=True)
+
         import asyncio
         import signal
-        from aciniformes_backend.worker.service.scheduler import ApSchedulerService
+        from aciniformes_backend.worker.scheduler import ApSchedulerService
 
-        fileConfig(args.logger_config, disable_existing_loggers=True)
 
         def sigint_callback(scheduler: ApSchedulerService) -> None:
             scheduler.stop()
