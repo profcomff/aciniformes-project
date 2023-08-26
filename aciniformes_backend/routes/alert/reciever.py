@@ -1,6 +1,7 @@
 import logging
 from enum import Enum
 
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
@@ -47,7 +48,11 @@ router = APIRouter()
 
 
 @router.post("", response_model=PostResponseSchema)
-async def create(create_schema: CreateSchema, receiver: ReceiverServiceInterface = Depends(receiver_service)):
+async def create(
+    create_schema: CreateSchema,
+    receiver: ReceiverServiceInterface = Depends(receiver_service),
+    _: dict[str] = Depends(UnionAuth(['pinger.reciever.create'])),
+):
     id_ = await receiver.create(create_schema.model_dump())
     return PostResponseSchema(**create_schema.model_dump(), id=id_)
 
@@ -55,13 +60,18 @@ async def create(create_schema: CreateSchema, receiver: ReceiverServiceInterface
 @router.get("")
 async def get_all(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
+    _: dict[str] = Depends(UnionAuth(['pinger.reciever.read'])),
 ):
     res = await receiver.get_all()
     return res
 
 
 @router.get("/{id}")
-async def get(id: int, receiver: ReceiverServiceInterface = Depends(receiver_service)):
+async def get(
+    id: int,
+    receiver: ReceiverServiceInterface = Depends(receiver_service),
+    _: dict[str] = Depends(UnionAuth(['pinger.reciever.read'])),
+):
     try:
         res = await receiver.get_by_id(id)
         return res
@@ -74,6 +84,7 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
+    _: dict[str] = Depends(UnionAuth(['pinger.reciever.update'])),
 ):
     try:
         res = await receiver.update(id, update_schema.model_dump(exclude_unset=True))
@@ -86,5 +97,6 @@ async def update(
 async def delete(
     id: int,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
+    _: dict[str] = Depends(UnionAuth(['pinger.reciever.delete'])),
 ):
     await receiver.delete(id)

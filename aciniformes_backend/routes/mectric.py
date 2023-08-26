@@ -1,3 +1,4 @@
+from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
@@ -32,19 +33,27 @@ router = APIRouter()
 async def create(
     metric_schema: CreateSchema,
     metric: MetricServiceInterface = Depends(metric_service),
+    _: dict[str] = Depends(UnionAuth(['pinger.metric.create'])),
 ):
     id_ = await metric.create(metric_schema.model_dump())
     return ResponsePostSchema(**metric_schema.model_dump(), id=id_)
 
 
 @router.get("")
-async def get_all(metric: MetricServiceInterface = Depends(metric_service)):
+async def get_all(
+    metric: MetricServiceInterface = Depends(metric_service),
+    _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
+):
     res = await metric.get_all()
     return res
 
 
 @router.get("/{id}")
-async def get(id: int, metric: MetricServiceInterface = Depends(metric_service)):
+async def get(
+    id: int,
+    metric: MetricServiceInterface = Depends(metric_service),
+    _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
+):
     try:
         res = await metric.get_by_id(id)
     except exc.ObjectNotFound:

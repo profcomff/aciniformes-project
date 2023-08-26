@@ -17,6 +17,9 @@ format:
 	make atomic-format module=aciniformes_backend
 	make atomic-format module=settings.py
 
+format-dev:
+	make atomic-format module=tests
+
 db:
 	docker run -d -p 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust --name db-pinger_backend postgres:15
 
