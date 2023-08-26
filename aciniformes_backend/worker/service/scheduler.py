@@ -7,9 +7,9 @@ import aiohttp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
-from aciniformes_backend.routes.alert.alert import CreateSchema as AlertCreateSchema
+from aciniformes_backend.routes.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from pinger_backend.exceptions import AlreadyRunning, AlreadyStopped
+from aciniformes_backend.exceptions import AlreadyRunning, AlreadyStopped
 from aciniformes_backend.settings import get_settings
 
 from .ping import ping
@@ -19,7 +19,6 @@ from .session import dbsession
 class ApSchedulerService(ABC):
     scheduler = AsyncIOScheduler()
     settings = get_settings()
-    backend_url = str
     fetchers: list
 
     def add_fetcher(self, fetcher: Fetcher):
