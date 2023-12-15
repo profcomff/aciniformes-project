@@ -70,6 +70,7 @@ class ApSchedulerService(ABC):
             receivers = session.query(Receiver).all()
             alert = Alert(**alert.model_dump(exclude_none=True))
             session.add(alert)
+            session.commit()
         for receiver in receivers:
             async with aiohttp.ClientSession() as s:
                 async with s.request(method=receiver.method, url=receiver.url, data=receiver.receiver_body):
@@ -148,6 +149,7 @@ class ApSchedulerService(ABC):
         with session_factory() as session:
             metric = Metric(**metric.model_dump(exclude_none=True))
             session.add(metric)
+            session.commit()
         return metric
 
     async def _fetch_it(self, fetcher: Fetcher):
