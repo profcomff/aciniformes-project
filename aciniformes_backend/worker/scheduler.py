@@ -70,11 +70,11 @@ class ApSchedulerService(ABC):
             receivers = session.query(Receiver).all()
             alert = Alert(**alert.model_dump(exclude_none=True))
             session.add(alert)
+            for receiver in receivers:
+                async with aiohttp.ClientSession() as s:
+                    async with s.request(method=receiver.method, url=receiver.url, data=receiver.receiver_body):
+                        pass
             session.commit()
-        for receiver in receivers:
-            async with aiohttp.ClientSession() as s:
-                async with s.request(method=receiver.method, url=receiver.url, data=receiver.receiver_body):
-                    pass
 
     @staticmethod
     def _parse_timedelta(fetcher: Fetcher) -> tuple[int, int]:
