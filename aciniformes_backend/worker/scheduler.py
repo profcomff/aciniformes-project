@@ -14,7 +14,7 @@ from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchem
 from aciniformes_backend.settings import get_settings
 
 from .ping import ping
-from .session import dbsession
+from .session import session_factory
 
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,8 @@ class ApSchedulerService(ABC):
             seconds=self.settings.FETCHERS_UPDATE_DELAY_IN_SECONDS,
             trigger="interval",
         )
-        self.fetchers = dbsession().query(Fetcher).all()
+        with session_factory() as session:
+            self.fetchers = session.query(Fetcher).all()
         self.scheduler.start()
         for fetcher in self.fetchers:
             self.add_fetcher(fetcher)
@@ -65,11 +66,10 @@ class ApSchedulerService(ABC):
         self.scheduler.shutdown()
 
     async def write_alert(self, alert: AlertCreateSchema):
-        receivers = dbsession().query(Receiver).all()
-        session = dbsession()
-        alert = Alert(**alert.model_dump(exclude_none=True))
-        session.add(alert)
-        session.flush()
+        with session_factory() as session:
+            receivers = session.query(Receiver).all()
+            alert = Alert(**alert.model_dump(exclude_none=True))
+            session.add(alert)
         for receiver in receivers:
             async with aiohttp.ClientSession() as s:
                 async with s.request(method=receiver.method, url=receiver.url, data=receiver.receiver_body):
@@ -83,7 +83,8 @@ class ApSchedulerService(ABC):
     async def __update_fetchers(self) -> AsyncIterator[None]:
         jobs = [job.id for job in self.scheduler.get_jobs()]
         old_fetchers = self.fetchers
-        new_fetchers = dbsession().query(Fetcher).all()
+        with session_factory() as session:
+            new_fetchers = session.query(Fetcher).all()
 
         # Проверка на удаление фетчера
         for fetcher in old_fetchers:
@@ -144,10 +145,9 @@ class ApSchedulerService(ABC):
         self._reschedule_job(fetcher, False)
 
     def add_metric(self, metric: MetricCreateSchema):
-        session = dbsession()
-        metric = Metric(**metric.model_dump(exclude_none=True))
-        session.add(metric)
-        session.commit()
+        with session_factory() as session:
+            metric = Metric(**metric.model_dump(exclude_none=True))
+            session.add(metric)
         return metric
 
     async def _fetch_it(self, fetcher: Fetcher):
