@@ -35,6 +35,7 @@ async def create(
     metric: MetricServiceInterface = Depends(metric_service),
     _: dict[str] = Depends(UnionAuth(['pinger.metric.create'])),
 ):
+    """Создание метрики."""
     id_ = await metric.create(metric_schema.model_dump())
     return ResponsePostSchema(**metric_schema.model_dump(), id=id_)
 
@@ -44,6 +45,7 @@ async def get_all(
     metric: MetricServiceInterface = Depends(metric_service),
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
+    """Получение всех метрик."""
     res = await metric.get_all()
     return res
 
@@ -54,6 +56,7 @@ async def get(
     metric: MetricServiceInterface = Depends(metric_service),
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
+    """Получение одной метрики по id."""
     try:
         res = await metric.get_by_id(id)
     except exc.ObjectNotFound:
