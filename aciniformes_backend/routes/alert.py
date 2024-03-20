@@ -42,6 +42,7 @@ async def create(
     alert: AlertServiceInterface = Depends(alert_service),
     _: dict[str] = Depends(UnionAuth(['pinger.alert.create'])),
 ) -> PostResponseSchema:
+    """Создание уведомления."""
     id_ = await alert.create(create_schema.model_dump(exclude_unset=True))
     return PostResponseSchema(**create_schema.model_dump(), id=id_)
 
@@ -51,6 +52,7 @@ async def get_all(
     alert: AlertServiceInterface = Depends(alert_service),
     _: dict[str] = Depends(UnionAuth(['pinger.alert.read'])),
 ):
+    """Возвращает все уведомления."""
     res = await alert.get_all()
     return res
 
@@ -61,6 +63,7 @@ async def get(
     alert: AlertServiceInterface = Depends(alert_service),
     _: dict[str] = Depends(UnionAuth(['pinger.alert.read'])),
 ):
+    """Возвращает одно уведомление."""
     try:
         res = await alert.get_by_id(id)
     except exc.ObjectNotFound:
@@ -75,6 +78,7 @@ async def update(
     alert: AlertServiceInterface = Depends(alert_service),
     _: dict[str] = Depends(UnionAuth(['pinger.alert.update'])),
 ):
+    """Обновление уведомления по id."""
     try:
         res = await alert.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -88,4 +92,5 @@ async def delete(
     alert: AlertServiceInterface = Depends(alert_service),
     _: dict[str] = Depends(UnionAuth(['pinger.alert.delete'])),
 ):
+    """удаление уведомления по id."""
     await alert.delete(id)
