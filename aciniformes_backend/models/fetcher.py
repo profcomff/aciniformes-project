@@ -1,5 +1,6 @@
 """Классы хранения настроек автоматического мониторинга
 """
+
 from datetime import datetime
 from enum import Enum
 
