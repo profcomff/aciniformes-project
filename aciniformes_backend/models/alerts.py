@@ -1,5 +1,6 @@
 """Классы хранения настроек нотификаций
 """
+
 from datetime import datetime
 from enum import Enum
 
