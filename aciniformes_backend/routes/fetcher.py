@@ -49,7 +49,7 @@ async def create(
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.create'])),
 ):
     """
-    Создает новый сборщик.
+    Создает новый сборщик метрик.
     """
     id_ = await fetcher.create(create_schema.model_dump())
     return ResponsePostSchema(**create_schema.model_dump(), id=id_)
@@ -61,7 +61,7 @@ async def get_all(
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
     """
-    Возвращает все сборщики.
+    Возвращает все сборщики метрик.
     """
     res = await fetcher.get_all()
     return res
@@ -73,7 +73,7 @@ async def get(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
-    """Получение одного сборщика по id"""
+    """Получение одного сборщика метрики по id"""
     try:
         res = await fetcher.get_by_id(id)
     except exc.ObjectNotFound:
@@ -88,7 +88,7 @@ async def update(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.update'])),
 ):
-    """Обновление одного сборика по id"""
+    """Обновление одного сборщsика метрики по id"""
     try:
         res = await fetcher.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -102,5 +102,5 @@ async def delete(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.delete'])),
 ):
-    """Удаление одного сборика по id"""
+    """Удаление одного сборщика метрики по id"""
     await fetcher.delete(id)

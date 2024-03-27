@@ -53,7 +53,7 @@ async def create(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.reciever.create'])),
 ):
-    """Создание ресивера."""
+    """Создание получателя уведомлений."""
     id_ = await receiver.create(create_schema.model_dump())
     return PostResponseSchema(**create_schema.model_dump(), id=id_)
 
@@ -63,7 +63,7 @@ async def get_all(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.reciever.read'])),
 ):
-    """Получить все ресиверы."""
+    """Получить всех получателей уведомлений."""
     res = await receiver.get_all()
     return res
 
@@ -74,7 +74,7 @@ async def get(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.reciever.read'])),
 ):
-    """Получение ресивера."""
+    """Получение получателя уведомлений."""
     try:
         res = await receiver.get_by_id(id)
         return res
@@ -89,7 +89,7 @@ async def update(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.reciever.update'])),
 ):
-    """Обновление ресивера по id."""
+    """Обновление получателя уведомлений по id."""
     try:
         res = await receiver.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -103,5 +103,5 @@ async def delete(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.reciever.delete'])),
 ):
-    """Удаление ресивера по id."""
+    """Удаление получателя уведомлений по id."""
     await receiver.delete(id)

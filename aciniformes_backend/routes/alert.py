@@ -92,5 +92,5 @@ async def delete(
     alert: AlertServiceInterface = Depends(alert_service),
     _: dict[str] = Depends(UnionAuth(['pinger.alert.delete'])),
 ):
-    """удаление уведомления по id."""
+    """Удаление уведомления по id."""
     await alert.delete(id)
