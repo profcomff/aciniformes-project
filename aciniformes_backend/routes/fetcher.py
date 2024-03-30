@@ -73,7 +73,7 @@ async def get(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
-    """Получение одного сборщика метрики по id"""
+    """Получение одного сборщика метрик по id"""
     try:
         res = await fetcher.get_by_id(id)
     except exc.ObjectNotFound:
@@ -88,7 +88,7 @@ async def update(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.update'])),
 ):
-    """Обновление одного сборщsика метрики по id"""
+    """Обновление одного сборщика метрик по id"""
     try:
         res = await fetcher.update(id, update_schema.model_dump(exclude_unset=True))
     except exc.ObjectNotFound:
@@ -102,5 +102,5 @@ async def delete(
     fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.delete'])),
 ):
-    """Удаление одного сборщика метрики по id"""
+    """Удаление одного сборщика метрик по id"""
     await fetcher.delete(id)
