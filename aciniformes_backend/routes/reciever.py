@@ -51,7 +51,7 @@ router = APIRouter()
 async def create(
     create_schema: CreateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    _: dict[str] = Depends(UnionAuth(['pinger.reciever.create'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.receiver.create'])),
 ):
     """Создание получателя уведомлений."""
     id_ = await receiver.create(create_schema.model_dump())
@@ -61,7 +61,7 @@ async def create(
 @router.get("")
 async def get_all(
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    _: dict[str] = Depends(UnionAuth(['pinger.reciever.read'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.receiver.read'])),
 ):
     """Получить всех получателей уведомлений."""
     res = await receiver.get_all()
@@ -72,7 +72,7 @@ async def get_all(
 async def get(
     id: int,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    _: dict[str] = Depends(UnionAuth(['pinger.reciever.read'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.receiver.read'])),
 ):
     """Получение получателя уведомлений."""
     try:
@@ -87,7 +87,7 @@ async def update(
     id: int,
     update_schema: UpdateSchema,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    _: dict[str] = Depends(UnionAuth(['pinger.reciever.update'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.receiver.update'])),
 ):
     """Обновление получателя уведомлений по id."""
     try:
@@ -101,7 +101,7 @@ async def update(
 async def delete(
     id: int,
     receiver: ReceiverServiceInterface = Depends(receiver_service),
-    _: dict[str] = Depends(UnionAuth(['pinger.reciever.delete'])),
+    _: dict[str] = Depends(UnionAuth(['pinger.receiver.delete'])),
 ):
     """Удаление получателя уведомлений по id."""
     await receiver.delete(id)
