@@ -1,4 +1,5 @@
 import logging
+import string
 import time
 from abc import ABC
 from contextlib import asynccontextmanager
@@ -67,12 +68,26 @@ class ApSchedulerService(ABC):
 
     async def write_alert(self, alert: AlertCreateSchema):
         with session_factory() as session:
-            receivers = session.query(Receiver).all()
-            alert = Alert(**alert.model_dump(exclude_none=True))
+            receivers: list[Receiver] = session.query(Receiver).all()
+            alert_data = alert.model_dump(exclude_none=True)
+            alert_metric = alert.data
+            alert = Alert(**alert_data)
             session.add(alert)
             for receiver in receivers:
+                # Заполняем тело письма, если в нем есть плейсхолдеры
+                message_body = receiver.receiver_body
+                for key, value in message_body.items():
+                    if not isinstance(value, str):
+                        continue
+                    placeholders = set(tup[1] for tup in string.Formatter().parse(value) if tup[1] is not None)
+                    placeholder_values = {}
+                    for i in placeholders:
+                        placeholder_values[i] = alert_metric.get(i)
+                    message_body[key] = value.format(**placeholder_values)
+
+                # Отправляем сообщение
                 async with aiohttp.ClientSession() as s:
-                    async with s.request(method=receiver.method, url=receiver.url, data=receiver.receiver_body):
+                    async with s.request(method=receiver.method, url=receiver.url, data=message_body):
                         pass
             session.commit()
 
