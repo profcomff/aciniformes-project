@@ -8,7 +8,7 @@ from aciniformes_backend import __version__
 from .alert import router as alert_router
 from .fetcher import router as fetcher_router
 from .mectric import router as metric_router
-from .reciever import router as receiver_router
+from .receiver import router as receiver_router
 
 
 settings = get_settings()
