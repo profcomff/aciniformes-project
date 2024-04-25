@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_sqlalchemy import DBSessionMiddleware
 
 from aciniformes_backend.settings import get_settings
@@ -19,4 +20,12 @@ app.add_middleware(
     DBSessionMiddleware,
     db_url=str(get_settings().DB_DSN),
     engine_args={"pool_pre_ping": True, "isolation_level": "AUTOCOMMIT"},
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ALLOW_ORIGINS,
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+    allow_methods=settings.CORS_ALLOW_METHODS,
+    allow_headers=settings.CORS_ALLOW_HEADERS,
 )
