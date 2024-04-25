@@ -137,6 +137,7 @@ class ApSchedulerService(ABC):
     async def _process_fail(
         self, fetcher: Fetcher, metric: MetricCreateSchema, res: aiohttp.ClientResponse | None | float
     ) -> None:
+        logger.info("Fetcher %s failed", fetcher.address)
         if fetcher.type_ != FetcherType.PING:
             alert = AlertCreateSchema(data=metric.model_dump(), filter="500" if res is None else str(res.status))
         else:
