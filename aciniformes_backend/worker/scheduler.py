@@ -125,17 +125,11 @@ class ApSchedulerService:
     async def process_fail(self, fetcher: Fetcher, metric: Metric, res: aiohttp.ClientResponse | None | float) -> None:
         logger.info("Fetcher %s failed", fetcher.address)
         if fetcher.type_ != FetcherType.PING:
-            alert = Alert(data=dict(metric), filter=res.status if isinstance(res, aiohttp.ClientResponse) else "500")
+            alert = Alert(data=metric.as_dict(), filter=res.status if isinstance(res, aiohttp.ClientResponse) else "500")
         else:
             _filter = "Service Unavailable" if res is False else "Timeout Error" if res is None else "Unknown Error"
-            alert = Alert(data=dict(metric), filter=_filter)
+            alert = Alert(data=metric.as_dict(), filter=_filter)
         await self.write_alert(alert)
-
-    def add_metric(self, metric: Metric):
-        with session_factory() as session:
-            session.add(metric)
-            session.commit()
-        return metric
 
     async def _fetch_it(self, fetcher: Fetcher):
         prev = time.time()
@@ -156,9 +150,11 @@ class ApSchedulerService:
             pass
 
         metric = ApSchedulerService.create_metric(prev, fetcher, res)
-        self.add_metric(metric)
-        if not metric.ok:
-            await self.process_fail(fetcher, metric, res)
+        with session_factory() as session:
+            session.add(metric)
+            session.commit()
+            if not metric.ok:
+                await self.process_fail(fetcher, metric, res)
 
         self.scheduler.reschedule_job(
             f"{fetcher.address} {fetcher.create_ts}",
