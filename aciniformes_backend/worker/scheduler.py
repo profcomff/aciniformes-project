@@ -1,8 +1,6 @@
 import logging
 import string
 import time
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 import aiohttp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -43,7 +41,7 @@ class ApSchedulerService:
         if self.scheduler.running:
             raise AlreadyRunning
         self.scheduler.add_job(
-            self._fetcher_update_job,
+            self.update_fetchers,
             id="check_fetchers",
             seconds=self.settings.FETCHERS_UPDATE_DELAY_IN_SECONDS,
             trigger="interval",
@@ -89,8 +87,7 @@ class ApSchedulerService:
     def _parse_timedelta(fetcher: Fetcher) -> tuple[int, int]:
         return fetcher.delay_ok, fetcher.delay_fail
 
-    @asynccontextmanager
-    async def __update_fetchers(self) -> AsyncIterator[None]:
+    async def update_fetchers(self):
         jobs = [job.id for job in self.scheduler.get_jobs()]
         old_fetchers = self.fetchers
         with session_factory() as session:
@@ -102,8 +99,8 @@ class ApSchedulerService:
                 f"{fetcher.address} {fetcher.create_ts}" in jobs
             ):
                 self.scheduler.remove_job(job_id=f"{fetcher.address} {fetcher.create_ts}")
-
         jobs = [job.id for job in self.scheduler.get_jobs()]
+
         # Проверка на добавление нового фетчера
         for fetcher in new_fetchers:
             if (f"{fetcher.address} {fetcher.create_ts}" not in jobs) and (
@@ -111,14 +108,10 @@ class ApSchedulerService:
             ):
                 self.add_fetcher(fetcher)
                 self.fetchers.append(fetcher)
-        yield
+
         self.scheduler.reschedule_job(
             "check_fetchers", seconds=self.settings.FETCHERS_UPDATE_DELAY_IN_SECONDS, trigger="interval"
         )
-
-    async def _fetcher_update_job(self) -> None:
-        async with self.__update_fetchers():
-            pass
 
     @staticmethod
     def create_metric(prev: float, fetcher: Fetcher, res: aiohttp.ClientResponse) -> Metric:
@@ -129,24 +122,14 @@ class ApSchedulerService:
         }[fetcher.type_]()
         return Metric(name=fetcher.address, ok=is_ok, time_delta=time.time() - prev)
 
-    def _reschedule_job(self, fetcher: Fetcher, ok: bool):
-        self.scheduler.reschedule_job(
-            f"{fetcher.address} {fetcher.create_ts}",
-            seconds=fetcher.delay_ok if ok else fetcher.delay_fail,
-            trigger="interval",
-        )
-
-    async def _process_fail(
-        self, fetcher: Fetcher, metric: Metric, res: aiohttp.ClientResponse | None | float
-    ) -> None:
+    async def process_fail(self, fetcher: Fetcher, metric: Metric, res: aiohttp.ClientResponse | None | float) -> None:
         logger.info("Fetcher %s failed", fetcher.address)
         if fetcher.type_ != FetcherType.PING:
-            alert = Alert(data=dict(metric), filter="500" if res is None else str(res.status))
+            alert = Alert(data=dict(metric), filter=res.status if isinstance(res, aiohttp.ClientResponse) else "500")
         else:
             _filter = "Service Unavailable" if res is False else "Timeout Error" if res is None else "Unknown Error"
             alert = Alert(data=dict(metric), filter=_filter)
         await self.write_alert(alert)
-        self._reschedule_job(fetcher, False)
 
     def add_metric(self, metric: Metric):
         with session_factory() as session:
@@ -170,13 +153,15 @@ class ApSchedulerService:
                 case FetcherType.PING:
                     res = await ping(fetcher.address)
         except Exception:
-            metric = ApSchedulerService.create_metric(prev, fetcher, res)
-            self.add_metric(metric)
-            await self._process_fail(fetcher, metric, None)
-        else:
-            metric = ApSchedulerService.create_metric(prev, fetcher, res)
-            self.add_metric(metric)
-            if not metric.ok:
-                await self._process_fail(fetcher, metric, res)
-            else:
-                self._reschedule_job(fetcher, True)
+            pass
+
+        metric = ApSchedulerService.create_metric(prev, fetcher, res)
+        self.add_metric(metric)
+        if not metric.ok:
+            await self.process_fail(fetcher, metric, res)
+
+        self.scheduler.reschedule_job(
+            f"{fetcher.address} {fetcher.create_ts}",
+            seconds=fetcher.delay_ok if metric.ok else fetcher.delay_fail,
+            trigger="interval",
+        )
