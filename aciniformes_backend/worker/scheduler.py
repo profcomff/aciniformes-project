@@ -125,7 +125,9 @@ class ApSchedulerService:
     async def process_fail(self, fetcher: Fetcher, metric: Metric, res: aiohttp.ClientResponse | None | float) -> None:
         logger.info("Fetcher %s failed", fetcher.address)
         if fetcher.type_ != FetcherType.PING:
-            alert = Alert(data=metric.as_dict(), filter=res.status if isinstance(res, aiohttp.ClientResponse) else "500")
+            alert = Alert(
+                data=metric.as_dict(), filter=res.status if isinstance(res, aiohttp.ClientResponse) else "500"
+            )
         else:
             _filter = "Service Unavailable" if res is False else "Timeout Error" if res is None else "Unknown Error"
             alert = Alert(data=metric.as_dict(), filter=_filter)

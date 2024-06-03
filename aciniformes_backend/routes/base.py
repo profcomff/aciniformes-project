@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_sqlalchemy import DBSessionMiddleware
 
-from aciniformes_backend.settings import get_settings
 from aciniformes_backend import __version__
+from aciniformes_backend.settings import get_settings
 
 from .alert import router as alert_router
 from .fetcher import router as fetcher_router
