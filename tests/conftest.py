@@ -14,16 +14,7 @@ def engine():
 
 
 @pytest.fixture(scope="session")
-def tables(engine):
-    BaseModel.metadata.create_all(engine)
-    yield
-    # truncate all tables
-    BaseModel.metadata.drop_all(engine)
-    BaseModel.metadata.create_all(engine)
-
-
-@pytest.fixture(scope="session")
-def dbsession(engine, tables):
+def dbsession(engine):
     connection = engine.connect()
     session = Session(bind=connection, autoflush=False)
     yield session
