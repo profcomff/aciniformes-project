@@ -8,7 +8,7 @@ run-worker:
 	source ./venv/bin/activate && python -m aciniformes_backend worker --logger-config ./logging_dev.conf
 
 configure: venv
-	source ./venv/bin/activate && pip install -r requirements.dev.txt -r requirements.txt
+	source ./venv/bin/activate && pip install -U -r requirements.dev.txt -r requirements.txt
 
 venv:
 	python3.11 -m venv venv

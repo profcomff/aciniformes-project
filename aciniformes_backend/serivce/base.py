@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 import sqlalchemy.orm
 
 import aciniformes_backend.models as db_models
 
 
-class BaseService(ABC):
+class BaseService(metaclass=ABCMeta):
     def __init__(self, session: sqlalchemy.orm.Session | None):
         self.session = session
 
@@ -18,7 +18,7 @@ class BaseService(ABC):
         raise NotImplementedError
 
 
-class AlertServiceInterface(BaseService):
+class AlertServiceInterface(BaseService, metaclass=ABCMeta):
     @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Alert:
         raise NotImplementedError
@@ -32,7 +32,7 @@ class AlertServiceInterface(BaseService):
         raise NotImplementedError
 
 
-class ReceiverServiceInterface(BaseService):
+class ReceiverServiceInterface(BaseService, metaclass=ABCMeta):
     @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Receiver:
         raise NotImplementedError
@@ -46,7 +46,7 @@ class ReceiverServiceInterface(BaseService):
         raise NotImplementedError
 
 
-class FetcherServiceInterface(BaseService):
+class FetcherServiceInterface(BaseService, metaclass=ABCMeta):
     @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Fetcher:
         raise NotImplementedError
@@ -60,7 +60,7 @@ class FetcherServiceInterface(BaseService):
         raise NotImplementedError
 
 
-class MetricServiceInterface(BaseService):
+class MetricServiceInterface(BaseService, metaclass=ABCMeta):
     @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Metric:
         raise NotImplementedError

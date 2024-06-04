@@ -15,7 +15,7 @@ def metric_schema():
 
 @pytest.fixture()
 def db_metric(dbsession, metric_schema):
-    q = sqlalchemy.insert(Metric).values(**metric_schema.dict(exclude_unset=True)).returning(Metric)
+    q = sqlalchemy.insert(Metric).values(**metric_schema.model_dump(exclude_unset=True)).returning(Metric)
     metric = dbsession.scalar(q)
     dbsession.flush()
     yield metric

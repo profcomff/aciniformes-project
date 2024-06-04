@@ -1,17 +1,12 @@
 import logging
 import string
 import time
-from abc import ABC
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 import aiohttp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from aciniformes_backend.exceptions import AlreadyRunning, AlreadyStopped
 from aciniformes_backend.models import Alert, Fetcher, FetcherType, Metric, Receiver
-from aciniformes_backend.routes.alert import CreateSchema as AlertCreateSchema
-from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
 from aciniformes_backend.settings import get_settings
 
 from .ping import ping
@@ -21,10 +16,10 @@ from .session import session_factory
 logger = logging.getLogger(__name__)
 
 
-class ApSchedulerService(ABC):
+class ApSchedulerService:
     scheduler = AsyncIOScheduler()
     settings = get_settings()
-    fetchers: list
+    fetchers: list[Fetcher]
 
     def add_fetcher(self, fetcher: Fetcher):
         self.scheduler.add_job(
@@ -46,7 +41,7 @@ class ApSchedulerService(ABC):
         if self.scheduler.running:
             raise AlreadyRunning
         self.scheduler.add_job(
-            self._fetcher_update_job,
+            self.update_fetchers,
             id="check_fetchers",
             seconds=self.settings.FETCHERS_UPDATE_DELAY_IN_SECONDS,
             trigger="interval",
@@ -66,12 +61,9 @@ class ApSchedulerService(ABC):
             job.remove()
         self.scheduler.shutdown()
 
-    async def write_alert(self, alert: AlertCreateSchema):
+    async def write_alert(self, alert: Alert):
         with session_factory() as session:
             receivers: list[Receiver] = session.query(Receiver).all()
-            alert_data = alert.model_dump(exclude_none=True)
-            alert_metric = alert.data
-            alert = Alert(**alert_data)
             session.add(alert)
             for receiver in receivers:
                 # Заполняем тело письма, если в нем есть плейсхолдеры
@@ -82,7 +74,7 @@ class ApSchedulerService(ABC):
                     placeholders = set(tup[1] for tup in string.Formatter().parse(value) if tup[1] is not None)
                     placeholder_values = {}
                     for i in placeholders:
-                        placeholder_values[i] = alert_metric.get(i)
+                        placeholder_values[i] = dict(alert.data).get(i)
                     message_body[key] = value.format(**placeholder_values)
 
                 # Отправляем сообщение
@@ -95,8 +87,7 @@ class ApSchedulerService(ABC):
     def _parse_timedelta(fetcher: Fetcher) -> tuple[int, int]:
         return fetcher.delay_ok, fetcher.delay_fail
 
-    @asynccontextmanager
-    async def __update_fetchers(self) -> AsyncIterator[None]:
+    async def update_fetchers(self):
         jobs = [job.id for job in self.scheduler.get_jobs()]
         old_fetchers = self.fetchers
         with session_factory() as session:
@@ -108,8 +99,8 @@ class ApSchedulerService(ABC):
                 f"{fetcher.address} {fetcher.create_ts}" in jobs
             ):
                 self.scheduler.remove_job(job_id=f"{fetcher.address} {fetcher.create_ts}")
-
         jobs = [job.id for job in self.scheduler.get_jobs()]
+
         # Проверка на добавление нового фетчера
         for fetcher in new_fetchers:
             if (f"{fetcher.address} {fetcher.create_ts}" not in jobs) and (
@@ -117,56 +108,30 @@ class ApSchedulerService(ABC):
             ):
                 self.add_fetcher(fetcher)
                 self.fetchers.append(fetcher)
-        yield
+
         self.scheduler.reschedule_job(
             "check_fetchers", seconds=self.settings.FETCHERS_UPDATE_DELAY_IN_SECONDS, trigger="interval"
         )
 
-    async def _fetcher_update_job(self) -> None:
-        async with self.__update_fetchers():
-            pass
-
     @staticmethod
-    def create_metric(prev: float, fetcher: Fetcher, res: aiohttp.ClientResponse) -> MetricCreateSchema:
-        cur = time.time()
-        timing = cur - prev
-        if fetcher.type_ != FetcherType.PING:
-            return MetricCreateSchema(
-                name=fetcher.address,
-                ok=True if res and (200 <= res.status <= 300) else False,
-                time_delta=timing,
-            )
-        return MetricCreateSchema(
-            name=fetcher.address,
-            ok=res is not False and res is not None,
-            time_delta=timing,
-        )
+    def create_metric(prev: float, fetcher: Fetcher, res: aiohttp.ClientResponse) -> Metric:
+        is_ok = {
+            FetcherType.GET: lambda: res and (200 <= res.status <= 300),
+            FetcherType.POST: lambda: res and (200 <= res.status <= 300),
+            FetcherType.PING: lambda: res is not False and res is not None,
+        }[fetcher.type_]()
+        return Metric(name=fetcher.address, ok=is_ok, time_delta=time.time() - prev)
 
-    def _reschedule_job(self, fetcher: Fetcher, ok: bool):
-        self.scheduler.reschedule_job(
-            f"{fetcher.address} {fetcher.create_ts}",
-            seconds=fetcher.delay_ok if ok else fetcher.delay_fail,
-            trigger="interval",
-        )
-
-    async def _process_fail(
-        self, fetcher: Fetcher, metric: MetricCreateSchema, res: aiohttp.ClientResponse | None | float
-    ) -> None:
+    async def process_fail(self, fetcher: Fetcher, metric: Metric, res: aiohttp.ClientResponse | None | float) -> None:
         logger.info("Fetcher %s failed", fetcher.address)
         if fetcher.type_ != FetcherType.PING:
-            alert = AlertCreateSchema(data=metric.model_dump(), filter="500" if res is None else str(res.status))
+            alert = Alert(
+                data=metric.as_dict(), filter=res.status if isinstance(res, aiohttp.ClientResponse) else "500"
+            )
         else:
             _filter = "Service Unavailable" if res is False else "Timeout Error" if res is None else "Unknown Error"
-            alert = AlertCreateSchema(data=metric.model_dump(), filter=_filter)
+            alert = Alert(data=metric.as_dict(), filter=_filter)
         await self.write_alert(alert)
-        self._reschedule_job(fetcher, False)
-
-    def add_metric(self, metric: MetricCreateSchema):
-        with session_factory() as session:
-            metric = Metric(**metric.model_dump(exclude_none=True))
-            session.add(metric)
-            session.commit()
-        return metric
 
     async def _fetch_it(self, fetcher: Fetcher):
         prev = time.time()
@@ -184,13 +149,17 @@ class ApSchedulerService(ABC):
                 case FetcherType.PING:
                     res = await ping(fetcher.address)
         except Exception:
-            metric = ApSchedulerService.create_metric(prev, fetcher, res)
-            self.add_metric(metric)
-            await self._process_fail(fetcher, metric, None)
-        else:
-            metric = ApSchedulerService.create_metric(prev, fetcher, res)
-            self.add_metric(metric)
+            pass
+
+        metric = ApSchedulerService.create_metric(prev, fetcher, res)
+        with session_factory() as session:
+            session.add(metric)
+            session.commit()
             if not metric.ok:
-                await self._process_fail(fetcher, metric, res)
-            else:
-                self._reschedule_job(fetcher, True)
+                await self.process_fail(fetcher, metric, res)
+
+        self.scheduler.reschedule_job(
+            f"{fetcher.address} {fetcher.create_ts}",
+            seconds=fetcher.delay_ok if metric.ok else fetcher.delay_fail,
+            trigger="interval",
+        )
