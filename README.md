@@ -2,6 +2,7 @@
 
 Проект пингера сервисов профкома ФФ МГУ. Позволяет пользователю просто и быстро проверять работоспособность любого сайта и сервиса и получать отчет через telegram бота.
 
+[<img src="https://cdn.profcomff.com/easycode/easycode.svg" width="200"></img>](https://easycode.profcomff.com/templates/docker-fastapi/workspace?mode=manual&param.Repository+URL=https://github.com/profcomff/aciniformes-project.git&param.Working+directory=pinger-api)
 
 # Функционал
 
