@@ -44,7 +44,7 @@ class GetSchema(BaseModel):
 
 
 @router.post("", response_model=ResponsePostSchema)
-async def create(
+def create(
     create_schema: CreateSchema,
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.create'])),
 ):
@@ -58,7 +58,7 @@ async def create(
 
 
 @router.get("")
-async def get_all(
+def get_all(
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
     """
@@ -68,7 +68,7 @@ async def get_all(
 
 
 @router.get("/{id}")
-async def get(
+def get(
     id: int,
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
@@ -84,21 +84,23 @@ async def get(
 
 
 @router.patch("/{id}")
-async def update(
+def update(
     id: int,
     update_schema: UpdateSchema,
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.update'])),
 ):
     """Обновление одного сборщика метрик по id"""
     try:
+        q = sa.select(db_models.Fetcher).where(db_models.Fetcher.id_ == id)
+        res = db.session.scalar(q)
+        if not res:
+            raise exc.ObjectNotFound(id)
         q = (
             sa.update(db_models.Fetcher)
             .where(db_models.Fetcher.id_ == id)
             .values(**update_schema)
             .returning(db_models.Fetcher)
         )
-        if not await db.get_by_id(id):
-            raise exc.ObjectNotFound(id)
         res = db.session.execute(q).scalar()
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
@@ -106,7 +108,7 @@ async def update(
 
 
 @router.delete("/{id}")
-async def delete(
+def delete(
     id: int,
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.delete'])),
 ):

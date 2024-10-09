@@ -47,7 +47,7 @@ async def get_all(
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
     """Получение всех метрик."""
-    return list(db.session.scalars(sa.select(db_models.Fetcher)).all())
+    return list(db.session.scalars(sa.select(db_models.Metric)).all())
 
 
 @router.get("/{id}")
@@ -57,7 +57,7 @@ async def get(
 ):
     """Получение одной метрики по id."""
     try:
-        q = sa.select(db_models.Fetcher).where(db_models.Fetcher.id_ == id)
+        q = sa.select(db_models.Metric).where(db_models.Metric.id_ == id)
         res = db.session.scalar(q)
         if not res:
             raise exc.ObjectNotFound(id)
