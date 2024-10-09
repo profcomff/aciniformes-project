@@ -4,7 +4,7 @@ import pytest
 import pytest_asyncio
 from starlette import status
 
-from aciniformes_backend.serivce.alert import PgAlertService
+from aciniformes_backend.service.alert import PgAlertService
 from aciniformes_backend.settings import get_settings
 
 

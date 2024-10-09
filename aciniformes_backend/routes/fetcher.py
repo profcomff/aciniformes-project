@@ -9,9 +9,9 @@ from starlette import status
 from typing_extensions import Annotated
 
 from aciniformes_backend.models.fetcher import FetcherType
-from aciniformes_backend.serivce import FetcherServiceInterface
-from aciniformes_backend.serivce import exceptions as exc
-from aciniformes_backend.serivce import fetcher_service
+from aciniformes_backend.service import FetcherServiceInterface
+from aciniformes_backend.service import exceptions as exc
+from aciniformes_backend.service import fetcher_service
 
 
 logger = logging.getLogger(__name__)

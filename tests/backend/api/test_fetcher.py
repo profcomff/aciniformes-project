@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 from starlette import status
 
-from aciniformes_backend.serivce.fetcher import PgFetcherService
+from aciniformes_backend.service.fetcher import PgFetcherService
 
 
 fetcher = {

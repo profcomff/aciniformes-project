@@ -4,7 +4,7 @@ import pytest
 import pytest_asyncio
 from starlette import status
 
-from aciniformes_backend.serivce.receiver import PgReceiverService
+from aciniformes_backend.service.receiver import PgReceiverService
 
 
 receiver = {"url": "https://google.com", "method": "post", "receiver_body": {}}

@@ -4,9 +4,9 @@ from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
 
-from aciniformes_backend.serivce import MetricServiceInterface
-from aciniformes_backend.serivce import exceptions as exc
-from aciniformes_backend.serivce import metric_service
+from aciniformes_backend.service import MetricServiceInterface
+from aciniformes_backend.service import exceptions as exc
+from aciniformes_backend.service import metric_service
 
 
 class CreateSchema(BaseModel):

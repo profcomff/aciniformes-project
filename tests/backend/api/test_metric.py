@@ -2,7 +2,7 @@ import pytest
 import pytest_asyncio
 from starlette import status
 
-from aciniformes_backend.serivce.metric import PgMetricService
+from aciniformes_backend.service.metric import PgMetricService
 
 
 metric = {"name": "string", "ok": True, "time_delta": 0}

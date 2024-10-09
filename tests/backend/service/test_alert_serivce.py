@@ -1,12 +1,12 @@
 import pytest
 import sqlalchemy
 
-import aciniformes_backend.serivce.exceptions as exc
+import aciniformes_backend.service.exceptions as exc
 from aciniformes_backend.models import Alert, Receiver
 from aciniformes_backend.routes.alert import CreateSchema as AlertCreateSchema
 from aciniformes_backend.routes.receiver import CreateSchema as ReceiverCreateSchema
-from aciniformes_backend.serivce.alert import PgAlertService
-from aciniformes_backend.serivce.receiver import PgReceiverService
+from aciniformes_backend.service.alert import PgAlertService
+from aciniformes_backend.service.receiver import PgReceiverService
 
 
 @pytest.fixture

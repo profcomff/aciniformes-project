@@ -3,7 +3,7 @@ from typing import Type
 import sqlalchemy as sa
 
 import aciniformes_backend.models as db_models
-import aciniformes_backend.serivce.exceptions as exc
+import aciniformes_backend.service.exceptions as exc
 
 from .base import ReceiverServiceInterface
 

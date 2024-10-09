@@ -3,7 +3,7 @@ import sqlalchemy
 
 from aciniformes_backend.models import Fetcher
 from aciniformes_backend.routes.fetcher import CreateSchema as FetcherCreateSchema
-from aciniformes_backend.serivce.fetcher import PgFetcherService
+from aciniformes_backend.service.fetcher import PgFetcherService
 
 
 @pytest.fixture

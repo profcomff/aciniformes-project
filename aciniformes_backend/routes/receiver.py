@@ -7,9 +7,9 @@ from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
 
-from aciniformes_backend.serivce import ReceiverServiceInterface
-from aciniformes_backend.serivce import exceptions as exc
-from aciniformes_backend.serivce import receiver_service
+from aciniformes_backend.service import ReceiverServiceInterface
+from aciniformes_backend.service import exceptions as exc
+from aciniformes_backend.service import receiver_service
 
 
 logger = logging.getLogger(__name__)

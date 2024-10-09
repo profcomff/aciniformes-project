@@ -3,7 +3,7 @@ import sqlalchemy
 
 from aciniformes_backend.models import Metric
 from aciniformes_backend.routes.mectric import CreateSchema as MetricCreateSchema
-from aciniformes_backend.serivce.metric import PgMetricService
+from aciniformes_backend.service.metric import PgMetricService
 
 
 @pytest.fixture
