@@ -1,12 +1,13 @@
+import sqlalchemy as sa
 from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from fastapi_sqlalchemy import db
 from pydantic import BaseModel
 from starlette import status
 
-from aciniformes_backend.serivce import MetricServiceInterface
-from aciniformes_backend.serivce import exceptions as exc
-from aciniformes_backend.serivce import metric_service
+import aciniformes_backend.models as db_models
+from aciniformes_backend.routes import exceptions as exc
 
 
 class CreateSchema(BaseModel):
@@ -30,35 +31,36 @@ router = APIRouter()
 
 
 @router.post("", response_model=ResponsePostSchema)
-async def create(
+def create(
     metric_schema: CreateSchema,
-    metric: MetricServiceInterface = Depends(metric_service),
     _: dict[str] = Depends(UnionAuth(['pinger.metric.create'])),
 ):
     """Создание метрики."""
-    id_ = await metric.create(metric_schema.model_dump())
-    return ResponsePostSchema(**metric_schema.model_dump(), id=id_)
+    q = sa.insert(db_models.Metric).values(**metric_schema.model_dump()).returning(db_models.Metric)
+    metric = db.session.scalar(q)
+    db.session.flush()
+    return ResponsePostSchema(**metric_schema.model_dump(), id=metric.id_)
 
 
 @router.get("")
-async def get_all(
-    metric: MetricServiceInterface = Depends(metric_service),
+def get_all(
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
     """Получение всех метрик."""
-    res = await metric.get_all()
-    return res
+    return list(db.session.scalars(sa.select(db_models.Metric)).all())
 
 
 @router.get("/{id}")
-async def get(
+def get(
     id: int,
-    metric: MetricServiceInterface = Depends(metric_service),
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
     """Получение одной метрики по id."""
     try:
-        res = await metric.get_by_id(id)
+        q = sa.select(db_models.Metric).where(db_models.Metric.id_ == id)
+        res = db.session.scalar(q)
+        if not res:
+            raise exc.ObjectNotFound(id)
+        return res
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return res

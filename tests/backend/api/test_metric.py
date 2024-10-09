@@ -1,8 +1,9 @@
 import pytest
 import pytest_asyncio
+import sqlalchemy as sa
 from starlette import status
 
-from aciniformes_backend.serivce.metric import PgMetricService
+import aciniformes_backend.models as db_models
 
 
 metric = {"name": "string", "ok": True, "time_delta": 0}
@@ -10,7 +11,16 @@ metric = {"name": "string", "ok": True, "time_delta": 0}
 
 @pytest_asyncio.fixture
 async def this_metric(dbsession):
-    yield await PgMetricService(dbsession).create(item=metric)
+    global metric
+    q = sa.insert(db_models.Metric).values(**metric).returning(db_models.Metric)
+    metric_db = dbsession.scalar(q)
+    dbsession.flush()
+
+    yield metric_db.id_
+
+    q = sa.delete(db_models.Metric).where(db_models.Metric.id_ == id)
+    dbsession.execute(q)
+    dbsession.flush()
 
 
 @pytest.mark.authenticated("pinger.metric.create")
@@ -27,6 +37,7 @@ def test_post_success(crud_client):
 
 @pytest.mark.authenticated("pinger.metric.read")
 def test_get_by_id_success(crud_client, this_metric):
+    global metric
     res = crud_client.get(f"/metric/{this_metric}")
     assert res.status_code == status.HTTP_200_OK
     for k, v in metric.items():

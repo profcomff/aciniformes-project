@@ -1,15 +1,16 @@
 import logging
 from enum import Enum
 
+import sqlalchemy as sa
 from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from fastapi_sqlalchemy import db
 from pydantic import BaseModel
 from starlette import status
 
-from aciniformes_backend.serivce import ReceiverServiceInterface
-from aciniformes_backend.serivce import exceptions as exc
-from aciniformes_backend.serivce import receiver_service
+import aciniformes_backend.models as db_models
+from aciniformes_backend.routes import exceptions as exc
 
 
 logger = logging.getLogger(__name__)
@@ -48,60 +49,70 @@ router = APIRouter()
 
 
 @router.post("", response_model=PostResponseSchema)
-async def create(
+def create(
     create_schema: CreateSchema,
-    receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.create'])),
 ):
     """Создание получателя уведомлений."""
-    id_ = await receiver.create(create_schema.model_dump())
-    return PostResponseSchema(**create_schema.model_dump(), id=id_)
+    q = sa.insert(db_models.Receiver).values(**create_schema.model_dump()).returning(db_models.Receiver)
+    receiver = db.session.execute(q).scalar()
+    db.session.flush()
+    return PostResponseSchema(**create_schema.model_dump(), id=receiver.id_)
 
 
 @router.get("")
-async def get_all(
-    receiver: ReceiverServiceInterface = Depends(receiver_service),
+def get_all(
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.read'])),
 ):
     """Получить всех получателей уведомлений."""
-    res = await receiver.get_all()
-    return res
+    return list(db.session.scalars(sa.select(db_models.Receiver)).all())
 
 
 @router.get("/{id}")
-async def get(
+def get(
     id: int,
-    receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.read'])),
 ):
     """Получение получателя уведомлений."""
     try:
-        res = await receiver.get_by_id(id)
-        return res
+        q = sa.select(db_models.Receiver).where(db_models.Receiver.id_ == id)
+        res = db.session.scalar(q)
+        if not res:
+            raise exc.ObjectNotFound(id)
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.patch("/{id}")
-async def update(
+def update(
     id: int,
     update_schema: UpdateSchema,
-    receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.update'])),
 ):
     """Обновление получателя уведомлений по id."""
     try:
-        res = await receiver.update(id, update_schema.model_dump(exclude_unset=True))
+        q = sa.select(db_models.Receiver).where(db_models.Receiver.id_ == id)
+        res = db.session.scalar(q)
+        if not res:
+            raise exc.ObjectNotFound(id)
+        q = (
+            sa.update(db_models.Receiver)
+            .where(db_models.Receiver.id_ == id)
+            .values(**update_schema.model_dump())
+            .returning(db_models.Receiver)
+        )
+        res = db.session.execute(q).scalar()
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res
 
 
 @router.delete("/{id}")
-async def delete(
+def delete(
     id: int,
-    receiver: ReceiverServiceInterface = Depends(receiver_service),
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.delete'])),
 ):
     """Удаление получателя уведомлений по id."""
-    await receiver.delete(id)
+    q = sa.delete(db_models.Receiver).where(db_models.Receiver.id_ == id)
+    db.session.execute(q)
+    db.session.flush()

@@ -3,9 +3,10 @@ from copy import deepcopy
 
 import pytest
 import pytest_asyncio
+import sqlalchemy as sa
 from starlette import status
 
-from aciniformes_backend.serivce.fetcher import PgFetcherService
+import aciniformes_backend.models as db_models
 
 
 fetcher = {
@@ -19,7 +20,16 @@ fetcher = {
 
 @pytest_asyncio.fixture
 async def this_fetcher(dbsession):
-    yield await PgFetcherService(dbsession).create(item=fetcher)
+    global fetcher
+    q = sa.insert(db_models.Fetcher).values(**fetcher).returning(db_models.Fetcher)
+    fetcher_db = dbsession.scalar(q)
+    dbsession.flush()
+
+    yield fetcher_db.id_
+
+    q = sa.delete(db_models.Fetcher).where(db_models.Fetcher.id_ == id)
+    dbsession.execute(q)
+    dbsession.flush()
 
 
 @pytest.mark.authenticated("pinger.fetcher.create")
@@ -39,6 +49,7 @@ def test_post_success(crud_client):
 
 @pytest.mark.authenticated("pinger.fetcher.read")
 def test_get_by_id_success(crud_client, this_fetcher):
+    global fetcher
     res = crud_client.get(f"/fetcher/{this_fetcher}")
     assert res.status_code == status.HTTP_200_OK
     _new_fetcher = deepcopy(fetcher)
