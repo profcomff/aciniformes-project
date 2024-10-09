@@ -1,15 +1,16 @@
 import logging
 from enum import Enum
 
+import sqlalchemy as sa
 from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from fastapi_sqlalchemy import db
 from pydantic import BaseModel
 from starlette import status
-from aciniformes_backend.routes import exceptions as exc
+
 import aciniformes_backend.models as db_models
-from fastapi_sqlalchemy import db
-import sqlalchemy as sa
+from aciniformes_backend.routes import exceptions as exc
 
 
 logger = logging.getLogger(__name__)

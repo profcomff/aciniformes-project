@@ -3,8 +3,9 @@ from copy import deepcopy
 
 import pytest
 import pytest_asyncio
-from starlette import status
 import sqlalchemy as sa
+from starlette import status
+
 import aciniformes_backend.models as db_models
 
 

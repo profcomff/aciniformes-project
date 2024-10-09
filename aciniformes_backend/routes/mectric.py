@@ -1,10 +1,11 @@
+import sqlalchemy as sa
 from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from fastapi_sqlalchemy import db
 from pydantic import BaseModel
 from starlette import status
-from fastapi_sqlalchemy import db
-import sqlalchemy as sa
+
 import aciniformes_backend.models as db_models
 from aciniformes_backend.routes import exceptions as exc
 

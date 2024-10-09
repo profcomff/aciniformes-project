@@ -1,16 +1,17 @@
 import logging
 
+import sqlalchemy as sa
 from auth_lib.fastapi import UnionAuth
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from fastapi_sqlalchemy import db
 from pydantic import BaseModel, HttpUrl
 from pydantic.functional_serializers import PlainSerializer
 from starlette import status
 from typing_extensions import Annotated
-import sqlalchemy as sa
+
 import aciniformes_backend.models as db_models
 from aciniformes_backend.models.fetcher import FetcherType
-from fastapi_sqlalchemy import db
 from aciniformes_backend.routes import exceptions as exc
 
 
@@ -90,7 +91,12 @@ async def update(
 ):
     """Обновление одного сборщика метрик по id"""
     try:
-        q = sa.update(db_models.Fetcher).where(db_models.Fetcher.id_ == id).values(**update_schema).returning(db_models.Fetcher)
+        q = (
+            sa.update(db_models.Fetcher)
+            .where(db_models.Fetcher.id_ == id)
+            .values(**update_schema)
+            .returning(db_models.Fetcher)
+        )
         if not await db.get_by_id(id):
             raise exc.ObjectNotFound(id)
         res = db.session.execute(q).scalar()

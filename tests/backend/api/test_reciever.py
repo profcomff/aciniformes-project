@@ -2,9 +2,10 @@ import json
 
 import pytest
 import pytest_asyncio
-from starlette import status
-from fastapi_sqlalchemy import db
 import sqlalchemy as sa
+from fastapi_sqlalchemy import db
+from starlette import status
+
 import aciniformes_backend.models as db_models
 
 
@@ -16,13 +17,12 @@ async def this_receiver(dbsession):
     q = sa.insert(db_models.Receiver).values(**receiver.model_dump()).returning(db_models.Receiver)
     receiver = dbsession.execute(q).scalar()
     dbsession.flush()
-    
+
     yield receiver.id_
 
     q = sa.delete(db_models.Receiver).where(db_models.Receiver.id_ == id)
     dbsession.execute(q)
     dbsession.flush()
-
 
 
 @pytest.mark.authenticated("pinger.receiver.create")
