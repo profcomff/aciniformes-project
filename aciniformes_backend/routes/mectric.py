@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from starlette import status
-
-from aciniformes_backend.service import MetricServiceInterface
-from aciniformes_backend.service import exceptions as exc
-from aciniformes_backend.service import metric_service
+from fastapi_sqlalchemy import db
+import sqlalchemy as sa
+import aciniformes_backend.models as db_models
+from aciniformes_backend.routes import exceptions as exc
 
 
 class CreateSchema(BaseModel):
@@ -32,33 +32,34 @@ router = APIRouter()
 @router.post("", response_model=ResponsePostSchema)
 async def create(
     metric_schema: CreateSchema,
-    metric: MetricServiceInterface = Depends(metric_service),
     _: dict[str] = Depends(UnionAuth(['pinger.metric.create'])),
 ):
     """Создание метрики."""
-    id_ = await metric.create(metric_schema.model_dump())
-    return ResponsePostSchema(**metric_schema.model_dump(), id=id_)
+    q = sa.insert(db_models.Metric).values(**metric_schema.model_dump()).returning(db_models.Metric)
+    metric = db.session.scalar(q)
+    db.session.flush()
+    return ResponsePostSchema(**metric_schema.model_dump(), id=metric.id_)
 
 
 @router.get("")
 async def get_all(
-    metric: MetricServiceInterface = Depends(metric_service),
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
     """Получение всех метрик."""
-    res = await metric.get_all()
-    return res
+    return list(db.session.scalars(sa.select(db_models.Fetcher)).all())
 
 
 @router.get("/{id}")
 async def get(
     id: int,
-    metric: MetricServiceInterface = Depends(metric_service),
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
     """Получение одной метрики по id."""
     try:
-        res = await metric.get_by_id(id)
+        q = sa.select(db_models.Fetcher).where(db_models.Fetcher.id_ == id)
+        res = db.session.scalar(q)
+        if not res:
+            raise exc.ObjectNotFound(id)
+        return res
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return res

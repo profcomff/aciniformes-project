@@ -1,8 +1,8 @@
 import pytest
 import pytest_asyncio
 from starlette import status
-
-from aciniformes_backend.service.metric import PgMetricService
+import aciniformes_backend.models as db_models
+import sqlalchemy as sa
 
 
 metric = {"name": "string", "ok": True, "time_delta": 0}
@@ -10,7 +10,15 @@ metric = {"name": "string", "ok": True, "time_delta": 0}
 
 @pytest_asyncio.fixture
 async def this_metric(dbsession):
-    yield await PgMetricService(dbsession).create(item=metric)
+    q = sa.insert(db_models.Metric).values(**metric).returning(db_models.Metric)
+    metric = dbsession.scalar(q)
+    dbsession.flush()
+
+    yield metric.id_
+
+    q = sa.delete(db_models.Metric).where(db_models.Metric.id_ == id)
+    dbsession.execute(q)
+    dbsession.flush()
 
 
 @pytest.mark.authenticated("pinger.metric.create")

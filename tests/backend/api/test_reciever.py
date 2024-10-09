@@ -3,8 +3,9 @@ import json
 import pytest
 import pytest_asyncio
 from starlette import status
-
-from aciniformes_backend.service.receiver import PgReceiverService
+from fastapi_sqlalchemy import db
+import sqlalchemy as sa
+import aciniformes_backend.models as db_models
 
 
 receiver = {"url": "https://google.com", "method": "post", "receiver_body": {}}
@@ -12,9 +13,16 @@ receiver = {"url": "https://google.com", "method": "post", "receiver_body": {}}
 
 @pytest_asyncio.fixture
 async def this_receiver(dbsession):
-    global receiver
-    _receiver = await PgReceiverService(dbsession).create(item=receiver)
-    yield _receiver
+    q = sa.insert(db_models.Receiver).values(**receiver.model_dump()).returning(db_models.Receiver)
+    receiver = dbsession.execute(q).scalar()
+    dbsession.flush()
+    
+    yield receiver.id_
+
+    q = sa.delete(db_models.Receiver).where(db_models.Receiver.id_ == id)
+    dbsession.execute(q)
+    dbsession.flush()
+
 
 
 @pytest.mark.authenticated("pinger.receiver.create")

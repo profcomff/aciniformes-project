@@ -7,11 +7,11 @@ from pydantic import BaseModel, HttpUrl
 from pydantic.functional_serializers import PlainSerializer
 from starlette import status
 from typing_extensions import Annotated
-
+import sqlalchemy as sa
+import aciniformes_backend.models as db_models
 from aciniformes_backend.models.fetcher import FetcherType
-from aciniformes_backend.service import FetcherServiceInterface
-from aciniformes_backend.service import exceptions as exc
-from aciniformes_backend.service import fetcher_service
+from fastapi_sqlalchemy import db
+from aciniformes_backend.routes import exceptions as exc
 
 
 logger = logging.getLogger(__name__)
@@ -45,52 +45,55 @@ class GetSchema(BaseModel):
 @router.post("", response_model=ResponsePostSchema)
 async def create(
     create_schema: CreateSchema,
-    fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.create'])),
 ):
     """
     Создает новый сборщик метрик.
     """
-    id_ = await fetcher.create(create_schema.model_dump())
-    return ResponsePostSchema(**create_schema.model_dump(), id=id_)
+    q = sa.insert(db_models.Fetcher).values(**create_schema.model_dump()).returning(db_models.Fetcher)
+    fetcher = db.session.scalar(q)
+    db.session.flush()
+    return ResponsePostSchema(**create_schema.model_dump(), id=fetcher.id_)
 
 
 @router.get("")
 async def get_all(
-    fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
     """
     Возвращает все сборщики метрик.
     """
-    res = await fetcher.get_all()
-    return res
+    return list(db.session.scalars(sa.select(db_models.Fetcher)).all())
 
 
 @router.get("/{id}")
 async def get(
     id: int,
-    fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.read'])),
 ):
     """Получение одного сборщика метрик по id"""
     try:
-        res = await fetcher.get_by_id(id)
+        q = sa.select(db_models.Fetcher).where(db_models.Fetcher.id_ == id)
+        res = db.session.scalar(q)
+        if not res:
+            raise exc.ObjectNotFound(id)
+        return res
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return res
 
 
 @router.patch("/{id}")
 async def update(
     id: int,
     update_schema: UpdateSchema,
-    fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.update'])),
 ):
     """Обновление одного сборщика метрик по id"""
     try:
-        res = await fetcher.update(id, update_schema.model_dump(exclude_unset=True))
+        q = sa.update(db_models.Fetcher).where(db_models.Fetcher.id_ == id).values(**update_schema).returning(db_models.Fetcher)
+        if not await db.get_by_id(id):
+            raise exc.ObjectNotFound(id)
+        res = db.session.execute(q).scalar()
     except exc.ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return res
@@ -99,8 +102,9 @@ async def update(
 @router.delete("/{id}")
 async def delete(
     id: int,
-    fetcher: FetcherServiceInterface = Depends(fetcher_service),
     _: dict[str] = Depends(UnionAuth(['pinger.fetcher.delete'])),
 ):
     """Удаление одного сборщика метрик по id"""
-    await fetcher.delete(id)
+    q = sa.delete(db_models.Fetcher).where(db_models.Fetcher.id_ == id)
+    db.session.execute(q)
+    db.session.flush()
