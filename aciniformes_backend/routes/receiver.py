@@ -49,7 +49,7 @@ router = APIRouter()
 
 
 @router.post("", response_model=PostResponseSchema)
-async def create(
+def create(
     create_schema: CreateSchema,
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.create'])),
 ):
@@ -61,7 +61,7 @@ async def create(
 
 
 @router.get("")
-async def get_all(
+def get_all(
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.read'])),
 ):
     """Получить всех получателей уведомлений."""
@@ -69,7 +69,7 @@ async def get_all(
 
 
 @router.get("/{id}")
-async def get(
+def get(
     id: int,
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.read'])),
 ):
@@ -84,7 +84,7 @@ async def get(
 
 
 @router.patch("/{id}")
-async def update(
+def update(
     id: int,
     update_schema: UpdateSchema,
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.update'])),
@@ -108,7 +108,7 @@ async def update(
 
 
 @router.delete("/{id}")
-async def delete(
+def delete(
     id: int,
     _: dict[str] = Depends(UnionAuth(['pinger.receiver.delete'])),
 ):

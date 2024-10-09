@@ -31,7 +31,7 @@ router = APIRouter()
 
 
 @router.post("", response_model=ResponsePostSchema)
-async def create(
+def create(
     metric_schema: CreateSchema,
     _: dict[str] = Depends(UnionAuth(['pinger.metric.create'])),
 ):
@@ -43,7 +43,7 @@ async def create(
 
 
 @router.get("")
-async def get_all(
+def get_all(
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
     """Получение всех метрик."""
@@ -51,7 +51,7 @@ async def get_all(
 
 
 @router.get("/{id}")
-async def get(
+def get(
     id: int,
     _: dict[str] = Depends(UnionAuth(['pinger.metric.read'])),
 ):
