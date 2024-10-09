@@ -1,9 +1,8 @@
-from .base import AlertServiceInterface, FetcherServiceInterface, MetricServiceInterface, ReceiverServiceInterface
+from .base import FetcherServiceInterface, MetricServiceInterface, ReceiverServiceInterface
 from .bootstrap import alert_service, fetcher_service, metric_service, receiver_service
 
 
 __all__ = [
-    "AlertServiceInterface",
     "FetcherServiceInterface",
     "MetricServiceInterface",
     "ReceiverServiceInterface",

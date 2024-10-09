@@ -17,21 +17,6 @@ class BaseService(metaclass=ABCMeta):
     async def create(self, item: dict) -> int:
         raise NotImplementedError
 
-
-class AlertServiceInterface(BaseService, metaclass=ABCMeta):
-    @abstractmethod
-    async def get_by_id(self, id_: int) -> db_models.Alert:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def delete(self, id_: int) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def update(self, id_: int, item: dict) -> db_models.Alert:
-        raise NotImplementedError
-
-
 class ReceiverServiceInterface(BaseService, metaclass=ABCMeta):
     @abstractmethod
     async def get_by_id(self, id_: int) -> db_models.Receiver:
