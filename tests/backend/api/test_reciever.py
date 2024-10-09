@@ -15,11 +15,11 @@ receiver = {"url": "https://google.com", "method": "post", "receiver_body": {}}
 @pytest_asyncio.fixture
 async def this_receiver(dbsession):
     global receiver
-    q = sa.insert(db_models.Receiver).values(**receiver.model_dump()).returning(db_models.Receiver)
-    receiver = dbsession.execute(q).scalar()
+    q = sa.insert(db_models.Receiver).values(**receiver).returning(db_models.Receiver)
+    receiver_db = dbsession.execute(q).scalar()
     dbsession.flush()
 
-    yield receiver.id_
+    yield receiver_db.id_
 
     q = sa.delete(db_models.Receiver).where(db_models.Receiver.id_ == id)
     dbsession.execute(q)

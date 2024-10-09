@@ -13,10 +13,10 @@ metric = {"name": "string", "ok": True, "time_delta": 0}
 async def this_metric(dbsession):
     global metric
     q = sa.insert(db_models.Metric).values(**metric).returning(db_models.Metric)
-    metric = dbsession.scalar(q)
+    metric_db = dbsession.scalar(q)
     dbsession.flush()
 
-    yield metric.id_
+    yield metric_db.id_
 
     q = sa.delete(db_models.Metric).where(db_models.Metric.id_ == id)
     dbsession.execute(q)

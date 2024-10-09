@@ -22,10 +22,10 @@ fetcher = {
 async def this_fetcher(dbsession):
     global fetcher
     q = sa.insert(db_models.Fetcher).values(**fetcher).returning(db_models.Fetcher)
-    fetcher = dbsession.scalar(q)
+    fetcher_db = dbsession.scalar(q)
     dbsession.flush()
 
-    yield fetcher.id_
+    yield fetcher_db.id_
 
     q = sa.delete(db_models.Fetcher).where(db_models.Fetcher.id_ == id)
     dbsession.execute(q)
