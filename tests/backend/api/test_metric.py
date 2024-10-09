@@ -11,6 +11,7 @@ metric = {"name": "string", "ok": True, "time_delta": 0}
 
 @pytest_asyncio.fixture
 async def this_metric(dbsession):
+    global metric
     q = sa.insert(db_models.Metric).values(**metric).returning(db_models.Metric)
     metric = dbsession.scalar(q)
     dbsession.flush()
@@ -36,6 +37,7 @@ def test_post_success(crud_client):
 
 @pytest.mark.authenticated("pinger.metric.read")
 def test_get_by_id_success(crud_client, this_metric):
+    global metric
     res = crud_client.get(f"/metric/{this_metric}")
     assert res.status_code == status.HTTP_200_OK
     for k, v in metric.items():

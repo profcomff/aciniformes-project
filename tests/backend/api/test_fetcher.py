@@ -20,6 +20,7 @@ fetcher = {
 
 @pytest_asyncio.fixture
 async def this_fetcher(dbsession):
+    global fetcher
     q = sa.insert(db_models.Fetcher).values(**fetcher).returning(db_models.Fetcher)
     fetcher = dbsession.scalar(q)
     dbsession.flush()
@@ -48,6 +49,7 @@ def test_post_success(crud_client):
 
 @pytest.mark.authenticated("pinger.fetcher.read")
 def test_get_by_id_success(crud_client, this_fetcher):
+    global fetcher
     res = crud_client.get(f"/fetcher/{this_fetcher}")
     assert res.status_code == status.HTTP_200_OK
     _new_fetcher = deepcopy(fetcher)

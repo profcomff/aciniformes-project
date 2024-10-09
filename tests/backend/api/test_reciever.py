@@ -14,6 +14,7 @@ receiver = {"url": "https://google.com", "method": "post", "receiver_body": {}}
 
 @pytest_asyncio.fixture
 async def this_receiver(dbsession):
+    global receiver
     q = sa.insert(db_models.Receiver).values(**receiver.model_dump()).returning(db_models.Receiver)
     receiver = dbsession.execute(q).scalar()
     dbsession.flush()
@@ -37,6 +38,7 @@ def test_post_success(crud_client):
 
 @pytest.mark.authenticated("pinger.receiver.read")
 def test_get_by_id_success(crud_client, this_receiver):
+    global receiver
     res = crud_client.get(f"/receiver/{this_receiver}")
     assert res.status_code == status.HTTP_200_OK
     res_body = res.json()
